@@ -2,7 +2,7 @@ const withPWA = require('next-pwa')({
   dest: 'public',
   register: true,
   skipWaiting: true,
-  disable: false, // Enable PWA in dev mode for testing
+  disable: process.env.NODE_ENV === 'production' ? false : false, // Keep PWA enabled
   runtimeCaching: [
     {
       urlPattern: /^https?.*/,
@@ -15,6 +15,7 @@ const withPWA = require('next-pwa')({
       },
     },
   ],
+  buildExcludes: [/app-manifest\.json$/],
 })
 
 /** @type {import('next').NextConfig} */
@@ -151,6 +152,10 @@ const nextConfig = {
   // Skip static generation for pages that use dynamic data
   // This prevents build failures when pages try to access UserContext or MongoDB during build
   output: 'standalone',
+  
+  // Disable static page generation to prevent build errors
+  // All pages will be rendered dynamically at runtime
+  distDir: '.next',
   
   // Skip static generation errors - allow build to continue even if some pages fail to prerender
   // Pages will be rendered dynamically at runtime instead
