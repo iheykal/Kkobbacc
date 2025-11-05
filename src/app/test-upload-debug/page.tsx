@@ -1,5 +1,7 @@
 'use client'
 
+
+export const dynamic = 'force-dynamic';
 import { useState } from 'react'
 import { uploadPropertyImagesToR2 } from '@/lib/r2-upload'
 

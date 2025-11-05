@@ -1,5 +1,7 @@
 'use client'
 
+
+export const dynamic = 'force-dynamic';
 import React from 'react'
 import HybridImage from '@/components/ui/HybridImage'
 import { generateUniqueAvatar, generateAgentAvatar, DEFAULT_AVATAR_URL } from '@/lib/utils'

@@ -1,5 +1,7 @@
 'use client'
 
+
+export const dynamic = 'force-dynamic';
 import { generatePieChartColors, PIE_CHART_COLORS, DISTRICT_COLORS, PROPERTY_TYPE_COLORS, LISTING_TYPE_COLORS } from '@/lib/chartColors'
 
 export default function TestPieColors() {

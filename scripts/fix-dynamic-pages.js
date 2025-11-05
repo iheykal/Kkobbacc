@@ -22,12 +22,11 @@ function findPageFiles(dir, fileList = []) {
   return fileList;
 }
 
-// Check if file uses UserContext
-function usesUserContext(filePath) {
+// Check if file uses UserContext or should be dynamic
+function shouldBeDynamic(filePath) {
   const content = fs.readFileSync(filePath, 'utf8');
-  return content.includes('useUser') || 
-         content.includes('UserContext') || 
-         content.includes('from \'@/contexts/UserContext\'');
+  // Make all client components dynamic to prevent build errors
+  return content.includes("'use client'");
 }
 
 // Add dynamic export if not present
@@ -39,13 +38,14 @@ function addDynamicExport(filePath) {
     return false;
   }
   
-  // Skip if not a client component
+  // Skip if not a client component (server components can be static)
   if (!content.includes("'use client'")) {
     return false;
   }
   
   // Add dynamic export after 'use client'
   if (content.includes("'use client'")) {
+    // Handle different formats of 'use client'
     content = content.replace(
       /'use client'(\s*\n)/,
       "'use client'$1\nexport const dynamic = 'force-dynamic';\n"
@@ -66,7 +66,7 @@ let modified = 0;
 let skipped = 0;
 
 pageFiles.forEach(file => {
-  if (usesUserContext(file)) {
+  if (shouldBeDynamic(file)) {
     if (addDynamicExport(file)) {
       console.log(`✅ Added dynamic export to: ${path.relative(pagesDir, file)}`);
       modified++;

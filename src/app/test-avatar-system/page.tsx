@@ -1,5 +1,7 @@
 'use client'
 
+
+export const dynamic = 'force-dynamic';
 import React from 'react'
 import { getStableAvatarUrl, DEFAULT_AVATAR_URL, isStableAvatarUrl, sanitizeAvatarUrl } from '@/lib/utils'
 
