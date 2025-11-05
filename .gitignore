@@ -1,0 +1,131 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Next.js
+.next/
+out/
+build/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+*.env
+*.pem
+*.key
+*.crt
+*.p12
+*.p8
+*.p7b
+*.p7c
+*.p7s
+*.pfx
+*.p12
+*.pem
+*.crt
+*.key
+*_rsa
+*_dsa
+*_ed25519
+*_ecdsa
+*_key
+*_key.pub
+*_private_key
+*_public_key
+*_secret
+*_token
+*_password
+*_passphrase
+*_credential
+*_access_key
+*_secret_key
+*_api_key
+*_api_token
+*_bearer_token
+*_jwt
+*_oauth
+*_saml
+*_openid
+*_smtp
+*_db_*
+*_database_*
+*_mongo_*
+*_mysql_*
+*_postgres_*
+*_redis_*
+*_vault_*
+*_kms_*
+*_secret_*
+*_token_*
+*_password_*
+*_credential_*
+*_key_*
+*_cert_*
+*_pem_*
+*_jwt_*
+*_oauth_*
+*_saml_*
+*_openid_*
+
+# Uploads directory (user-uploaded content)
+public/uploads/
+
+# Logs
+*.log
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+
+# nyc test coverage
+.nyc_output
+
+# Dependency directories
+jspm_packages/
+
+# Optional npm cache directory
+.npm
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variables file
+.env
+
+# PWA generated files
+public/sw.js
+public/workbox-*.js
+public/worker-*.js
+public/sw.js.map
+public/workbox-*.js.map
+public/worker-*.js.map
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+.vercel
