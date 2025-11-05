@@ -1,11 +1,12 @@
 // Conditionally enable PWA - disable during build to prevent build issues
-const isProductionBuild = process.env.NODE_ENV === 'production' && process.env.SKIP_PWA_BUILD !== 'true'
+// PWA will be disabled during build (when SKIP_PWA_BUILD=true) but enabled at runtime
+const shouldDisablePWA = process.env.SKIP_PWA_BUILD === 'true'
 
 const withPWA = require('next-pwa')({
   dest: 'public',
   register: true,
   skipWaiting: true,
-  disable: !isProductionBuild, // Disable PWA during build, enable at runtime
+  disable: shouldDisablePWA, // Disable PWA during build, enable at runtime
   runtimeCaching: [
     {
       urlPattern: /^https?.*/,
