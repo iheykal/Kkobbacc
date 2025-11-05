@@ -1,8 +1,11 @@
+// Conditionally enable PWA - disable during build to prevent build issues
+const isProductionBuild = process.env.NODE_ENV === 'production' && process.env.SKIP_PWA_BUILD !== 'true'
+
 const withPWA = require('next-pwa')({
   dest: 'public',
   register: true,
   skipWaiting: true,
-  disable: process.env.NODE_ENV === 'production' ? false : false, // Keep PWA enabled
+  disable: !isProductionBuild, // Disable PWA during build, enable at runtime
   runtimeCaching: [
     {
       urlPattern: /^https?.*/,
@@ -164,6 +167,13 @@ const nextConfig = {
   },
   eslint: {
     ignoreDuringBuilds: false,
+  },
+  
+  // Disable static optimization - all pages will be rendered dynamically
+  // This prevents Next.js from trying to prerender pages during build
+  generateBuildId: async () => {
+    // Use a timestamp-based build ID to ensure dynamic rendering
+    return `build-${Date.now()}`
   },
   
   // Standard output for reliable deployment

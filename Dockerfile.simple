@@ -15,6 +15,7 @@ COPY . .
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_OPTIONS="--max-old-space-size=4096"
+ENV SKIP_PWA_BUILD="true"
 # Provide a dummy MONGODB_URI for build time (will be overridden at runtime)
 ENV MONGODB_URI="mongodb://dummy:27017/dummy"
 
