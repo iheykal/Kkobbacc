@@ -1,5 +1,7 @@
 'use client'
 
+
+export const dynamic = 'force-dynamic';
 import Hero from '@/components/sections/Hero'
 import { Button } from '@/components/ui/Button'
 import { User } from 'lucide-react'
