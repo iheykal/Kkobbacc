@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "NODE_OPTIONS='--max-old-space-size=4096' next build",
     "start": "echo 'Starting Next.js app...' && next start -p $PORT -H 0.0.0.0",
     "lint": "next lint",
     "fix-properties": "node scripts/fix-existing-properties.js",

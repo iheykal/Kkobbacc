@@ -36,9 +36,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ]
   
-  // During build time, MongoDB might not be available
-  // Return only static pages to prevent build failures
-  if (process.env.NODE_ENV === 'production' && !process.env.MONGODB_URI) {
+  // During build time, MongoDB might not be available or might be a dummy value
+  // Check if MONGODB_URI is a dummy value (set in Dockerfile for build)
+  const mongoUri = process.env.MONGODB_URI || ''
+  const isDummyMongoUri = mongoUri.includes('dummy') || mongoUri.includes('mongodb://dummy')
+  
+  // During build time, return only static pages to prevent build failures
+  if (process.env.NODE_ENV === 'production' && (isDummyMongoUri || !mongoUri)) {
     console.warn('MongoDB URI not available during build, returning static sitemap only')
     return staticPages
   }
