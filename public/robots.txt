@@ -1,0 +1,20 @@
+User-agent: *
+Allow: /
+
+# Disallow admin and debug pages from crawlers
+Disallow: /admin/
+Disallow: /api/
+Disallow: /dashboard/
+Disallow: /agent/
+Disallow: /debug/
+Disallow: /test-*/
+
+# Sitemap location
+Sitemap: https://kobac-real-estate.onrender.com/sitemap.xml
+
+# Crawl delay for good citizen behavior
+Crawl-delay: 1
+
+
+
+

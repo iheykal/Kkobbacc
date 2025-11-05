@@ -1,0 +1,94 @@
+import { MetadataRoute } from 'next'
+import connectDB from '@/lib/mongodb'
+import Property from '@/models/Property'
+
+export const dynamic = 'force-dynamic'
+export const revalidate = 3600 // Revalidate every hour
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  try {
+    // Connect to database
+    await connectDB()
+    
+    // Fetch all active properties
+    const properties = await Property.find({
+      deletionStatus: { $ne: 'deleted' },
+      isExpired: { $ne: true }
+    })
+    .select('propertyId propertyType status listingType district location createdAt updatedAt')
+    .lean()
+    
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://kobac-real-estate.onrender.com'
+    
+    // Generate property URLs
+    const propertyUrls = properties.map(property => {
+      const propertyType = property.propertyType?.toLowerCase().replace(/\s+/g, '-') || 'property'
+      const status = property.status?.toLowerCase().replace(/\s+/g, '-') || property.listingType || ''
+      const city = 'muqdisho' // Default city
+      const district = property.district?.toLowerCase().replace(/\s+/g, '-') || 'unknown'
+      
+      // Generate SEO-friendly URL
+      const seoUrl = `/${propertyType}-${status}-ah/${city}/degmada-${district}/${property.propertyId}`
+      
+      return {
+        url: `${baseUrl}${seoUrl}`,
+        lastModified: property.updatedAt || property.createdAt || new Date(),
+        changeFrequency: 'daily' as const,
+        priority: 0.8,
+      }
+    })
+    
+    // Static pages
+    const staticPages = [
+      {
+        url: baseUrl,
+        lastModified: new Date(),
+        changeFrequency: 'hourly' as const,
+        priority: 1.0,
+      },
+      {
+        url: `${baseUrl}/properties`,
+        lastModified: new Date(),
+        changeFrequency: 'daily' as const,
+        priority: 0.9,
+      },
+      {
+        url: `${baseUrl}/about`,
+        lastModified: new Date(),
+        changeFrequency: 'monthly' as const,
+        priority: 0.7,
+      },
+      {
+        url: `${baseUrl}/agents`,
+        lastModified: new Date(),
+        changeFrequency: 'weekly' as const,
+        priority: 0.6,
+      },
+    ]
+    
+    return [...staticPages, ...propertyUrls]
+  } catch (error) {
+    console.error('Error generating sitemap:', error)
+    
+    // Return basic sitemap if database fails
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://kobac-real-estate.onrender.com'
+    return [
+      {
+        url: baseUrl,
+        lastModified: new Date(),
+        changeFrequency: 'hourly',
+        priority: 1.0,
+      },
+      {
+        url: `${baseUrl}/properties`,
+        lastModified: new Date(),
+        changeFrequency: 'daily',
+        priority: 0.9,
+      },
+    ]
+  }
+}
+
+
+
+

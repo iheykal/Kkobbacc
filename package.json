@@ -1,0 +1,56 @@
+{
+  "name": "luxury-real-estate-app",
+  "version": "1.0.1",
+  "description": "Premium luxury real estate web application",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "echo 'Starting Next.js app...' && next start -p $PORT -H 0.0.0.0",
+    "lint": "next lint",
+    "fix-properties": "node scripts/fix-existing-properties.js",
+    "restore-properties": "node scripts/restore-all-properties.js",
+    "force-deploy": "node force-deploy.js",
+    "zero-error-deploy": "node zero-error-deploy.js",
+    "restore-debug": "node restore-debug-pages.js",
+    "test-scroll-preservation": "node test-scroll-preservation.js",
+    "test-hybrid-navigation": "node test-hybrid-navigation.js",
+    "convert-webp": "node scripts/convert-to-webp.js",
+    "convert-images": "node scripts/convert-to-webp.js",
+    "deploy": "npm run build && git add . && git commit -m 'Deploy' && git push origin main"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.0.0",
+    "@aws-sdk/s3-request-presigner": "^3.0.0",
+    "argon2": "^0.44.0",
+    "autoprefixer": "^10.4.0",
+    "bcryptjs": "^2.4.3",
+    "clsx": "^2.0.0",
+    "formidable": "^3.5.0",
+    "framer-motion": "^10.16.0",
+    "lucide-react": "^0.292.0",
+    "mongoose": "^8.0.0",
+    "next": "^14.0.0",
+    "next-pwa": "^5.6.0",
+    "postcss": "^8.4.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "recharts": "^3.1.2",
+    "sharp": "^0.34.3",
+    "tailwind-merge": "^2.0.0",
+    "tailwindcss": "^3.3.0",
+    "typescript": "^5.0.0",
+    "zxcvbn": "^4.4.2"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/formidable": "^3.4.5",
+    "@types/node": "^20.0.0",
+    "@types/react": "18.3.24",
+    "@types/react-dom": "^18.2.0",
+    "@types/zxcvbn": "^4.4.5"
+  },
+  "engines": {
+    "node": "20.x"
+  }
+}

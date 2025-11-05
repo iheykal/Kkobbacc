@@ -1,0 +1,43 @@
+{
+  "generated": "2025-09-15T21:52:04.048Z",
+  "totalFiles": 14,
+  "totalSavings": {
+    "bytes": 18500660,
+    "percentage": "85.6",
+    "originalSize": 21613618,
+    "webpSize": 3112958
+  },
+  "mapping": {
+    "public\\icons\\bed.png": "public\\icons\\bed.webp",
+    "public\\icons\\bg-1.png": "public\\icons\\bg-1.webp",
+    "public\\icons\\duwaq.jpg": "public\\icons\\duwaq.webp",
+    "public\\icons\\haanta-dheer.jpg": "public\\icons\\haanta-dheer.webp",
+    "public\\icons\\happy-family.png": "public\\icons\\happy-family.webp",
+    "public\\icons\\header.png": "public\\icons\\header.webp",
+    "public\\icons\\kobac.png": "public\\icons\\kobac.webp",
+    "public\\icons\\line.png": "public\\icons\\line.webp",
+    "public\\icons\\shower.png": "public\\icons\\shower.webp",
+    "public\\icons\\somali-flag.jpg": "public\\icons\\somali-flag.webp",
+    "public\\icons\\uze.png": "public\\icons\\uze.webp",
+    "public\\icons\\villa-2.png": "public\\icons\\villa-2.webp",
+    "public\\icons\\yellow-villa.jpg": "public\\icons\\yellow-villa.webp",
+    "public\\icons\\yellow-villah.png": "public\\icons\\yellow-villah.webp"
+  },
+  "config": {
+    "directories": [
+      "public/icons",
+      "public/uploads",
+      "src/assets",
+      "src/images"
+    ],
+    "inputFormats": [
+      ".png",
+      ".jpg",
+      ".jpeg"
+    ],
+    "outputFormat": ".webp",
+    "quality": 85,
+    "keepOriginals": true,
+    "createMapping": true
+  }
+}

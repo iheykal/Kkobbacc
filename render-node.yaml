@@ -1,0 +1,35 @@
+# Alternative Node.js configuration for Render
+# Use this if Docker deployment fails
+services:
+  - type: web
+    name: kobac-real-estate-node
+    env: node
+    plan: starter
+    buildCommand: |
+      npm ci --only=production
+      npm run build
+    startCommand: npm start
+    healthCheckPath: /
+    autoDeploy: true
+    branch: main
+    region: oregon
+    nodeVersion: "20"
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false
+      - key: R2_ENDPOINT
+        sync: false
+      - key: R2_ACCESS_KEY_ID
+        sync: false
+      - key: R2_SECRET_ACCESS_KEY
+        sync: false
+      - key: R2_BUCKET
+        sync: false
+      - key: NEXTAUTH_SECRET
+        sync: false
+      - key: NEXTAUTH_URL
+        sync: false
+      - key: PORT
+        value: "3000"

@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEO Crawler Test Tool</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+            width: 100%;
+        }
+        button:hover {
+            transform: translateY(-2px);
+        }
+        .test-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        .test-item {
+            padding: 15px;
+            margin: 10px 0;
+            background: white;
+            border-radius: 8px;
+            border-left: 4px solid #ddd;
+        }
+        .test-item.pass {
+            border-left-color: #28a745;
+        }
+        .test-item.fail {
+            border-left-color: #dc3545;
+        }
+        .test-item.checking {
+            border-left-color: #ffc107;
+        }
+        .test-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        .test-result {
+            font-size: 14px;
+            color: #666;
+        }
+        .status-icon {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+        .pass .status-icon { background: #28a745; }
+        .fail .status-icon { background: #dc3545; }
+        .checking .status-icon {
+            background: #ffc107;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .error {
+            color: #dc3545;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        .summary {
+            margin-top: 20px;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .summary h2 {
+            margin-bottom: 10px;
+        }
+        .summary .score {
+            font-size: 3em;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 SEO Crawler Test Tool</h1>
+        <p class="subtitle">Test if search engines can crawl your website properly</p>
+        
+        <div class="input-group">
+            <label for="website-url">Enter Your Website URL:</label>
+            <input type="text" id="website-url" placeholder="https://your-domain.com" value="https://kobac-real-estate.onrender.com">
+        </div>
+        
+        <button onclick="runAllTests()">🚀 Run All Tests</button>
+        
+        <div class="test-section" id="test-results" style="display: none;">
+            <h2>Test Results</h2>
+            <div id="tests-container"></div>
+            <div class="summary" id="summary" style="display: none;">
+                <h2>Test Summary</h2>
+                <div class="score" id="score">-</div>
+                <p id="summary-text">Loading...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const CORS_PROXY = 'https://api.allorigins.win/raw?url=';
+        
+        async function runAllTests() {
+            const url = document.getElementById('website-url').value.trim();
+            if (!url) {
+                alert('Please enter a website URL');
+                return;
+            }
+            
+            // Normalize URL
+            const baseUrl = url.replace(/\/$/, '');
+            
+            document.getElementById('test-results').style.display = 'block';
+            document.getElementById('summary').style.display = 'none';
+            document.getElementById('tests-container').innerHTML = '';
+            
+            const tests = [
+                { name: 'robots.txt', path: '/robots.txt', check: checkRobots },
+                { name: 'sitemap.xml', path: '/sitemap.xml', check: checkSitemap },
+                { name: 'Homepage Metadata', path: '/', check: checkMetadata },
+                { name: 'Properties Page', path: '/properties', check: checkProperties },
+                { name: 'Open Graph Tags', path: '/', check: checkOpenGraph },
+                { name: 'Twitter Cards', path: '/', check: checkTwitter },
+                { name: 'Structured Data', path: '/', check: checkStructuredData },
+                { name: 'Canonical URLs', path: '/', check: checkCanonical },
+                { name: 'Image Alt Text', path: '/', check: checkAltText },
+            ];
+            
+            let passed = 0;
+            
+            for (const test of tests) {
+                const testElement = createTestElement(test.name, 'Checking...', 'checking');
+                document.getElementById('tests-container').appendChild(testElement);
+                
+                try {
+                    const result = await test.check(baseUrl, test.path);
+                    passed += result.passed ? 1 : 0;
+                    updateTestElement(testElement, result.passed, result.message);
+                } catch (error) {
+                    updateTestElement(testElement, false, `Error: ${error.message}`);
+                }
+                
+                await delay(300); // Small delay between tests
+            }
+            
+            // Show summary
+            const total = tests.length;
+            const percentage = Math.round((passed / total) * 100);
+            
+            document.getElementById('score').textContent = `${percentage}%`;
+            document.getElementById('summary-text').textContent = 
+                `${passed} out of ${total} tests passed`;
+            document.getElementById('summary').style.display = 'block';
+        }
+        
+        function createTestElement(title, message, status) {
+            const div = document.createElement('div');
+            div.className = `test-item ${status}`;
+            div.innerHTML = `
+                <div class="test-title">
+                    <span class="status-icon"></span>${title}
+                </div>
+                <div class="test-result">${message}</div>
+            `;
+            return div;
+        }
+        
+        function updateTestElement(element, passed, message) {
+            element.className = `test-item ${passed ? 'pass' : 'fail'}`;
+            element.querySelector('.test-result').textContent = message;
+        }
+        
+        async function fetchWithCORS(url) {
+            try {
+                const response = await fetch(CORS_PROXY + encodeURIComponent(url), {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*'
+                    }
+                });
+                return await response.text();
+            } catch (error) {
+                throw new Error('CORS or network error');
+            }
+        }
+        
+        async function checkRobots(baseUrl, path) {
+            try {
+                const content = await fetchWithCORS(baseUrl + '/robots.txt');
+                const hasUserAgent = content.includes('User-agent:');
+                const hasSitemap = content.includes('Sitemap:');
+                return {
+                    passed: hasUserAgent && hasSitemap,
+                    message: hasUserAgent && hasSitemap 
+                        ? 'robots.txt found with proper structure'
+                        : 'robots.txt missing or incomplete'
+                };
+            } catch (error) {
+                return { passed: false, message: 'Cannot access robots.txt' };
+            }
+        }
+        
+        async function checkSitemap(baseUrl, path) {
+            try {
+                const content = await fetchWithCORS(baseUrl + '/sitemap.xml');
+                const isValidXML = content.includes('<?xml') && content.includes('<urlset');
+                const hasUrls = (content.match(/<loc>/g) || []).length >= 1;
+                return {
+                    passed: isValidXML && hasUrls,
+                    message: isValidXML && hasUrls
+                        ? `Valid sitemap with ${(content.match(/<loc>/g) || []).length} URLs`
+                        : 'sitemap.xml invalid or empty'
+                };
+            } catch (error) {
+                return { passed: false, message: 'Cannot access sitemap.xml' };
+            }
+        }
+        
+        async function checkMetadata(baseUrl, path) {
+            try {
+                const content = await fetchWithCORS(baseUrl + path);
+                const hasTitle = content.includes('<title>');
+                const hasDescription = content.includes('name="description"');
+                const hasKeywords = content.includes('name="keywords"');
+                const allPresent = hasTitle && hasDescription && hasKeywords;
+                return {
+                    passed: allPresent,
+                    message: allPresent 
+                        ? 'All basic metadata tags present'
+                        : 'Missing metadata tags: ' + [
+                            !hasTitle ? 'title' : '',
+                            !hasDescription ? 'description' : '',
+                            !hasKeywords ? 'keywords' : ''
+                        ].filter(Boolean).join(', ')
+                };
+            } catch (error) {
+                return { passed: false, message: 'Cannot check metadata' };
+            }
+        }
+        
+        async function checkProperties(baseUrl, path) {
+            try {
+                const content = await fetchWithCORS(baseUrl + '/properties');
+                const hasTitle = content.includes('<title>');
+                const hasDescription = content.includes('name="description"');
+                return {
+                    passed: hasTitle && hasDescription,
+                    message: hasTitle && hasDescription
+                        ? 'Properties page has metadata'
+                        : 'Properties page missing metadata'
+                };
+            } catch (error) {
+                return { passed: false, message: 'Cannot check properties page' };
+            }
+        }
+        
+        async function checkOpenGraph(baseUrl, path) {
+            try {
+                const content = await fetchWithCORS(baseUrl + path);
+                const hasOGTitle = content.includes('property="og:title"');
+                const hasOGDescription = content.includes('property="og:description"');
+                const hasOGUrl = content.includes('property="og:url"');
+                const allPresent = hasOGTitle && hasOGDescription && hasOGUrl;
+                return {
+                    passed: allPresent,
+                    message: allPresent
+                        ? 'Complete Open Graph tags'
+                        : 'Missing OG tags'
+                };
+            } catch (error) {
+                return { passed: false, message: 'Cannot check Open Graph' };
+            }
+        }
+        
+        async function checkTwitter(baseUrl, path) {
+            try {
+                const content = await fetchWithCORS(baseUrl + path);
+                const hasTwitterCard = content.includes('name="twitter:card"');
+                const hasTwitterTitle = content.includes('name="twitter:title"');
+                return {
+                    passed: hasTwitterCard && hasTwitterTitle,
+                    message: hasTwitterCard && hasTwitterTitle
+                        ? 'Twitter Card tags present'
+                        : 'Missing Twitter Card tags'
+                };
+            } catch (error) {
+                return { passed: false, message: 'Cannot check Twitter Cards' };
+            }
+        }
+        
+        async function checkStructuredData(baseUrl, path) {
+            try {
+                const content = await fetchWithCORS(baseUrl + path);
+                const hasSchema = content.includes('schema.org') || 
+                                  content.includes('application/ld+json');
+                return {
+                    passed: hasSchema,
+                    message: hasSchema
+                        ? 'Structured data (JSON-LD) found'
+                        : 'No structured data detected'
+                };
+            } catch (error) {
+                return { passed: false, message: 'Cannot check structured data' };
+            }
+        }
+        
+        async function checkCanonical(baseUrl, path) {
+            try {
+                const content = await fetchWithCORS(baseUrl + path);
+                const hasCanonical = content.includes('rel="canonical"') ||
+                                    content.includes('rel=\'canonical\'');
+                return {
+                    passed: hasCanonical,
+                    message: hasCanonical
+                        ? 'Canonical URL present'
+                        : 'Missing canonical URL'
+                };
+            } catch (error) {
+                return { passed: false, message: 'Cannot check canonical URLs' };
+            }
+        }
+        
+        async function checkAltText(baseUrl, path) {
+            try {
+                const content = await fetchWithCORS(baseUrl + path);
+                const imgCount = (content.match(/<img /g) || []).length;
+                if (imgCount === 0) {
+                    return { passed: true, message: 'No images on page' };
+                }
+                const altCount = (content.match(/alt="/g) || []).length;
+                const percentage = Math.round((altCount / imgCount) * 100);
+                return {
+                    passed: percentage >= 80,
+                    message: `${altCount}/${imgCount} images have alt text (${percentage}%)`
+                };
+            } catch (error) {
+                return { passed: false, message: 'Cannot check alt text' };
+            }
+        }
+        
+        function delay(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+    </script>
+</body>
+</html>
+
+
+
+
