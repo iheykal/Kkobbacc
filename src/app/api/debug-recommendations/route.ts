@@ -3,6 +3,9 @@ import connectDB from '@/lib/mongodb';
 import Property from '@/models/Property';
 import { getPrimaryImageUrl } from '@/lib/imageUrlResolver';
 
+// Force dynamic rendering since this route uses nextUrl.searchParams
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     console.log('🔍 GET /api/debug-recommendations - Starting request');

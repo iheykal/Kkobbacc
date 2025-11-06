@@ -39,7 +39,6 @@ export const metadata: Metadata = {
   keywords: 'luxury real estate, premium properties, luxury homes, real estate, kobac real estate',
   authors: [{ name: 'Kobac Real Estate' }],
   manifest: '/manifest.json',
-  themeColor: '#2563eb',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
@@ -51,6 +50,10 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_US',
   },
+}
+
+export const viewport = {
+  themeColor: '#2563eb',
 }
 
 export default function RootLayout({

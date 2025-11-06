@@ -32,8 +32,8 @@ import { getCompanyLogoUrl, DEFAULT_AVATAR_URL } from '@/lib/utils';
 import { getSessionFromRequest } from '@/lib/sessionUtils';
 import { isAllowed, createListFilter, enforceOwnership, sanitizeUpdateData } from '@/lib/authz/authorize';
 
-// Enable caching with revalidation for better performance
-export const revalidate = 60; // Cache for 60 seconds
+// Force dynamic rendering since this route uses request.cookies and request.url
+export const dynamic = 'force-dynamic';
 
 /**
  * Property API Routes

@@ -4,6 +4,9 @@ import User from '@/models/User';
 import { getSessionFromRequest } from '@/lib/sessionUtils';
 import { createListFilter } from '@/lib/authz/authorize';
 
+// Force dynamic rendering since this route uses request.cookies
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     await connectDB();

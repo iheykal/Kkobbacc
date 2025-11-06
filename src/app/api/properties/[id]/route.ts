@@ -6,6 +6,8 @@ import User from '@/models/User'; // Import User model for populate to work
 import connectToDatabase from '@/lib/mongodb';
 import mongoose from 'mongoose'; // Import mongoose to check models
 
+// Force dynamic rendering since this route uses request.cookies
+export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 export async function PATCH(

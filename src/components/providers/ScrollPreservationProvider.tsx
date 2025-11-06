@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, Suspense } from 'react'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { 
   saveScrollPosition, 
@@ -12,7 +12,8 @@ interface ScrollPreservationProviderProps {
   children: React.ReactNode
 }
 
-export const ScrollPreservationProvider = ({ children }: ScrollPreservationProviderProps) => {
+// Inner component that uses useSearchParams - must be wrapped in Suspense
+function ScrollPreservationInner({ children }: ScrollPreservationProviderProps) {
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const hasRestoredRef = useRef(false)
@@ -179,5 +180,14 @@ export const ScrollPreservationProvider = ({ children }: ScrollPreservationProvi
   }, [pathname])
 
   return <>{children}</>
+}
+
+// Main provider component that wraps the inner component in Suspense
+export const ScrollPreservationProvider = ({ children }: ScrollPreservationProviderProps) => {
+  return (
+    <Suspense fallback={<>{children}</>}>
+      <ScrollPreservationInner>{children}</ScrollPreservationInner>
+    </Suspense>
+  )
 }
 

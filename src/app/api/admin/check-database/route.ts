@@ -3,6 +3,9 @@ import { getSessionFromRequest } from '@/lib/sessionUtils';
 import Property from '@/models/Property';
 import connectToDatabase from '@/lib/mongodb';
 
+// Force dynamic rendering since this route uses request.cookies
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     // Check authentication

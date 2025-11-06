@@ -46,3 +46,4 @@ export const LazyMotionNav = createLazyMotionComponent('nav')
 export const LazyMotionH1 = createLazyMotionComponent('h1')
 export const LazyMotionH2 = createLazyMotionComponent('h2')
 export const LazyMotionH3 = createLazyMotionComponent('h3')
+

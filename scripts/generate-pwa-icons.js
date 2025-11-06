@@ -94,3 +94,4 @@ async function generateIcons() {
 // Run the generator
 generateIcons();
 
+

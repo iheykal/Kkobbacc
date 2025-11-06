@@ -29,8 +29,6 @@ const nextConfig = {
     serverComponentsExternalPackages: ['mongoose', 'argon2', 'bcryptjs', '@aws-sdk/client-s3', '@aws-sdk/s3-request-presigner', 'formidable', 'sharp'],
     // Optimize package imports for better tree shaking
     optimizePackageImports: ['framer-motion', 'recharts', 'lucide-react'],
-    // Skip static generation for pages that can't be pre-rendered
-    isrMemoryCacheSize: 0, // Disable ISR cache to force dynamic rendering
   },
   
   // Environment variables for deployment

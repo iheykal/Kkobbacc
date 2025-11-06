@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Property from '@/models/Property';
 
+// Force dynamic rendering since this route uses nextUrl.searchParams
+export const dynamic = 'force-dynamic';
+
 // District neighbors mapping based on Mogadishu map
 // Format: Database district name → [neighboring districts in database format]
 const DISTRICT_NEIGHBORS: Record<string, string[]> = {

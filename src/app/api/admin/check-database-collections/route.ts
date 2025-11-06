@@ -4,6 +4,9 @@ import Property from '@/models/Property';
 import User from '@/models/User';
 import connectToDatabase from '@/lib/mongodb';
 
+// Force dynamic rendering since this route uses request.cookies
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     // Check authentication

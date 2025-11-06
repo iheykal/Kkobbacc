@@ -3,6 +3,9 @@ import connectDB from '@/lib/mongodb'
 import Property from '@/models/Property'
 import User from '@/models/User'
 
+// Force dynamic rendering since this route uses request.cookies
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     await connectDB()

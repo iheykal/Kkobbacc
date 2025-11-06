@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Property from '@/models/Property';
 
+// Force dynamic rendering since this route uses nextUrl.searchParams
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     console.log('🔍 Debug: Checking deleted properties issue...');

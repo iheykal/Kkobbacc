@@ -3,6 +3,8 @@ import connectDB from '@/lib/mongodb';
 import Property from '@/models/Property';
 
 export const runtime = 'nodejs';
+// Force dynamic rendering since this route uses request.url
+export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
