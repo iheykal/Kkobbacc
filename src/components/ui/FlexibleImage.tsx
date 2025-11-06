@@ -420,6 +420,44 @@ export const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({
 }) => {
   const [selectedImage, setSelectedImage] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(false);
+  const preloadedImagesRef = useRef<Set<string>>(new Set());
+
+  // Preload all images when gallery opens
+  useEffect(() => {
+    if (images.length === 0) return;
+
+    images.forEach((url: string) => {
+      if (!preloadedImagesRef.current.has(url)) {
+        const img = new Image();
+        img.src = url;
+        preloadedImagesRef.current.add(url);
+      }
+    });
+  }, [images]);
+
+  // Preload adjacent images when selected image changes
+  useEffect(() => {
+    if (images.length === 0) return;
+
+    const preloadImage = (index: number) => {
+      if (index >= 0 && index < images.length) {
+        const url = images[index];
+        if (!preloadedImagesRef.current.has(url)) {
+          const img = new Image();
+          img.src = url;
+          preloadedImagesRef.current.add(url);
+        }
+      }
+    };
+
+    // Preload next image
+    const nextIndex = selectedImage < images.length - 1 ? selectedImage + 1 : 0;
+    preloadImage(nextIndex);
+
+    // Preload previous image
+    const prevIndex = selectedImage > 0 ? selectedImage - 1 : images.length - 1;
+    preloadImage(prevIndex);
+  }, [selectedImage, images]);
 
   // Auto-play functionality
   useEffect(() => {
@@ -529,6 +567,8 @@ export const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({
           enableZoom={enableZoom}
           showLoadingState={true}
           watermark={watermark}
+          loading="eager"
+          priority={true}
         />
 
         {/* Navigation Arrows */}
@@ -536,28 +576,28 @@ export const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({
           <>
             <motion.button
               onClick={() => setSelectedImage(selectedImage > 0 ? selectedImage - 1 : images.length - 1)}
-              className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full p-2 shadow-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-transparent hover:bg-black/10 rounded-full p-2 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.3 }}
             >
-              <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-6 h-6 text-white drop-shadow-lg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </motion.button>
 
             <motion.button
               onClick={() => setSelectedImage(selectedImage < images.length - 1 ? selectedImage + 1 : 0)}
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full p-2 shadow-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-transparent hover:bg-black/10 rounded-full p-2 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.3 }}
             >
-              <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-6 h-6 text-white drop-shadow-lg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </motion.button>

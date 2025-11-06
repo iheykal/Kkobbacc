@@ -178,6 +178,17 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ property, onClos
   }, [property]);
   const [isFavorite, setIsFavorite] = useState(false)
 
+  // Preload all images when property detail opens for instant gallery navigation
+  useEffect(() => {
+    if (allImageUrls.length === 0) return;
+
+    // Preload all images in the background
+    allImageUrls.forEach((url: string) => {
+      const img = new Image();
+      img.src = url;
+    });
+  }, [allImageUrls]);
+
   // Increment view count when property detail is opened
   useEffect(() => {
     const incrementViewCount = async () => {

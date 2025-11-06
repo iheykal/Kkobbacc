@@ -135,6 +135,17 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({ proper
   const [isFavorite, setIsFavorite] = useState(false)
   const [loadingAgentId, setLoadingAgentId] = useState<string | null>(null)
 
+  // Preload all images when modal opens for instant gallery navigation
+  useEffect(() => {
+    if (allImageUrls.length === 0) return;
+
+    // Preload all images in the background
+    allImageUrls.forEach((url: string) => {
+      const img = new Image();
+      img.src = url;
+    });
+  }, [allImageUrls]);
+
   // Function to get agent's first name
   const getAgentFirstName = () => {
     if (!property.agent?.name) return 'Agent'

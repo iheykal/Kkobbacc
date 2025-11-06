@@ -14,7 +14,7 @@ import { useScrollRestoration } from '@/hooks/useScrollRestoration'
 import { useProperties, FilterOptions } from '@/hooks/useProperties'
 import { cn, getPropertyUrl } from '@/lib/utils'
 import { PropertyImageWithWatermarkFixed } from '@/components/ui/PropertyImageWithWatermarkFixed'
-import { getPrimaryImageUrl } from '@/lib/imageUrlResolver'
+import { getPrimaryImageUrl, getAllImageUrls } from '@/lib/imageUrlResolver'
 import HybridImage from '@/components/ui/HybridImage'
 import { getStableAvatarUrl, capitalizeName, formatPhoneNumber } from '@/lib/utils'
 import { getFirstName } from '@/utils/nameUtils'
@@ -124,6 +124,15 @@ const BeautifulPropertyCard = ({ property, index, viewMode }: { property: any; i
 
   // Grid View Card Component with original beautiful design
   const GridCard = ({ property, index }: { property: any; index: number }) => {
+    // Preload property images on hover for faster modal opening
+    const handleMouseEnter = () => {
+      const allUrls = getAllImageUrls(property);
+      allUrls.forEach((url) => {
+        const img = new Image();
+        img.src = url;
+      });
+    };
+
     return (
       <div
         key={getPropertyKey(property, index)}
@@ -137,6 +146,7 @@ const BeautifulPropertyCard = ({ property, index, viewMode }: { property: any; i
       >
         <div 
           className="relative bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1"
+          onMouseEnter={handleMouseEnter}
           onClick={(e) => {
             // Only navigate to property if click is not on agent profile
             if (!(e.target as HTMLElement).closest('[data-agent-profile]')) {

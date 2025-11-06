@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import EnhancedPropertyImage from './EnhancedPropertyImage';
 import EnhancedThumbnailNavigation from './EnhancedThumbnailNavigation';
@@ -52,8 +52,47 @@ export default function EnhancedImageGallery({
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const [imageAspectRatio, setImageAspectRatio] = useState<number>(4/5);
   const [isAutoPlaying, setIsAutoPlaying] = useState(false);
+  const preloadedImagesRef = useRef<Set<string>>(new Set());
 
   const { allImageUrls } = useEnhancedPropertyImages(property);
+
+  // Preload all images when gallery opens
+  useEffect(() => {
+    if (allImageUrls.length === 0) return;
+
+    // Preload all images in the background
+    allImageUrls.forEach((url: string) => {
+      if (!preloadedImagesRef.current.has(url)) {
+        const img = new Image();
+        img.src = url;
+        preloadedImagesRef.current.add(url);
+      }
+    });
+  }, [allImageUrls]);
+
+  // Preload adjacent images when selected image changes
+  useEffect(() => {
+    if (allImageUrls.length === 0) return;
+
+    const preloadImage = (index: number) => {
+      if (index >= 0 && index < allImageUrls.length) {
+        const url = allImageUrls[index];
+        if (!preloadedImagesRef.current.has(url)) {
+          const img = new Image();
+          img.src = url;
+          preloadedImagesRef.current.add(url);
+        }
+      }
+    };
+
+    // Preload next image
+    const nextIndex = selectedImage < allImageUrls.length - 1 ? selectedImage + 1 : 0;
+    preloadImage(nextIndex);
+
+    // Preload previous image
+    const prevIndex = selectedImage > 0 ? selectedImage - 1 : allImageUrls.length - 1;
+    preloadImage(prevIndex);
+  }, [selectedImage, allImageUrls]);
 
   // Handle image change with smooth transitions
   const handleImageChange = useCallback((index: number) => {
@@ -216,6 +255,8 @@ export default function EnhancedImageGallery({
               showWatermark={showWatermark}
               watermarkPosition={watermarkPosition}
               watermarkSize={watermarkSize}
+              loading="eager"
+              priority={true}
             />
           </motion.div>
         </AnimatePresence>
@@ -225,28 +266,28 @@ export default function EnhancedImageGallery({
           <>
             <motion.button
               onClick={goToPrevious}
-              className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full p-2 shadow-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-transparent hover:bg-black/10 rounded-full p-2 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.3 }}
             >
-              <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-6 h-6 text-white drop-shadow-lg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </motion.button>
 
             <motion.button
               onClick={goToNext}
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full p-2 shadow-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-transparent hover:bg-black/10 rounded-full p-2 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.3 }}
             >
-              <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-6 h-6 text-white drop-shadow-lg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </motion.button>

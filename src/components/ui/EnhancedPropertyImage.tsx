@@ -164,7 +164,7 @@ export default function EnhancedPropertyImage({
       <motion.img
         src={imageUrl}
         alt={alt || property.title || 'Property image'}
-        loading={loading || 'lazy'}
+        loading={loading || (priority ? 'eager' : 'lazy')}
         sizes={sizes}
         decoding="async"
         fetchPriority={priority ? 'high' : 'low'}
