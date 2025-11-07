@@ -1679,7 +1679,7 @@ export default function UserManagementPage() {
                                 {property.status === 'For Sale' && property.measurement && (
                                   <span className="flex items-center">
                                     <img 
-                                      src="/icons/ruler.gif" 
+                                      src="/icons/ruler.webp" 
                                       alt="Measurement" 
                                       className="w-4 h-4 mr-1 object-contain"
                                     />

@@ -623,7 +623,7 @@ export default function AgentProfilePage() {
                             </div>
                             <div className="flex items-center text-slate-600 mb-3 md:mb-4">
                               <img 
-                                src="/icons/location.gif" 
+                                src="/icons/location.webp" 
                                 alt="Location" 
                                 className="w-4 h-4 md:w-5 md:h-5 mr-2 object-contain"
                               />
@@ -688,7 +688,7 @@ export default function AgentProfilePage() {
                               <div className="text-center group/stat">
                                 <div className="w-12 h-12 md:w-16 md:h-16 flex items-center justify-center mx-auto mb-2 md:mb-3 group-hover/stat:scale-110 transition-transform duration-300">
                                   <img 
-                                    src="/icons/ruler.gif" 
+                                    src="/icons/ruler.webp" 
                                     alt="Measurement" 
                                     className="w-7 h-7 md:w-9 md:h-9 object-contain"
                                   />

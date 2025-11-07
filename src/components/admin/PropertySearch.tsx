@@ -297,7 +297,7 @@ export default function PropertySearch() {
                   </div>
                   <div className="flex items-center space-x-2 text-slate-600">
                     <img 
-                      src="/icons/location.gif" 
+                      src="/icons/location.webp" 
                       alt="Location" 
                       className="w-5 h-5 object-contain"
                     />
@@ -341,7 +341,7 @@ export default function PropertySearch() {
                       <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl">
                         <div className="w-20 h-20 flex items-center justify-center mx-auto mb-2">
                           <img 
-                            src="/icons/ruler.gif" 
+                            src="/icons/ruler.webp" 
                             alt="Measurement" 
                             className="w-14 h-14 object-contain"
                           />

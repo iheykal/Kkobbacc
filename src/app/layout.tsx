@@ -16,6 +16,7 @@ const inter = Inter({
   variable: '--font-inter',
   display: 'swap',
   preload: true,
+  adjustFontFallback: true,
 })
 
 const playfair = Playfair_Display({ 
@@ -23,6 +24,7 @@ const playfair = Playfair_Display({
   variable: '--font-playfair',
   display: 'swap',
   preload: true,
+  adjustFontFallback: true,
 })
 
 const cormorant = Cormorant_Garamond({ 
@@ -31,6 +33,7 @@ const cormorant = Cormorant_Garamond({
   display: 'swap',
   weight: ['400', '600'],
   preload: true,
+  adjustFontFallback: true,
 })
 
 export const metadata: Metadata = {
@@ -66,6 +69,12 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${playfair.variable} ${cormorant.variable}`}>
       <head>
+        {/* Preconnect to external domains for faster resource loading */}
+        <link rel="preconnect" href="https://api.dicebear.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://api.dicebear.com" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        
         {/* PWA Meta Tags */}
         <meta name="application-name" content="Kobac Real Estate" />
         <meta name="apple-mobile-web-app-capable" content="yes" />

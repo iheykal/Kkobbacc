@@ -332,7 +332,7 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ property, onClos
                   </div>
                   <div className="flex items-center space-x-2 text-slate-600">
                     <img 
-                      src="/icons/location.gif" 
+                      src="/icons/location.webp" 
                       alt="Location" 
                       className="w-4 h-4 sm:w-5 sm:h-5 object-contain flex-shrink-0"
                     />

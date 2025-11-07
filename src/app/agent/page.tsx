@@ -1350,7 +1350,7 @@ export default function AgentDashboard() {
                         </h3>
                         <div className="flex items-center space-x-2 text-gray-600">
                           <img 
-                            src="/icons/location.gif" 
+                            src="/icons/location.webp" 
                             alt="Location" 
                             className="w-4 h-4 object-contain"
                           />
@@ -1389,7 +1389,7 @@ export default function AgentDashboard() {
                             <div className="flex items-center space-x-2 text-gray-600">
                               <div className="p-2 rounded-lg bg-emerald-50">
                                 <img 
-                                  src="/icons/ruler.gif" 
+                                  src="/icons/ruler.webp" 
                                   alt="Measurement" 
                                   className="w-6 h-6 object-contain"
                                 />

@@ -265,7 +265,12 @@ function PropertiesContent() {
 
             {/* District Filter */}
             <div>
+              <label htmlFor="district-filter" className="sr-only">
+                Filter by District
+              </label>
               <select
+                id="district-filter"
+                aria-label="Filter by District"
                 value={districtFilter}
                 onChange={(e) => setDistrictFilter(e.target.value)}
                 className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:border-blue-500 focus:ring-blue-500"
@@ -281,7 +286,12 @@ function PropertiesContent() {
 
             {/* Property Type Filter */}
             <div>
+              <label htmlFor="property-type-filter" className="sr-only">
+                Filter by Property Type
+              </label>
               <select
+                id="property-type-filter"
+                aria-label="Filter by Property Type"
                 value={propertyType}
                 onChange={(e) => setPropertyType(e.target.value)}
                 className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:border-blue-500 focus:ring-blue-500"
@@ -296,7 +306,12 @@ function PropertiesContent() {
 
             {/* Status Filter */}
             <div>
+              <label htmlFor="status-filter" className="sr-only">
+                Filter by Status
+              </label>
               <select
+                id="status-filter"
+                aria-label="Filter by Status"
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
                 className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:border-blue-500 focus:ring-blue-500"
@@ -333,6 +348,7 @@ function PropertiesContent() {
               <span className="text-slate-600 font-medium">View:</span>
               <button
                 onClick={() => setViewMode('grid')}
+                aria-label="Switch to grid view"
                 className={cn(
                   "p-2 rounded-lg transition-colors",
                   viewMode === 'grid' ? "bg-blue-500 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
@@ -342,6 +358,7 @@ function PropertiesContent() {
               </button>
               <button
                 onClick={() => setViewMode('list')}
+                aria-label="Switch to list view"
                 className={cn(
                   "p-2 rounded-lg transition-colors",
                   viewMode === 'list' ? "bg-blue-500 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
@@ -481,7 +498,7 @@ function PropertiesContent() {
                         </div>
                         <div className="flex items-center text-slate-600 mb-3 md:mb-4">
                           <img 
-                            src="/icons/location.gif" 
+                            src="/icons/location.webp" 
                             alt="Location" 
                             className="w-4 h-4 md:w-5 md:h-5 mr-2 object-contain"
                           />
@@ -497,7 +514,7 @@ function PropertiesContent() {
                         {/* Price Display */}
                         <div className="mb-4 md:mb-6">
                           <div 
-                            className="text-2xl md:text-3xl font-bold text-green-600"
+                            className="text-2xl md:text-3xl font-bold text-green-700"
                             dangerouslySetInnerHTML={{ __html: formatPrice(property.price, property.listingType) }}
                           />
                         </div>
@@ -527,7 +544,7 @@ function PropertiesContent() {
                             <div className="text-center group/stat">
                               <div className="w-12 h-12 md:w-16 md:h-16 flex items-center justify-center mx-auto mb-2 md:mb-3 group-hover/stat:scale-110 transition-transform duration-300">
                                 <img 
-                                  src="/icons/ruler.gif" 
+                                  src="/icons/ruler.webp" 
                                   alt="Measurement" 
                                   className="w-9 h-9 md:w-11 md:h-11 object-contain"
                                 />

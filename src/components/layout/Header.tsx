@@ -314,6 +314,7 @@ export const Header: React.FC = () => {
               size="sm"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="lg:hidden"
+              aria-label={isMenuOpen ? "Close menu" : "Open menu"}
             >
               {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </Button>

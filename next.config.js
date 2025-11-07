@@ -36,7 +36,7 @@ const nextConfig = {
     VERCEL: process.env.VERCEL,
   },
   
-  // Image configuration for Cloudflare R2
+  // Image configuration for Cloudflare R2 with optimization
   images: {
     remotePatterns: [
       {
@@ -77,6 +77,10 @@ const nextConfig = {
         pathname: '/**',
       },
     ],
+    formats: ['image/webp', 'image/avif'],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    minimumCacheTTL: 60,
   },
   
   // Optimized webpack config
@@ -99,6 +103,8 @@ const nextConfig = {
     if (!isServer) {
       config.optimization = {
         ...config.optimization,
+        usedExports: true, // Enable tree shaking
+        sideEffects: false, // Mark as side-effect free for better tree shaking
         splitChunks: {
           chunks: 'all',
           cacheGroups: {
@@ -111,19 +117,21 @@ const nextConfig = {
               priority: 10,
               reuseExistingChunk: true,
             },
-            // Separate chunk for framer-motion (large library)
+            // Separate chunk for framer-motion (large library) - load async
             framerMotion: {
               test: /[\\/]node_modules[\\/]framer-motion[\\/]/,
               name: 'framer-motion',
               priority: 20,
               reuseExistingChunk: true,
+              chunks: 'async', // Load async instead of blocking
             },
-            // Separate chunk for recharts (large library)
+            // Separate chunk for recharts (large library) - load async
             recharts: {
               test: /[\\/]node_modules[\\/]recharts[\\/]/,
               name: 'recharts',
               priority: 20,
               reuseExistingChunk: true,
+              chunks: 'async', // Load async instead of blocking
             },
             // Common chunk for shared code
             common: {
@@ -138,6 +146,14 @@ const nextConfig = {
     }
 
     return config;
+  },
+  
+  // Compiler optimizations
+  compiler: {
+    // Remove console.log in production (keep errors and warnings)
+    removeConsole: process.env.NODE_ENV === 'production' ? {
+      exclude: ['error', 'warn'],
+    } : false,
   },
   
   // Enable proper build optimizations

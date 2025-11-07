@@ -39,16 +39,16 @@ export const getFeatureIcon = (featureName: string): FeatureIcon => {
       className: 'h-16 w-16 mr-4 bg-transparent relative z-10'
     },
     
-    // Ruler feature
+    // Ruler feature - using WebP for better performance
     'ruler': {
-      src: '/icons/ruler.gif',
+      src: '/icons/ruler.webp',
       alt: 'Ruler',
       className: 'h-16 w-16 mr-4 bg-transparent relative z-10'
     },
     
-    // Location feature
+    // Location feature - using WebP for better performance
     'location': {
-      src: '/icons/location.gif',
+      src: '/icons/location.webp',
       alt: 'Location',
       className: 'h-16 w-16 mr-4 bg-transparent relative z-10'
     },

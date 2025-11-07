@@ -149,9 +149,10 @@ const Hero = () => {
                 isLoaded ? 'opacity-100' : 'opacity-0'
               }`}
               priority={index === 0}
+              fetchPriority={index === 0 ? "high" : "low"}
               loading={index === 0 ? "eager" : "lazy"}
               sizes="100vw"
-              quality={90}
+              quality={index === 0 ? 75 : 70}
               onError={(e) => {
                 console.log(`Image failed to load: ${image.src} for ${image.name}`)
                 // Don't try to manipulate the image source in onError

@@ -114,3 +114,4 @@ The web application is now significantly lighter with:
 The application should feel much faster, especially on slower connections!
 
 
+

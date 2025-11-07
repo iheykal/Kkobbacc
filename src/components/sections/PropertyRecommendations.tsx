@@ -260,7 +260,7 @@ export const PropertyRecommendations: React.FC<PropertyRecommendationsProps> = R
                     </h3>
                     <div className="flex items-center text-slate-600 mb-2">
                       <img 
-                        src="/icons/location.gif" 
+                        src="/icons/location.webp" 
                         alt="Location" 
                         className="w-4 h-4 mr-2 object-contain flex-shrink-0"
                       />
@@ -274,7 +274,7 @@ export const PropertyRecommendations: React.FC<PropertyRecommendationsProps> = R
                     {/* Price Display */}
                     <div className="mb-3 sm:mb-4">
                       <div 
-                        className="text-xl sm:text-2xl font-bold text-green-600"
+                        className="text-xl sm:text-2xl font-bold text-green-700"
                         dangerouslySetInnerHTML={{ __html: formatPrice(property.price, property.status === 'For Rent' ? 'rent' : 'sale') }}
                       />
                     </div>
@@ -300,7 +300,7 @@ export const PropertyRecommendations: React.FC<PropertyRecommendationsProps> = R
                         <div className="text-center group/stat">
                           <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center mx-auto mb-1 sm:mb-2 group-hover/stat:scale-110 transition-transform duration-300 flex-shrink-0">
                             <img 
-                              src="/icons/ruler.gif" 
+                              src="/icons/ruler.webp" 
                               alt="Measurement" 
                               className="w-6 h-6 sm:w-8 sm:h-8 object-contain"
                             />

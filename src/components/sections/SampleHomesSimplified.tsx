@@ -201,7 +201,7 @@ const BeautifulPropertyCard = ({ property, index, viewMode }: { property: any; i
               </div>
               <div className="flex items-center text-slate-600 mb-2 sm:mb-3 md:mb-4">
                 <img 
-                  src="/icons/location.gif" 
+                  src="/icons/location.webp" 
                   alt="Location" 
                   className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 mr-1 sm:mr-2 flex-shrink-0 object-contain"
                 />
@@ -219,7 +219,7 @@ const BeautifulPropertyCard = ({ property, index, viewMode }: { property: any; i
               {/* Price Display */}
               <div className="mb-2 sm:mb-3 md:mb-4">
                 <div 
-                  className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold text-green-600"
+                  className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold text-green-700"
                   dangerouslySetInnerHTML={{ __html: formatPrice(property.price, property.listingType) }}
                 />
               </div>
@@ -245,7 +245,7 @@ const BeautifulPropertyCard = ({ property, index, viewMode }: { property: any; i
                   <div className="hidden sm:block text-center group/stat">
                     <div className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 xl:w-16 xl:h-16 flex items-center justify-center mx-auto mb-1 sm:mb-2 md:mb-3 group-hover/stat:scale-110 transition-transform duration-300">
                       <img 
-                        src="/icons/ruler.gif" 
+                        src="/icons/ruler.webp" 
                         alt="Measurement" 
                         className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 lg:w-12 lg:h-12 object-contain"
                       />
@@ -422,7 +422,7 @@ const BeautifulPropertyCard = ({ property, index, viewMode }: { property: any; i
                 </h3>
                 <div className="flex items-center text-gray-600 mb-3">
                   <img 
-                    src="/icons/location.gif" 
+                    src="/icons/location.webp" 
                     alt="Location" 
                     className="w-4 h-4 mr-2 flex-shrink-0 object-contain"
                   />
@@ -475,7 +475,7 @@ const BeautifulPropertyCard = ({ property, index, viewMode }: { property: any; i
               
               {/* Price */}
               <div 
-                className="text-2xl md:text-3xl font-bold text-green-600"
+                className="text-2xl md:text-3xl font-bold text-green-700"
                 dangerouslySetInnerHTML={{ __html: formatPrice(property.price, property.listingType) }}
               />
 

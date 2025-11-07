@@ -213,6 +213,8 @@ export const PropertyFilters: React.FC<PropertyFiltersProps> = ({
             
             <div className="relative">
               <select
+                id="district-filter-select"
+                aria-label="Select District"
                 value={filters.district}
                 onChange={(e) => handleDistrictChange(e.target.value)}
                 onClick={handleDistrictDropdownClick}

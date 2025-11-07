@@ -780,7 +780,7 @@ export const SampleHomes: React.FC = () => {
             </div>
             <div className="flex items-center text-slate-600 mb-2 sm:mb-3 md:mb-4">
               <img 
-                src="/icons/location.gif" 
+                src="/icons/location.webp" 
                 alt="Location" 
                 className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 mr-1 sm:mr-2 flex-shrink-0 object-contain"
               />
@@ -824,7 +824,7 @@ export const SampleHomes: React.FC = () => {
                 <div className="text-center group/stat">
                   <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-16 lg:h-16 flex items-center justify-center mx-auto mb-1 sm:mb-2 md:mb-3 group-hover/stat:scale-110 transition-transform duration-300">
                     <img 
-                      src="/icons/ruler.gif" 
+                      src="/icons/ruler.webp" 
                       alt="Measurement" 
                       className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 lg:w-12 lg:h-12 object-contain"
                     />
@@ -992,7 +992,7 @@ export const SampleHomes: React.FC = () => {
                   </h3>
                   <div className="flex items-center text-slate-600 mb-3">
                     <img 
-                      src="/icons/location.gif" 
+                      src="/icons/location.webp" 
                       alt="Location" 
                       className="w-5 h-5 mr-2 object-contain"
                     />
@@ -1035,7 +1035,7 @@ export const SampleHomes: React.FC = () => {
                       
                       <div className="flex items-center space-x-2">
                         <NextImage 
-                          src="/icons/ruler.gif" 
+                          src="/icons/ruler.webp" 
                           alt="Measurement" 
                           width={32}
                           height={32}

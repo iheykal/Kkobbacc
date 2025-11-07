@@ -2,13 +2,30 @@ import { NextRequest, NextResponse } from 'next/server'
 import { canAccessRoute, getDefaultRoute } from './lib/authz/authorize'
 import { Role } from './lib/authz/policy'
 
+// Helper function to add security headers to any response
+function addSecurityHeaders(response: NextResponse): NextResponse {
+  response.headers.set('X-DNS-Prefetch-Control', 'on')
+  response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload')
+  response.headers.set('X-Frame-Options', 'SAMEORIGIN')
+  response.headers.set('X-Content-Type-Options', 'nosniff')
+  response.headers.set('X-XSS-Protection', '1; mode=block')
+  response.headers.set('Referrer-Policy', 'origin-when-cross-origin')
+  response.headers.set(
+    'Content-Security-Policy',
+    "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' https://api.dicebear.com https://www.google-analytics.com; frame-src 'self';"
+  )
+  response.headers.set('Cross-Origin-Opener-Policy', 'same-origin-allow-popups')
+  response.headers.set('Cross-Origin-Embedder-Policy', 'require-corp')
+  return response
+}
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   console.log('🔍 Middleware - Processing request for:', pathname)
 
-  // Skip middleware for API routes, static files, and public routes
-  if (
+  // Check if this is a public route
+  const isPublicRoute = 
     pathname.startsWith('/api/') ||
     pathname.startsWith('/_next/') ||
     pathname.startsWith('/favicon.ico') ||
@@ -20,9 +37,12 @@ export function middleware(request: NextRequest) {
     pathname === '/register-agent' ||
     pathname.startsWith('/debug') ||
     pathname.startsWith('/test')
-  ) {
+
+  // For public routes, return early with security headers
+  if (isPublicRoute) {
     console.log('✅ Middleware - Skipping middleware for:', pathname)
-    return NextResponse.next()
+    const response = NextResponse.next()
+    return addSecurityHeaders(response)
   }
 
   // Get session from cookie - check both possible cookie names
@@ -39,7 +59,8 @@ export function middleware(request: NextRequest) {
     console.log('❌ Middleware - No session cookie found, redirecting to home')
     const url = request.nextUrl.clone()
     url.pathname = '/'
-    return NextResponse.redirect(url)
+    const response = NextResponse.redirect(url)
+    return addSecurityHeaders(response)
   }
 
   try {
@@ -53,7 +74,8 @@ export function middleware(request: NextRequest) {
       // Invalid session - redirect to home page
       const url = request.nextUrl.clone()
       url.pathname = '/'
-      return NextResponse.redirect(url)
+      const response = NextResponse.redirect(url)
+      return addSecurityHeaders(response)
     }
 
     const role = session.role
@@ -69,29 +91,34 @@ export function middleware(request: NextRequest) {
       console.log('❌ Middleware - Access denied, redirecting to:', defaultRoute)
       const url = request.nextUrl.clone()
       url.pathname = defaultRoute
-      return NextResponse.redirect(url)
+      const response = NextResponse.redirect(url)
+      return addSecurityHeaders(response)
     }
 
     // User has permission - allow access
     console.log('✅ Middleware - Access granted for:', pathname)
-    return NextResponse.next()
+    const response = NextResponse.next()
+    return addSecurityHeaders(response)
 
   } catch (error) {
     console.error('Middleware session parsing error:', error)
     // Invalid session format - redirect to home page
     const url = request.nextUrl.clone()
     url.pathname = '/'
-    return NextResponse.redirect(url)
+    const response = NextResponse.redirect(url)
+    return addSecurityHeaders(response)
   }
 }
 
 export const config = {
   matcher: [
-    '/admin/:path*',
-    '/agent/:path*',
-    '/dashboard/:path*',
-    '/profile/:path*'
-  ]
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     */
+    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+  ],
 }
-
-
