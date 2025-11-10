@@ -25,6 +25,16 @@ const withPWA = require('next-pwa')({
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Rewrite favicon.ico to serve the header logo
+  async rewrites() {
+    return [
+      {
+        source: '/favicon.ico',
+        destination: '/icons/header.png',
+      },
+    ]
+  },
+  
   // Enable experimental features properly
   experimental: {
     serverComponentsExternalPackages: ['mongoose', 'argon2', 'bcryptjs', '@aws-sdk/client-s3', '@aws-sdk/s3-request-presigner', 'formidable', 'sharp'],

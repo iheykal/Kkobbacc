@@ -45,16 +45,16 @@ function HomePageContent() {
   return (
     <>
       <Head>
-        <title>Kobac Real Estate - Premium Properties in Mogadishu</title>
-        <meta name="description" content="Discover luxury villas, modern apartments, and premium properties in Mogadishu. Kobac Real Estate offers the finest selection of homes for sale and rent. Find your dream property today." />
+        <title>Kobac Real Estate: Homepage</title>
+        <meta name="description" content="Somalia's #1 Real Estate Platform. Browse premium properties for sale and rent in Mogadishu. Find villas, apartments, and houses with trusted agents." />
         <meta name="keywords" content="real estate, mogadishu, properties, villas, apartments, houses, luxury homes, for sale, for rent, somalia property" />
-        <meta property="og:title" content="Kobac Real Estate - Premium Properties in Mogadishu" />
-        <meta property="og:description" content="Discover luxury villas, modern apartments, and premium properties in Mogadishu. Kobac Real Estate offers the finest selection of homes for sale and rent." />
+        <meta property="og:title" content="Kobac Real Estate: Homepage" />
+        <meta property="og:description" content="Somalia's #1 Real Estate Platform. Browse premium properties for sale and rent in Mogadishu. Find villas, apartments, and houses with trusted agents." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content={`${typeof window !== 'undefined' ? window.location.origin : ''}`} />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Kobac Real Estate - Premium Properties" />
-        <meta name="twitter:description" content="Discover luxury villas and modern apartments in Mogadishu. Find your dream property today." />
+        <meta name="twitter:title" content="Kobac Real Estate: Homepage" />
+        <meta name="twitter:description" content="Somalia's #1 Real Estate Platform. Browse premium properties for sale and rent in Mogadishu." />
       </Head>
       <div className="min-h-screen">
         {/* Redirect Animation */}

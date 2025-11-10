@@ -422,15 +422,41 @@ export const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({
   const [isAutoPlaying, setIsAutoPlaying] = useState(false);
   const preloadedImagesRef = useRef<Set<string>>(new Set());
 
-  // Preload all images when gallery opens
+  // Preload images with priority hints for faster loading
   useEffect(() => {
     if (images.length === 0) return;
 
-    images.forEach((url: string) => {
+    // Preload first image with high priority using link rel="preload"
+    if (images[0] && !preloadedImagesRef.current.has(images[0])) {
+      const link = document.createElement('link');
+      link.rel = 'preload';
+      link.as = 'image';
+      link.href = images[0];
+      link.setAttribute('fetchpriority', 'high');
+      document.head.appendChild(link);
+      preloadedImagesRef.current.add(images[0]);
+    }
+
+    // Preload remaining images in parallel with lower priority
+    images.slice(1).forEach((url: string, index: number) => {
       if (!preloadedImagesRef.current.has(url)) {
-        const img = new Image();
-        img.src = url;
-        preloadedImagesRef.current.add(url);
+        // Use requestIdleCallback for non-critical images
+        if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+          requestIdleCallback(() => {
+            const img = new Image();
+            img.fetchPriority = 'low';
+            img.src = url;
+            preloadedImagesRef.current.add(url);
+          }, { timeout: 2000 });
+        } else {
+          // Fallback: load with slight stagger
+          setTimeout(() => {
+            const img = new Image();
+            img.fetchPriority = 'low';
+            img.src = url;
+            preloadedImagesRef.current.add(url);
+          }, index * 30);
+        }
       }
     });
   }, [images]);
@@ -450,13 +476,26 @@ export const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({
       }
     };
 
-    // Preload next image
-    const nextIndex = selectedImage < images.length - 1 ? selectedImage + 1 : 0;
-    preloadImage(nextIndex);
+    // Preload adjacent images with priority
+    const preloadImageWithPriority = (index: number, priority: 'high' | 'low' = 'low') => {
+      if (index >= 0 && index < images.length) {
+        const url = images[index];
+        if (!preloadedImagesRef.current.has(url)) {
+          const img = new Image();
+          img.fetchPriority = priority;
+          img.src = url;
+          preloadedImagesRef.current.add(url);
+        }
+      }
+    };
 
-    // Preload previous image
+    // Preload next image (higher priority as user is likely to navigate forward)
+    const nextIndex = selectedImage < images.length - 1 ? selectedImage + 1 : 0;
+    preloadImageWithPriority(nextIndex, 'high');
+
+    // Preload previous image (lower priority)
     const prevIndex = selectedImage > 0 ? selectedImage - 1 : images.length - 1;
-    preloadImage(prevIndex);
+    preloadImageWithPriority(prevIndex, 'low');
   }, [selectedImage, images]);
 
   // Auto-play functionality
@@ -567,8 +606,8 @@ export const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({
           enableZoom={enableZoom}
           showLoadingState={true}
           watermark={watermark}
-          loading="eager"
-          priority={true}
+          loading={selectedImage === 0 ? "eager" : "lazy"}
+          priority={selectedImage === 0}
         />
 
         {/* Navigation Arrows */}

@@ -24,6 +24,14 @@ export function middleware(request: NextRequest) {
 
   console.log('🔍 Middleware - Processing request for:', pathname)
 
+  // Define protected routes that require authentication
+  const protectedRoutes = ['/admin', '/dashboard', '/profile']
+  const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route))
+  
+  // Special handling: /agent is protected (dashboard), but /agent/[id] is public (agent profile)
+  const isAgentDashboard = pathname === '/agent'
+  const isAgentProfile = pathname.startsWith('/agent/') && pathname !== '/agent'
+
   // Check if this is a public route
   const isPublicRoute = 
     pathname.startsWith('/api/') ||
@@ -32,13 +40,22 @@ export function middleware(request: NextRequest) {
     pathname.startsWith('/icons/') ||
     pathname.startsWith('/uploads/') ||
     pathname === '/' ||
+    pathname === '/about' ||
+    pathname === '/properties' ||
+    pathname === '/agents' ||
     pathname === '/login' ||
     pathname === '/signup' ||
     pathname === '/register-agent' ||
     pathname.startsWith('/debug') ||
     pathname.startsWith('/test') ||
+    // Agent profile pages (public) - /agent/[id] but not /agent (which is protected)
+    isAgentProfile ||
     pathname === '/sitemap.xml' ||
-    pathname === '/robots.txt'
+    pathname === '/robots.txt' ||
+    // Property detail pages - SEO-friendly URLs or legacy format
+    // Matches patterns like: /apartment-kiro-ah/muqdisho/... or /kiro/123 or /iib/456
+    // But exclude protected routes and agent dashboard
+    (!isProtectedRoute && !isAgentDashboard && pathname.split('/').filter(Boolean).length >= 2)
 
   // For public routes, return early with security headers
   if (isPublicRoute) {

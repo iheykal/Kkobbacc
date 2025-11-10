@@ -135,14 +135,37 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({ proper
   const [isFavorite, setIsFavorite] = useState(false)
   const [loadingAgentId, setLoadingAgentId] = useState<string | null>(null)
 
-  // Preload all images when modal opens for instant gallery navigation
+  // Preload images with priority hints for faster loading
   useEffect(() => {
     if (allImageUrls.length === 0) return;
 
-    // Preload all images in the background
-    allImageUrls.forEach((url: string) => {
-      const img = new Image();
-      img.src = url;
+    // Preload first image with high priority using link rel="preload"
+    if (allImageUrls[0]) {
+      const link = document.createElement('link');
+      link.rel = 'preload';
+      link.as = 'image';
+      link.href = allImageUrls[0];
+      link.setAttribute('fetchpriority', 'high');
+      document.head.appendChild(link);
+    }
+
+    // Preload remaining images in parallel with lower priority
+    allImageUrls.slice(1).forEach((url: string, index: number) => {
+      // Use requestIdleCallback for non-critical images
+      if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+        requestIdleCallback(() => {
+          const img = new Image();
+          img.fetchPriority = 'low';
+          img.src = url;
+        }, { timeout: 2000 });
+      } else {
+        // Fallback for browsers without requestIdleCallback
+        setTimeout(() => {
+          const img = new Image();
+          img.fetchPriority = 'low';
+          img.src = url;
+        }, index * 50); // Stagger slightly to avoid overwhelming
+      }
     });
   }, [allImageUrls]);
 

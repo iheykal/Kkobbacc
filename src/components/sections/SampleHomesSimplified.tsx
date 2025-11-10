@@ -83,15 +83,13 @@ const BeautifulPropertyCard = ({ property, index, viewMode }: { property: any; i
 
   const handlePropertyClick = (property: any) => {
     try {
-      console.log('🔍 Property clicked:', {
-        property: property,
-        propertyId: property.propertyId,
-        _id: property._id,
-        status: property.status,
-        title: property.title
-      })
+      const propertyId = property.propertyId || property._id
+      if (!propertyId) {
+        console.error('❌ Property ID not found:', property)
+        return
+      }
 
-      // Store current page and scroll position for back navigation
+      // Cache property data BEFORE navigation for instant display
       if (typeof window !== 'undefined') {
         setPreviousPage(window.location.pathname)
         
@@ -99,37 +97,107 @@ const BeautifulPropertyCard = ({ property, index, viewMode }: { property: any; i
         const currentScrollY = window.scrollY
         if (currentScrollY > 100) {
           sessionStorage.setItem('home_scroll_position', currentScrollY.toString())
-          console.log('🚀 SampleHomes: Saved scroll position as backup:', currentScrollY)
         }
         
-        console.log('🚀 SampleHomes: Navigating to property detail page')
+        // Cache property data for instant loading on detail page
+        const cachePayload = JSON.stringify({
+          data: property,
+          timestamp: Date.now()
+        })
+        
+        try {
+          // Cache with multiple keys for fast lookup
+          sessionStorage.setItem(`prefetched_property_${propertyId}`, cachePayload)
+          if (property._id && property._id !== propertyId) {
+            sessionStorage.setItem(`prefetched_property_${property._id}`, cachePayload)
+          }
+          // Also cache with property_ prefix for compatibility
+          sessionStorage.setItem(`property_${propertyId}`, cachePayload)
+        } catch (cacheError) {
+          console.warn('⚠️ Failed to cache property:', cacheError)
+        }
       }
       
-      // Navigate to property detail page
-      const propertyId = property.propertyId || property._id
-      if (!propertyId) {
-        console.error('❌ Property ID not found:', property)
-        return
-      }
-
-      // Use SEO-friendly URL format
+      // Use SEO-friendly URL format - navigate directly (no redirect chain)
       const targetUrl = getPropertyUrl(property)
-      console.log('🚀 SampleHomes: Navigating to', targetUrl)
       router.push(targetUrl)
     } catch (error) {
       console.error('❌ Error handling property click:', error)
     }
   }
 
+  // Prefetch property data on hover for instant loading
+  const handleMouseEnter = () => {
+    if (typeof window === 'undefined') return
+    
+    const propertyId = property.propertyId || property._id
+    if (!propertyId) return
+
+    // Check if already cached
+    const cacheKey = `prefetched_property_${propertyId}`
+    const cached = sessionStorage.getItem(cacheKey)
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached)
+        const cacheAge = Date.now() - (parsed.timestamp || 0)
+        // If cache is fresh (< 2 minutes), skip prefetch
+        if (cacheAge < 2 * 60 * 1000) {
+          return
+        }
+      } catch {
+        // Continue to prefetch if cache is invalid
+      }
+    }
+
+    // Prefetch property data in background
+    const targetUrl = getPropertyUrl(property)
+    
+    // Prefetch the route (Next.js will handle this)
+    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+      requestIdleCallback(() => {
+        const link = document.createElement('link')
+        link.rel = 'prefetch'
+        link.href = targetUrl
+        document.head.appendChild(link)
+      })
+    }
+
+    // Prefetch property API data
+    fetch(`/api/properties/${propertyId}`, {
+      cache: 'force-cache',
+      priority: 'low'
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.data) {
+          const cachePayload = JSON.stringify({
+            data: data.data,
+            timestamp: Date.now()
+          })
+          sessionStorage.setItem(cacheKey, cachePayload)
+          if (data.data._id && data.data._id !== propertyId) {
+            sessionStorage.setItem(`prefetched_property_${data.data._id}`, cachePayload)
+          }
+        }
+      })
+      .catch(() => {
+        // Silent error - prefetch failures shouldn't affect UX
+      })
+  }
+
   // Grid View Card Component with original beautiful design
   const GridCard = ({ property, index }: { property: any; index: number }) => {
-    // Preload property images on hover for faster modal opening
-    const handleMouseEnter = () => {
+    // Combined prefetch: property data + images on hover
+    const handleGridMouseEnter = () => {
+      // Preload property images for faster display
       const allUrls = getAllImageUrls(property);
       allUrls.forEach((url) => {
         const img = new Image();
         img.src = url;
       });
+      
+      // Also prefetch property data (reuse parent function logic)
+      handleMouseEnter();
     };
 
     return (
@@ -145,7 +213,7 @@ const BeautifulPropertyCard = ({ property, index, viewMode }: { property: any; i
       >
         <div 
           className="relative bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1"
-          onMouseEnter={handleMouseEnter}
+          onMouseEnter={handleGridMouseEnter}
           onClick={(e) => {
             // Only navigate to property if click is not on agent profile
             if (!(e.target as HTMLElement).closest('[data-agent-profile]')) {
@@ -241,7 +309,7 @@ const BeautifulPropertyCard = ({ property, index, viewMode }: { property: any; i
                     <div className="text-blue-800 text-xs sm:text-sm font-medium">Sharciga</div>
                   </div>
                   
-                  <div className="hidden sm:block text-center group/stat">
+                  <div className="text-center group/stat">
                     <div className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 xl:w-16 xl:h-16 flex items-center justify-center mx-auto mb-1 sm:mb-2 md:mb-3 group-hover/stat:scale-110 transition-transform duration-300">
                       <img 
                         src="/icons/ruler2.gif" 

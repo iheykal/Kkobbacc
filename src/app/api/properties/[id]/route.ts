@@ -183,10 +183,19 @@ export async function GET(
       
       // Wait for connection to be ready (bufferCommands: false requires this)
       // readyState: 0 = disconnected, 1 = connected, 2 = connecting, 3 = disconnecting
+      // Optimized: Reduced timeout and faster check
       if (mongoose.connection.readyState !== 1) {
-        console.log('⏳ Waiting for MongoDB connection to be ready...');
+        // If connecting (state 2), wait briefly; if disconnected, fail fast
+        if (mongoose.connection.readyState === 0) {
+          // Disconnected - try to reconnect quickly
+          console.log('⚠️ MongoDB disconnected, attempting quick reconnect...');
+        } else if (mongoose.connection.readyState === 2) {
+          // Connecting - wait briefly
+          console.log('⏳ MongoDB connecting, waiting...');
+        }
+        
         await new Promise<void>((resolve, reject) => {
-          // Check if already connected
+          // Check if already connected (double-check)
           if (mongoose.connection.readyState === 1) {
             resolve();
             return;
@@ -204,13 +213,11 @@ export async function GET(
           };
           
           const onConnected = () => {
-            console.log('✅ MongoDB connection ready');
             cleanup();
             resolve();
           };
           
           const onError = (error: any) => {
-            console.error('❌ MongoDB connection error:', error);
             cleanup();
             reject(error);
           };
@@ -218,13 +225,13 @@ export async function GET(
           mongoose.connection.once('connected', onConnected);
           mongoose.connection.once('error', onError);
           
-          // Timeout after 10 seconds
+          // Reduced timeout from 10s to 3s for faster failure
           timeoutId = setTimeout(() => {
             if (mongoose.connection.readyState !== 1) {
               cleanup();
               reject(new Error('MongoDB connection timeout'));
             }
-          }, 10000);
+          }, 3000);
         });
       }
       

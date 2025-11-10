@@ -145,6 +145,66 @@ export default function SEOPropertyPage() {
           return
         }
 
+        // If we already have cached data, skip API call and just validate URL
+        if (hasHydratedFromCache) {
+          // Get cached property from sessionStorage to avoid dependency on state
+          const candidateKeys = new Set<string>([propertyId])
+          if (parsedUrl?.propertyId) {
+            candidateKeys.add(String(parsedUrl.propertyId))
+          }
+          
+          let cachedProperty = null
+          for (const key of candidateKeys) {
+            try {
+              const cached = sessionStorage.getItem(`prefetched_property_${key}`)
+              if (cached) {
+                const parsed = JSON.parse(cached)
+                if (parsed?.data) {
+                  cachedProperty = parsed.data
+                  break
+                }
+              }
+            } catch {
+              continue
+            }
+          }
+          
+          if (cachedProperty) {
+            // Only check URL and update if needed, skip API call
+            const correctSEOUrl = generateSEOUrl({
+              propertyType: cachedProperty.propertyType || 'property',
+              status: cachedProperty.status || cachedProperty.listingType || '',
+              listingType: cachedProperty.listingType,
+              district: cachedProperty.district || 'unknown',
+              location: cachedProperty.location,
+              propertyId: cachedProperty.propertyId || cachedProperty._id,
+              _id: cachedProperty._id
+            })
+
+            if (segmentsPath !== correctSEOUrl.seoUrl) {
+              console.log('🔄 Redirecting to correct SEO URL:', {
+                current: segmentsPath,
+                correct: correctSEOUrl.seoUrl
+              })
+              router.replace(correctSEOUrl.seoUrl)
+              return
+            }
+
+            setSeoUrl(correctSEOUrl.seoUrl)
+            setProperty(cachedProperty)
+            setLoading(false)
+            
+            // Increment view count in background (non-blocking)
+            if (!isReturningFromBack) {
+              incrementPropertyView(propertyId).catch(err => {
+                console.error('Error incrementing view count:', err)
+              })
+            }
+            
+            return
+          }
+        }
+
         if (!hasHydratedFromCache) {
           setLoading(true)
         }
@@ -235,13 +295,11 @@ export default function SEOPropertyPage() {
             restorePropertyState()
           }
 
-          // Only increment view count if NOT returning from back navigation
+          // Increment view count in background (non-blocking) - don't await
           if (!isReturningFromBack) {
-            try {
-              await incrementPropertyView(propertyId)
-            } catch (error) {
-              console.error('Error incrementing view count:', error)
-            }
+            incrementPropertyView(propertyId).catch(err => {
+              console.error('Error incrementing view count:', err)
+            })
           }
         } else {
           throw new Error('Property not found')
@@ -257,7 +315,7 @@ export default function SEOPropertyPage() {
     if (propertyId) {
       fetchProperty()
     }
-  }, [propertyId, segmentsPath, router, isReturningFromBack, hasHydratedFromCache])
+  }, [propertyId, segmentsPath, router, isReturningFromBack, hasHydratedFromCache, parsedUrl?.propertyId])
 
   // Separate effect for state restoration
   useEffect(() => {

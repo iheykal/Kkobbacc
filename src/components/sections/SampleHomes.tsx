@@ -414,15 +414,19 @@ export const SampleHomes: React.FC = () => {
 
   const handlePropertyClick = (property: any) => {
     try {
-      console.log('🔍 Property clicked:', {
-        property: property,
-        propertyId: property.propertyId,
-        _id: property._id,
-        status: property.status,
-        title: property.title
-      })
+      const propertyId = property.propertyId || property._id
+      if (!propertyId) {
+        console.error('❌ Property ID not found:', {
+          property,
+          propertyId: property.propertyId,
+          _id: property._id,
+          availableKeys: Object.keys(property)
+        })
+        alert('Error: Property ID not found. Please try again.')
+        return
+      }
 
-      // Store current page and scroll position for back navigation
+      // Cache property data BEFORE navigation for instant display
       if (typeof window !== 'undefined') {
         setPreviousPage(window.location.pathname)
         
@@ -440,33 +444,27 @@ export const SampleHomes: React.FC = () => {
         // Also use the hook's save function for redundancy
         saveScrollPosition()
         
-        console.log('🚀 SampleHomes: Saved scroll position', currentScrollPosition, 'for path', window.location.pathname)
-        console.log('🚀 SampleHomes: Property clicked - navigating to detail page')
-      }
-      
-      // Navigate to property detail page using client-side routing for faster loading
-      const propertyId = property.propertyId || property._id
-      if (!propertyId) {
-        console.error('❌ Property ID not found:', {
-          property,
-          propertyId: property.propertyId,
-          _id: property._id,
-          availableKeys: Object.keys(property)
+        // Cache property data for instant loading on detail page
+        const cachePayload = JSON.stringify({
+          data: property,
+          timestamp: Date.now()
         })
-        alert('Error: Property ID not found. Please try again.')
-        return
+        
+        try {
+          // Cache with multiple keys for fast lookup
+          sessionStorage.setItem(`prefetched_property_${propertyId}`, cachePayload)
+          if (property._id && property._id !== propertyId) {
+            sessionStorage.setItem(`prefetched_property_${property._id}`, cachePayload)
+          }
+          // Also cache with property_ prefix for compatibility
+          sessionStorage.setItem(`property_${propertyId}`, cachePayload)
+        } catch (cacheError) {
+          console.warn('⚠️ Failed to cache property:', cacheError)
+        }
       }
       
-      // Use SEO-friendly URL format
+      // Use SEO-friendly URL format - navigate directly (no redirect chain)
       const targetUrl = getPropertyUrl(property)
-      
-      console.log('✅ Navigating to property:', { 
-        propertyId, 
-        targetUrl,
-        propertyTitle: property.title 
-      })
-      
-      // Navigate to individual property page
       router.push(targetUrl)
       
     } catch (error) {

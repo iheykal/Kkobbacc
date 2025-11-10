@@ -10,6 +10,7 @@ import { ScrollPreservationProvider } from '@/components/providers/ScrollPreserv
 import { ScrollToTopButton } from '@/components/ui/ScrollToTopButton'
 import { ClientLayoutWrapper } from '@/components/providers/ClientLayoutWrapper'
 import GoogleAnalyticsComponent from '@/components/analytics/GoogleAnalytics'
+import { StructuredData } from '@/components/seo/StructuredData'
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -37,25 +38,25 @@ const cormorant = Cormorant_Garamond({
 })
 
 export const metadata: Metadata = {
-  title: 'Kobac Real Estate - Premium Real Estate',
-  description: 'Discover luxury properties in the most prestigious locations worldwide. Experience premium real estate with Kobac Real Estate.',
+  title: 'Kobac Real Estate: Homepage',
+  description: "Somalia's #1 Real Estate Platform. Browse premium properties for sale and rent in Mogadishu. Find villas, apartments, and houses with trusted agents.",
   keywords: 'luxury real estate, premium properties, luxury homes, real estate, kobac real estate',
   authors: [{ name: 'Kobac Real Estate' }],
   manifest: '/manifest.json',
   icons: {
     icon: [
-      { url: '/icons/kobac.png', sizes: '32x32', type: 'image/png' },
-      { url: '/icons/kobac.png', sizes: '48x48', type: 'image/png' },
-      { url: '/icons/kobac.png', sizes: '64x64', type: 'image/png' },
-      { url: '/icons/kobac.png', sizes: '128x128', type: 'image/png' },
-      { url: '/icons/kobac.png', sizes: '192x192', type: 'image/png' },
-      { url: '/icons/kobac.png', sizes: '256x256', type: 'image/png' },
-      { url: '/icons/kobac.png', sizes: '384x384', type: 'image/png' },
-      { url: '/icons/kobac.png', sizes: '512x512', type: 'image/png' },
-      { url: '/icons/kobac.png', sizes: '16x16', type: 'image/png' },
+      { url: '/icons/header.png', sizes: '16x16', type: 'image/png' },
+      { url: '/icons/header.png', sizes: '32x32', type: 'image/png' },
+      { url: '/icons/header.png', sizes: '48x48', type: 'image/png' },
+      { url: '/icons/header.png', sizes: '64x64', type: 'image/png' },
+      { url: '/icons/header.png', sizes: '128x128', type: 'image/png' },
+      { url: '/icons/header.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icons/header.png', sizes: '256x256', type: 'image/png' },
+      { url: '/icons/header.png', sizes: '384x384', type: 'image/png' },
+      { url: '/icons/header.png', sizes: '512x512', type: 'image/png' },
     ],
-    shortcut: '/icons/kobac.png',
-    apple: '/icons/icon-192x192.png',
+    shortcut: '/icons/header.png',
+    apple: '/icons/header.png',
   },
   appleWebApp: {
     capable: true,
@@ -67,6 +68,20 @@ export const metadata: Metadata = {
     description: 'Discover luxury properties in the most prestigious locations worldwide.',
     type: 'website',
     locale: 'en_US',
+    images: [
+      {
+        url: '/icons/header.png',
+        width: 512,
+        height: 512,
+        alt: 'Kobac Real Estate Logo',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Kobac Real Estate - Premium Real Estate',
+    description: 'Discover luxury properties in the most prestigious locations worldwide.',
+    images: ['/icons/header.png'],
   },
 }
 
@@ -103,19 +118,30 @@ export default function RootLayout({
         <meta name="msapplication-TileColor" content="#2563eb" />
         <meta name="msapplication-config" content="/browserconfig.xml" />
         
+        {/* Favicon - Google Search looks for /favicon.ico specifically */}
+        <link rel="icon" href="/favicon.ico" type="image/png" />
+        <link rel="icon" href="/icons/header.png" sizes="16x16" type="image/png" />
+        <link rel="icon" href="/icons/header.png" sizes="32x32" type="image/png" />
+        <link rel="icon" href="/icons/header.png" sizes="48x48" type="image/png" />
+        <link rel="icon" href="/icons/header.png" sizes="64x64" type="image/png" />
+        <link rel="icon" href="/icons/header.png" sizes="128x128" type="image/png" />
+        <link rel="icon" href="/icons/header.png" sizes="192x192" type="image/png" />
+        <link rel="icon" href="/icons/header.png" sizes="256x256" type="image/png" />
+        <link rel="icon" href="/icons/header.png" sizes="384x384" type="image/png" />
+        <link rel="icon" href="/icons/header.png" sizes="512x512" type="image/png" />
+        <link rel="shortcut icon" href="/favicon.ico" />
+        
         {/* Apple Touch Icons */}
-        <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-192x192.png" />
-        <link rel="icon" href="/icons/kobac.png" sizes="16x16" type="image/png" />
-        <link rel="icon" type="image/png" sizes="32x32" href="/icons/kobac.png" />
-        <link rel="icon" type="image/png" sizes="48x48" href="/icons/kobac.png" />
-        <link rel="icon" type="image/png" sizes="64x64" href="/icons/kobac.png" />
-        <link rel="icon" type="image/png" sizes="128x128" href="/icons/kobac.png" />
-        <link rel="icon" type="image/png" sizes="192x192" href="/icons/kobac.png" />
-        <link rel="icon" type="image/png" sizes="256x256" href="/icons/kobac.png" />
-        <link rel="icon" type="image/png" sizes="384x384" href="/icons/kobac.png" />
-        <link rel="icon" type="image/png" sizes="512x512" href="/icons/kobac.png" />
-        <link rel="icon" sizes="any" href="/icons/kobac.png" />
-        <link rel="shortcut icon" href="/icons/kobac.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/icons/header.png" />
+        <link rel="apple-touch-icon" sizes="152x152" href="/icons/header.png" />
+        <link rel="apple-touch-icon" sizes="144x144" href="/icons/header.png" />
+        <link rel="apple-touch-icon" sizes="120x120" href="/icons/header.png" />
+        <link rel="apple-touch-icon" sizes="114x114" href="/icons/header.png" />
+        <link rel="apple-touch-icon" sizes="76x76" href="/icons/header.png" />
+        <link rel="apple-touch-icon" sizes="72x72" href="/icons/header.png" />
+        <link rel="apple-touch-icon" sizes="60x60" href="/icons/header.png" />
+        <link rel="apple-touch-icon" sizes="57x57" href="/icons/header.png" />
+        <link rel="apple-touch-icon" href="/icons/header.png" />
         
         {/* Only preload GA if ID is provided and not in development */}
         {gaId && process.env.NODE_ENV === 'production' && (
@@ -125,6 +151,9 @@ export default function RootLayout({
             as="script"
           />
         )}
+        
+        {/* Structured Data for Google Search Sitelinks */}
+        <StructuredData />
       </head>
       <body className="font-sans antialiased bg-white text-primary-900">
         <UserProvider>
