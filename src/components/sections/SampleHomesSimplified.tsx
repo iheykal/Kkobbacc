@@ -12,11 +12,10 @@ import { useRouter } from 'next/navigation'
 import { useNavigation } from '@/contexts/NavigationContext'
 import { useScrollRestoration } from '@/hooks/useScrollRestoration'
 import { useProperties, FilterOptions } from '@/hooks/useProperties'
-import { cn, getPropertyUrl } from '@/lib/utils'
+import { cn, getPropertyUrl, getStableAvatarUrl, capitalizeName, formatPhoneNumber, resolveMeasurementValue } from '@/lib/utils'
 import { PropertyImageWithWatermarkFixed } from '@/components/ui/PropertyImageWithWatermarkFixed'
 import { getPrimaryImageUrl, getAllImageUrls } from '@/lib/imageUrlResolver'
 import HybridImage from '@/components/ui/HybridImage'
-import { getStableAvatarUrl, capitalizeName, formatPhoneNumber } from '@/lib/utils'
 import { getFirstName } from '@/utils/nameUtils'
 import { propertyEventManager } from '@/lib/propertyEvents'
 import { getAgentProfileClickHandler } from '@/lib/agentNavigation'
@@ -199,14 +198,6 @@ const BeautifulPropertyCard = ({ property, index, viewMode }: { property: any; i
                   {property.title}
                 </h3>
               </div>
-              <div className="flex items-center text-slate-600 mb-2 sm:mb-3 md:mb-4">
-                <img 
-                  src="/icons/location.webp" 
-                  alt="Location" 
-                  className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 mr-1 sm:mr-2 flex-shrink-0 object-contain"
-                />
-                <span className="text-xs sm:text-sm md:text-base lg:text-lg line-clamp-1">{property.location}</span>
-              </div>
               {property.district && (
                 <div className="flex items-center text-slate-500 mb-2 sm:mb-3 md:mb-4">
                   <MapPin className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 mr-1 sm:mr-2 text-green-500 flex-shrink-0" />
@@ -215,6 +206,14 @@ const BeautifulPropertyCard = ({ property, index, viewMode }: { property: any; i
                   </span>
                 </div>
               )}
+              <div className="flex items-center text-slate-600 mb-2 sm:mb-3 md:mb-4">
+                <img 
+                  src="/icons/adress.png" 
+                  alt="Location" 
+                  className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 mr-1 sm:mr-2 flex-shrink-0 object-contain"
+                />
+                <span className="text-xs sm:text-sm md:text-base lg:text-lg line-clamp-1">{property.location}</span>
+              </div>
               
               {/* Price Display */}
               <div className="mb-2 sm:mb-3 md:mb-4">
@@ -245,12 +244,14 @@ const BeautifulPropertyCard = ({ property, index, viewMode }: { property: any; i
                   <div className="hidden sm:block text-center group/stat">
                     <div className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 xl:w-16 xl:h-16 flex items-center justify-center mx-auto mb-1 sm:mb-2 md:mb-3 group-hover/stat:scale-110 transition-transform duration-300">
                       <img 
-                        src="/icons/ruler.webp" 
+                        src="/icons/ruler2.gif" 
                         alt="Measurement" 
                         className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 lg:w-12 lg:h-12 object-contain"
                       />
                     </div>
-                    <div className="text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl font-bold text-slate-900 mb-0.5 sm:mb-1">{property.measurement || 'N/A'}</div>
+                    <div className="text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl font-bold text-slate-900 mb-0.5 sm:mb-1">
+                      {resolveMeasurementValue(property.measurement, property.sqft, property.lotSize)}
+                    </div>
                     <div className="text-blue-800 text-xs sm:text-sm font-medium">Cabbirka</div>
                   </div>
                 </>
@@ -420,14 +421,6 @@ const BeautifulPropertyCard = ({ property, index, viewMode }: { property: any; i
                 <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
                   {property.title}
                 </h3>
-                <div className="flex items-center text-gray-600 mb-3">
-                  <img 
-                    src="/icons/location.webp" 
-                    alt="Location" 
-                    className="w-4 h-4 mr-2 flex-shrink-0 object-contain"
-                  />
-                  <span className="text-sm">{property.location}</span>
-                </div>
                 {property.district && (
                   <div className="flex items-center text-gray-500 mb-3">
                     <MapPin className="w-4 h-4 mr-2 text-green-500 flex-shrink-0" />
@@ -436,6 +429,14 @@ const BeautifulPropertyCard = ({ property, index, viewMode }: { property: any; i
                     </span>
                   </div>
                 )}
+                <div className="flex items-center text-gray-600 mb-3">
+                  <img 
+                    src="/icons/adress.png" 
+                    alt="Location" 
+                    className="w-4 h-4 mr-2 flex-shrink-0 object-contain"
+                  />
+                  <span className="text-sm">{property.location}</span>
+                </div>
                 {/* Description removed - only shown on detail page */}
               </div>
               

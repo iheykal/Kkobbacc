@@ -34,7 +34,7 @@ export const ScrollToTopButton = () => {
           className="fixed bottom-6 right-6 z-50 w-12 h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center group"
           aria-label="Scroll to top"
         >
-          <ChevronUp className="w-6 h-6 group-hover:scale-110 transition-transform duration-200" />
+          <ChevronUp className="w-6 h-6 group-hover:scale-110 transition-transform duration-200" aria-hidden="true" />
         </motion.button>
       )}
     </AnimatePresence>

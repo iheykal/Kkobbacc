@@ -41,14 +41,14 @@ export const getFeatureIcon = (featureName: string): FeatureIcon => {
     
     // Ruler feature - using WebP for better performance
     'ruler': {
-      src: '/icons/ruler.webp',
+      src: '/icons/ruler2.gif',
       alt: 'Ruler',
       className: 'h-16 w-16 mr-4 bg-transparent relative z-10'
     },
     
-    // Location feature - using WebP for better performance
+    // Location feature - use the refreshed address pin graphic
     'location': {
-      src: '/icons/location.webp',
+      src: '/icons/adress.png',
       alt: 'Location',
       className: 'h-16 w-16 mr-4 bg-transparent relative z-10'
     },

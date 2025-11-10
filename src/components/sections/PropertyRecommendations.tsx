@@ -8,7 +8,7 @@ import { PropertyImageWithWatermark } from '@/components/ui/PropertyImageWithWat
 import { ResponsivePropertyImage } from '@/components/ui/ResponsivePropertyImage'
 import { AdaptivePropertyImage } from '@/components/ui/AdaptivePropertyImage'
 import HybridImage from '@/components/ui/HybridImage'
-import { cn, formatPrice, formatPhoneNumber, capitalizeName, DEFAULT_AVATAR_URL, getStableAvatarUrl } from '@/lib/utils'
+import { cn, formatPrice, formatPhoneNumber, capitalizeName, DEFAULT_AVATAR_URL, getStableAvatarUrl, resolveMeasurementValue } from '@/lib/utils'
 import { getFirstName } from '@/utils/nameUtils'
 import { getPrimaryImageUrl } from '@/lib/imageUrlResolver'
 import { getAgentProfileClickHandler } from '@/lib/agentNavigation'
@@ -245,8 +245,10 @@ export const PropertyRecommendations: React.FC<PropertyRecommendationsProps> = R
                         e.stopPropagation()
                         // Handle favorite logic
                       }}
+                      aria-label="Add to favorites"
+                      type="button"
                     >
-                      <Heart className="w-3 h-3 sm:w-4 sm:h-4 text-slate-600 group-hover/btn:text-red-500 transition-colors duration-300" />
+                      <Heart className="w-3 h-3 sm:w-4 sm:h-4 text-slate-600 group-hover/btn:text-red-500 transition-colors duration-300" aria-hidden="true" />
                     </button>
                   </div>
                 </div>
@@ -258,17 +260,17 @@ export const PropertyRecommendations: React.FC<PropertyRecommendationsProps> = R
                     <h3 className="text-lg sm:text-xl font-bold text-slate-900 group-hover:text-blue-600 transition-colors duration-300 mb-2 line-clamp-2">
                       {property.title}
                     </h3>
+                    <div className="flex items-center text-slate-500 mb-2 sm:mb-3">
+                      <MapPin className="w-4 h-4 mr-2 text-green-500 flex-shrink-0" />
+                      <span className="text-xs sm:text-sm font-medium truncate">{property.district}</span>
+                    </div>
                     <div className="flex items-center text-slate-600 mb-2">
                       <img 
-                        src="/icons/location.webp" 
+                        src="/icons/adress.png" 
                         alt="Location" 
                         className="w-4 h-4 mr-2 object-contain flex-shrink-0"
                       />
                       <span className="text-xs sm:text-sm truncate">{property.location}</span>
-                    </div>
-                    <div className="flex items-center text-slate-500 mb-2 sm:mb-3">
-                      <MapPin className="w-4 h-4 mr-2 text-green-500 flex-shrink-0" />
-                      <span className="text-xs sm:text-sm font-medium truncate">{property.district}</span>
                     </div>
                     
                     {/* Price Display */}
@@ -300,13 +302,15 @@ export const PropertyRecommendations: React.FC<PropertyRecommendationsProps> = R
                         <div className="text-center group/stat">
                           <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center mx-auto mb-1 sm:mb-2 group-hover/stat:scale-110 transition-transform duration-300 flex-shrink-0">
                             <img 
-                              src="/icons/ruler.webp" 
+                              src="/icons/ruler2.gif" 
                               alt="Measurement" 
                               className="w-6 h-6 sm:w-8 sm:h-8 object-contain"
                             />
                           </div>
                           <div className="text-blue-800 text-[10px] sm:text-xs font-bold mb-1">Cabbirka</div>
-                          <div className="text-sm sm:text-lg font-bold text-slate-900 truncate">{property.measurement || 'N/A'}</div>
+                          <div className="text-sm sm:text-lg font-bold text-slate-900 truncate">
+                            {resolveMeasurementValue(property.measurement, undefined, property.lotSize)}
+                          </div>
                         </div>
                       </>
                     ) : (

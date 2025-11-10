@@ -623,7 +623,7 @@ export default function AgentProfilePage() {
                             </div>
                             <div className="flex items-center text-slate-600 mb-3 md:mb-4">
                               <img 
-                                src="/icons/location.webp" 
+                                src="/icons/adress.png" 
                                 alt="Location" 
                                 className="w-4 h-4 md:w-5 md:h-5 mr-2 object-contain"
                               />

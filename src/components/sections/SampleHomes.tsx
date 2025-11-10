@@ -6,7 +6,7 @@ import { Bed, Bath, MapPin, Heart, ArrowRight, Play, Calendar, Users, Grid, List
 import { Card, CardContent } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { PropertyImageWithWatermarkFixed } from '@/components/ui/PropertyImageWithWatermarkFixed'
-import { cn, formatPrice, formatPhoneNumber, capitalizeName, DEFAULT_AVATAR_URL, getStableAvatarUrl, getPropertyUrl } from '@/lib/utils'
+import { cn, formatPrice, formatPhoneNumber, capitalizeName, DEFAULT_AVATAR_URL, getStableAvatarUrl, getPropertyUrl, resolveMeasurementValue } from '@/lib/utils'
 import { getFirstName } from '@/utils/nameUtils'
 import { getPrimaryImageUrl } from '@/lib/imageUrlResolver'
 import { useProperties, FilterOptions } from '@/hooks/useProperties'
@@ -778,14 +778,6 @@ export const SampleHomes: React.FC = () => {
                 {property.title}
               </h3>
             </div>
-            <div className="flex items-center text-slate-600 mb-2 sm:mb-3 md:mb-4">
-              <img 
-                src="/icons/location.webp" 
-                alt="Location" 
-                className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 mr-1 sm:mr-2 flex-shrink-0 object-contain"
-              />
-              <span className="text-xs sm:text-sm md:text-base lg:text-lg line-clamp-1">{property.location}</span>
-            </div>
             {property.district && (
               <div className="flex items-center text-slate-500 mb-2 sm:mb-3 md:mb-4">
                 <MapPin className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 mr-1 sm:mr-2 text-green-500 flex-shrink-0" />
@@ -794,6 +786,14 @@ export const SampleHomes: React.FC = () => {
                 </span>
               </div>
             )}
+            <div className="flex items-center text-slate-600 mb-2 sm:mb-3 md:mb-4">
+              <img 
+                src="/icons/adress.png" 
+                alt="Location" 
+                className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 mr-1 sm:mr-2 flex-shrink-0 object-contain"
+              />
+              <span className="text-xs sm:text-sm md:text-base lg:text-lg line-clamp-1">{property.location}</span>
+            </div>
             
             {/* Price Display */}
             <div className="mb-3 sm:mb-4 md:mb-6">
@@ -824,12 +824,14 @@ export const SampleHomes: React.FC = () => {
                 <div className="text-center group/stat">
                   <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-16 lg:h-16 flex items-center justify-center mx-auto mb-1 sm:mb-2 md:mb-3 group-hover/stat:scale-110 transition-transform duration-300">
                     <img 
-                      src="/icons/ruler.webp" 
+                      src="/icons/ruler2.gif" 
                       alt="Measurement" 
                       className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 lg:w-12 lg:h-12 object-contain"
                     />
                   </div>
-                  <div className="text-sm sm:text-base md:text-lg lg:text-2xl font-bold text-slate-900 mb-0.5 sm:mb-1">{property.measurement || 'N/A'}</div>
+                  <div className="text-sm sm:text-base md:text-lg lg:text-2xl font-bold text-slate-900 mb-0.5 sm:mb-1">
+                    {resolveMeasurementValue(property.measurement, property.sqft, property.lotSize)}
+                  </div>
                   <div className="text-blue-800 text-xs sm:text-sm font-medium">Cabbirka</div>
                 </div>
               </>
@@ -990,14 +992,6 @@ export const SampleHomes: React.FC = () => {
                   <h3 className="text-2xl md:text-3xl font-bold text-slate-900 group-hover:text-blue-600 transition-colors duration-300 mb-2">
                     {property.title}
                   </h3>
-                  <div className="flex items-center text-slate-600 mb-3">
-                    <img 
-                      src="/icons/location.webp" 
-                      alt="Location" 
-                      className="w-5 h-5 mr-2 object-contain"
-                    />
-                    <span className="text-lg">{property.location}</span>
-                  </div>
                   {property.district && (
                     <div className="flex items-center text-slate-500 mb-3">
                       <MapPin className="w-5 h-5 mr-2 text-green-500" />
@@ -1006,6 +1000,14 @@ export const SampleHomes: React.FC = () => {
                       </span>
                     </div>
                   )}
+                  <div className="flex items-center text-slate-600 mb-3">
+                    <img 
+                      src="/icons/adress.png" 
+                      alt="Location" 
+                      className="w-5 h-5 mr-2 object-contain"
+                    />
+                    <span className="text-lg">{property.location}</span>
+                  </div>
                   
                   {/* Price Display */}
                   <div className="mb-6">
@@ -1035,7 +1037,7 @@ export const SampleHomes: React.FC = () => {
                       
                       <div className="flex items-center space-x-2">
                         <NextImage 
-                          src="/icons/ruler.webp" 
+                          src="/icons/ruler2.gif" 
                           alt="Measurement" 
                           width={32}
                           height={32}
@@ -1044,7 +1046,9 @@ export const SampleHomes: React.FC = () => {
                         />
                         <div>
                           <div className="text-blue-800 text-sm font-bold mb-1">Cabbirka</div>
-                          <div className="text-xl font-bold text-slate-900">{property.measurement || 'N/A'}</div>
+                        <div className="text-xl font-bold text-slate-900">
+                          {resolveMeasurementValue(property.measurement, property.sqft, property.lotSize)}
+                        </div>
                         </div>
                       </div>
                     </>

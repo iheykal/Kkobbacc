@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useLayoutEffect } from 'react';
 import { propertyEventManager, PropertyEventType } from '@/lib/propertyEvents';
 
 export interface Property {
@@ -46,37 +46,71 @@ export interface FilterOptions {
 }
 
 export const useProperties = (featured?: boolean, filters?: FilterOptions) => {
-  const [properties, setProperties] = useState<Property[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  
   // Cache key for this specific query
   const cacheKey = `properties_${featured ? 'featured' : 'all'}_${JSON.stringify(filters || {})}`;
 
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [hasHydratedFromCache, setHasHydratedFromCache] = useState(false);
+
+  // Hydrate immediately from cache on client to minimize loading flashes
+  useLayoutEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+    try {
+      const cached = sessionStorage.getItem(`cache_${cacheKey}`);
+      if (!cached) {
+        return;
+      }
+      const parsed = JSON.parse(cached);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        setProperties(parsed);
+        setLoading(false);
+        setHasHydratedFromCache(true);
+      }
+    } catch (error) {
+      console.warn('⚠️ Failed to hydrate properties cache:', error);
+    }
+  }, [cacheKey]);
+
   const fetchProperties = useCallback(async () => {
     try {
-      setLoading(true);
       setError(null);
-      
-      // Detect mobile device
-      const isMobile = typeof window !== 'undefined' && (window.innerWidth < 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
-      
+
+      const isBrowser = typeof window !== 'undefined';
+      const isMobile = isBrowser && (window.innerWidth < 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
+
       // For mobile, use shorter cache time or skip cache to ensure fresh data
       const cacheValidTime = isMobile ? 60000 : 300000; // 1 minute for mobile, 5 minutes for desktop
-      
+
+      let cachedData: string | null = null;
+      let cacheTimestamp: string | null = null;
+      let cacheAge = Infinity;
+      let cacheValid = false;
+
+      if (isBrowser) {
+        cachedData = sessionStorage.getItem(`cache_${cacheKey}`);
+        cacheTimestamp = sessionStorage.getItem(`cache_timestamp_${cacheKey}`);
+        cacheAge = cacheTimestamp ? Date.now() - parseInt(cacheTimestamp, 10) : Infinity;
+        cacheValid = cacheAge < cacheValidTime;
+      }
+
+      const cacheFreshForMobile = cacheAge < 60000;
+      const canUseCacheImmediately = !!cachedData && cacheValid && (!isMobile || cacheFreshForMobile);
+
+      if (!canUseCacheImmediately) {
+        setLoading(true);
+      }
+
       // Check cache first (but skip on mobile for first load to ensure fresh data)
-      const cachedData = sessionStorage.getItem(`cache_${cacheKey}`);
-      const cacheTimestamp = sessionStorage.getItem(`cache_timestamp_${cacheKey}`);
-      const now = Date.now();
-      const cacheAge = cacheTimestamp ? now - parseInt(cacheTimestamp, 10) : Infinity;
-      const cacheValid = cacheAge < cacheValidTime;
-      
-      // Only use cache if valid and not on mobile (or if mobile cache is fresh)
-      if (cachedData && cacheValid && (!isMobile || cacheAge < 60000)) {
+      if (canUseCacheImmediately && cachedData) {
         try {
           const parsed = JSON.parse(cachedData);
           setProperties(parsed);
           setLoading(false);
+          setHasHydratedFromCache(true);
           // Still fetch fresh data in background for mobile
           if (isMobile) {
             // Continue to fetch fresh data below
@@ -156,7 +190,7 @@ export const useProperties = (featured?: boolean, filters?: FilterOptions) => {
         // Cache the data (always update cache with fresh data)
         try {
           sessionStorage.setItem(`cache_${cacheKey}`, JSON.stringify(data.data));
-          sessionStorage.setItem(`cache_timestamp_${cacheKey}`, now.toString());
+          sessionStorage.setItem(`cache_timestamp_${cacheKey}`, Date.now().toString());
         } catch (storageError) {
           console.warn('⚠️ Failed to cache data (storage may be full):', storageError);
         }

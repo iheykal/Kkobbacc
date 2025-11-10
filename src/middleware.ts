@@ -36,7 +36,9 @@ export function middleware(request: NextRequest) {
     pathname === '/signup' ||
     pathname === '/register-agent' ||
     pathname.startsWith('/debug') ||
-    pathname.startsWith('/test')
+    pathname.startsWith('/test') ||
+    pathname === '/sitemap.xml' ||
+    pathname === '/robots.txt'
 
   // For public routes, return early with security headers
   if (isPublicRoute) {
@@ -118,7 +120,9 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
+     * - sitemap.xml (sitemap file)
+     * - robots.txt (robots file)
      */
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)',
   ],
 }

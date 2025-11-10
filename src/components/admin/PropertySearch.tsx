@@ -19,7 +19,7 @@ import {
   AlertTriangle,
   Eye
 } from 'lucide-react'
-import { DEFAULT_AVATAR_URL } from '@/lib/utils'
+import { DEFAULT_AVATAR_URL, resolveMeasurementValue } from '@/lib/utils'
 import { getPrimaryImageUrl, getAllImageUrls } from '@/lib/imageUrlResolver'
 import EnhancedImageGallery from '@/components/ui/EnhancedImageGallery'
 
@@ -297,7 +297,7 @@ export default function PropertySearch() {
                   </div>
                   <div className="flex items-center space-x-2 text-slate-600">
                     <img 
-                      src="/icons/location.webp" 
+                      src="/icons/adress.png" 
                       alt="Location" 
                       className="w-5 h-5 object-contain"
                     />
@@ -341,13 +341,15 @@ export default function PropertySearch() {
                       <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl">
                         <div className="w-20 h-20 flex items-center justify-center mx-auto mb-2">
                           <img 
-                            src="/icons/ruler.webp" 
+                            src="/icons/ruler2.gif" 
                             alt="Measurement" 
                             className="w-14 h-14 object-contain"
                           />
                         </div>
                         <div className="text-sm text-blue-800 mb-1 font-bold">Cabbirka</div>
-                        <div className="text-xl font-bold text-slate-900">{property.measurement || 'N/A'}</div>
+                        <div className="text-xl font-bold text-slate-900">
+                          {resolveMeasurementValue(property.measurement, property.sqft, property.lotSize)}
+                        </div>
                       </div>
                     </>
                   ) : (

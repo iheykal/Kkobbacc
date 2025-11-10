@@ -134,6 +134,27 @@ export function formatListingDate(dateString: string | Date): string {
   return `${day}/${month}/${year}`
 }
 
+export function resolveMeasurementValue(
+  measurement?: string | null,
+  sqft?: number | null,
+  lotSize?: number | null
+): string {
+  const normalized = typeof measurement === 'string' ? measurement.trim() : ''
+  if (normalized) {
+    return normalized
+  }
+
+  if (typeof sqft === 'number' && sqft > 0) {
+    return `${sqft.toLocaleString()} sqft`
+  }
+
+  if (typeof lotSize === 'number' && lotSize > 0) {
+    return `${lotSize.toLocaleString()} m²`
+  }
+
+  return 'N/A'
+}
+
 /**
  * Get the company logo URL that will be automatically attached to agent property posts
  * This can be easily changed to use a different logo by modifying this function

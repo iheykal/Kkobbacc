@@ -2,11 +2,11 @@ import { MetadataRoute } from 'next'
 import connectDB from '@/lib/mongodb'
 import Property from '@/models/Property'
 
-export const dynamic = 'force-dynamic'
 export const revalidate = 3600 // Revalidate every hour
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://kobac-real-estate.onrender.com'
+  // Use environment variable or default to kobac.net
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://kobac.net'
   
   // Static pages - always return these
   const staticPages = [

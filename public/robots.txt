@@ -10,7 +10,7 @@ Disallow: /debug/
 Disallow: /test-*/
 
 # Sitemap location
-Sitemap: https://kobac-real-estate.onrender.com/sitemap.xml
+Sitemap: https://kobac.net/sitemap.xml
 
 # Crawl delay for good citizen behavior
 Crawl-delay: 1

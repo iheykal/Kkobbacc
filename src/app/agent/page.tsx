@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useUser } from '@/contexts/UserContext'
 import { uploadToR2, uploadMultipleToR2, uploadPropertyImagesToR2 } from '@/lib/r2-upload'
-import { formatPrice, handlePriceInputChange, parsePriceFromInput } from '@/lib/utils'
+import { formatPrice, handlePriceInputChange, parsePriceFromInput, resolveMeasurementValue } from '@/lib/utils'
 import { propertyEventManager } from '@/lib/propertyEvents'
 import { 
   Plus, 
@@ -35,6 +35,8 @@ interface Property {
   listingType: string
   documentType?: string
   measurement?: string
+  sqft?: number
+  lotSize?: number
   status: string
   description: string
   price: string
@@ -1348,18 +1350,18 @@ export default function AgentDashboard() {
                         <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-1 group-hover:text-blue-600 transition-colors duration-300">
                           {property.title}
                         </h3>
-                        <div className="flex items-center space-x-2 text-gray-600">
-                          <img 
-                            src="/icons/location.webp" 
-                            alt="Location" 
-                            className="w-4 h-4 object-contain"
-                          />
-                          <span className="text-sm">{property.location || 'Location not specified'}</span>
-                        </div>
                         <div className="mt-2">
                           <span className="inline-block px-3 py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded-full">
                             {property.district || 'District not specified'}
                           </span>
+                        </div>
+                        <div className="flex items-center space-x-2 text-gray-600">
+                          <img 
+                            src="/icons/adress.png" 
+                            alt="Location" 
+                            className="w-4 h-4 object-contain"
+                          />
+                          <span className="text-sm">{property.location || 'Location not specified'}</span>
                         </div>
                       </div>
 
@@ -1389,14 +1391,16 @@ export default function AgentDashboard() {
                             <div className="flex items-center space-x-2 text-gray-600">
                               <div className="p-2 rounded-lg bg-emerald-50">
                                 <img 
-                                  src="/icons/ruler.webp" 
+                                  src="/icons/ruler2.gif" 
                                   alt="Measurement" 
                                   className="w-6 h-6 object-contain"
                                 />
                               </div>
                               <div>
                                 <p className="text-xs text-blue-800 mb-1 font-bold">Cabbirka</p>
-                                <p className="text-sm font-medium text-gray-900">{property.measurement || 'N/A'}</p>
+                                <p className="text-sm font-medium text-gray-900">
+                                  {resolveMeasurementValue(property.measurement, property.sqft, property.lotSize)}
+                                </p>
                               </div>
                             </div>
                           </>
@@ -1616,13 +1620,18 @@ export default function AgentDashboard() {
                 
                 <div className="space-y-2">
                   <label className="block text-sm font-semibold text-gray-800 mb-3">Location</label>
-                  <input
-                    type="text"
-                    value={propertyData.location}
-                    onChange={(e) => setPropertyData(prev => ({ ...prev, location: e.target.value }))}
-                    className="w-full px-4 py-4 border-2 border-gray-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 bg-white hover:border-gray-300"
-                    placeholder="Enter location"
-                  />
+                  <div className="relative">
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center z-10">
+                      <img src="/icons/adress.png" alt="Address" className="w-5 h-5 object-contain" />
+                    </div>
+                    <input
+                      type="text"
+                      value={propertyData.location}
+                      onChange={(e) => setPropertyData(prev => ({ ...prev, location: e.target.value }))}
+                      className="w-full pl-14 pr-4 py-4 border-2 border-gray-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 bg-white hover:border-gray-300"
+                      placeholder="Enter location"
+                    />
+                  </div>
                 </div>
                 
                 <div className="space-y-2">

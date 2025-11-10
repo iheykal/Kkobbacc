@@ -42,6 +42,21 @@ export const metadata: Metadata = {
   keywords: 'luxury real estate, premium properties, luxury homes, real estate, kobac real estate',
   authors: [{ name: 'Kobac Real Estate' }],
   manifest: '/manifest.json',
+  icons: {
+    icon: [
+      { url: '/icons/kobac.png', sizes: '32x32', type: 'image/png' },
+      { url: '/icons/kobac.png', sizes: '48x48', type: 'image/png' },
+      { url: '/icons/kobac.png', sizes: '64x64', type: 'image/png' },
+      { url: '/icons/kobac.png', sizes: '128x128', type: 'image/png' },
+      { url: '/icons/kobac.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icons/kobac.png', sizes: '256x256', type: 'image/png' },
+      { url: '/icons/kobac.png', sizes: '384x384', type: 'image/png' },
+      { url: '/icons/kobac.png', sizes: '512x512', type: 'image/png' },
+      { url: '/icons/kobac.png', sizes: '16x16', type: 'image/png' },
+    ],
+    shortcut: '/icons/kobac.png',
+    apple: '/icons/icon-192x192.png',
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
@@ -57,6 +72,10 @@ export const metadata: Metadata = {
 
 export const viewport = {
   themeColor: '#2563eb',
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
 }
 
 export default function RootLayout({
@@ -86,6 +105,17 @@ export default function RootLayout({
         
         {/* Apple Touch Icons */}
         <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-192x192.png" />
+        <link rel="icon" href="/icons/kobac.png" sizes="16x16" type="image/png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/icons/kobac.png" />
+        <link rel="icon" type="image/png" sizes="48x48" href="/icons/kobac.png" />
+        <link rel="icon" type="image/png" sizes="64x64" href="/icons/kobac.png" />
+        <link rel="icon" type="image/png" sizes="128x128" href="/icons/kobac.png" />
+        <link rel="icon" type="image/png" sizes="192x192" href="/icons/kobac.png" />
+        <link rel="icon" type="image/png" sizes="256x256" href="/icons/kobac.png" />
+        <link rel="icon" type="image/png" sizes="384x384" href="/icons/kobac.png" />
+        <link rel="icon" type="image/png" sizes="512x512" href="/icons/kobac.png" />
+        <link rel="icon" sizes="any" href="/icons/kobac.png" />
+        <link rel="shortcut icon" href="/icons/kobac.png" />
         
         {/* Only preload GA if ID is provided and not in development */}
         {gaId && process.env.NODE_ENV === 'production' && (

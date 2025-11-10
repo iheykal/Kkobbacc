@@ -302,8 +302,10 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({ proper
           <button
             onClick={onClose}
             className="p-2 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 hover:scale-110 transition-all"
+            aria-label="Close property details"
+            type="button"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
@@ -349,7 +351,7 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({ proper
                   </div>
                 </div>
                 <div className="flex items-center text-gray-600">
-                  <MapPin className="w-5 h-5 mr-2" />
+                  <MapPin className="w-5 h-5 mr-2" aria-hidden="true" />
                   <span>{property.location}</span>
                   {property.district && (
                     <>
@@ -363,22 +365,22 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({ proper
               {/* Property Details */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
                 <div className="bg-gray-50 rounded-lg p-4 text-center">
-                  <Bed className="w-6 h-6 text-blue-600 mx-auto mb-2" />
+                  <Bed className="w-6 h-6 text-blue-600 mx-auto mb-2" aria-hidden="true" />
                   <div className="text-2xl font-bold text-gray-900">{property.beds}</div>
                   <div className="text-sm text-gray-600">Bedrooms</div>
                 </div>
                 <div className="bg-gray-50 rounded-lg p-4 text-center">
-                  <Bath className="w-6 h-6 text-blue-600 mx-auto mb-2" />
+                  <Bath className="w-6 h-6 text-blue-600 mx-auto mb-2" aria-hidden="true" />
                   <div className="text-2xl font-bold text-gray-900">{property.baths}</div>
                   <div className="text-sm text-gray-600">Bathrooms</div>
                 </div>
                 <div className="bg-gray-50 rounded-lg p-4 text-center">
-                  <Ruler className="w-6 h-6 text-blue-600 mx-auto mb-2" />
+                  <Ruler className="w-6 h-6 text-blue-600 mx-auto mb-2" aria-hidden="true" />
                   <div className="text-2xl font-bold text-gray-900">{property.lotSize}</div>
                   <div className="text-sm text-gray-600">Sq Ft</div>
                 </div>
                 <div className="bg-gray-50 rounded-lg p-4 text-center">
-                  <Calendar className="w-6 h-6 text-blue-600 mx-auto mb-2" />
+                  <Calendar className="w-6 h-6 text-blue-600 mx-auto mb-2" aria-hidden="true" />
                   <div className="text-2xl font-bold text-gray-900">{property.yearBuilt}</div>
                   <div className="text-sm text-gray-600">Year Built</div>
                 </div>
@@ -434,8 +436,10 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({ proper
                     >
                     <img
                       src={property.agent?.image || DEFAULT_AVATAR_URL}
-                      alt={capitalizeName(property.agent?.name || 'Agent')}
-                        className="w-20 h-20 rounded-full mx-auto mb-4 object-cover border-4 border-white shadow-lg hover:border-blue-500 transition-colors"
+                      alt={`${capitalizeName(property.agent?.name || 'Agent')} profile picture`}
+                      width={80}
+                      height={80}
+                      className="w-20 h-20 rounded-full mx-auto mb-4 object-cover border-4 border-white shadow-lg hover:border-blue-500 transition-colors"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
                         target.src = DEFAULT_AVATAR_URL;
@@ -446,12 +450,12 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({ proper
                       {capitalizeName(property.agent?.name || 'Agent')}
                     </h3>
                     <div className="flex items-center justify-center mb-4">
-                      <div className="flex text-yellow-400">
+                      <div className="flex text-yellow-400" aria-label={`Rating: ${property.agent?.rating || 5.0} out of 5`}>
                         {[...Array(5)].map((_, i) => (
-                          <Award key={i} className="w-4 h-4 fill-current" />
+                          <Award key={i} className="w-4 h-4 fill-current" aria-hidden="true" />
                         ))}
                       </div>
-                      <span className="ml-2 text-sm text-gray-600">
+                      <span className="ml-2 text-sm text-gray-600" aria-label={`${property.agent?.rating || 5.0} stars`}>
                         {property.agent?.rating || 5.0}
                       </span>
                     </div>
@@ -480,8 +484,9 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({ proper
                         }}
                         variant="outline"
                         className="w-full"
+                        aria-label={`Call ${capitalizeName(property.agent?.name || 'Agent')} at ${property.agent?.phone ? formatPhoneNumber(property.agent.phone) : 'phone number'}`}
                       >
-                        <Phone className="w-4 h-4 mr-2" />
+                        <Phone className="w-4 h-4 mr-2" aria-hidden="true" />
                         {property.agent?.phone ? formatPhoneNumber(property.agent.phone) : 'Call Agent'}
                       </Button>
                     </div>
@@ -498,8 +503,9 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({ proper
                       ? 'bg-red-600 hover:bg-red-700 text-white'
                       : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
                   }`}
+                  aria-label={isFavorite ? 'Remove property from saved list' : 'Save property to favorites'}
                 >
-                  <Heart className={`w-4 h-4 mr-2 ${isFavorite ? 'fill-current' : ''}`} />
+                  <Heart className={`w-4 h-4 mr-2 ${isFavorite ? 'fill-current' : ''}`} aria-hidden="true" />
                   {isFavorite ? 'Saved' : 'Save Property'}
                 </Button>
                 <Button
@@ -517,8 +523,9 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({ proper
                   }}
                   variant="outline"
                   className="w-full"
+                  aria-label="Share property"
                 >
-                  <Share2 className="w-4 h-4 mr-2" />
+                  <Share2 className="w-4 h-4 mr-2" aria-hidden="true" />
                   Share Property
                 </Button>
               </div>

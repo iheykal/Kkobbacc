@@ -61,6 +61,7 @@ export default function SEOPropertyPage() {
   const [isFavorite, setIsFavorite] = useState(false)
   const [originUrl, setOriginUrl] = useState('')
   const [seoUrl, setSeoUrl] = useState('')
+  const [hasHydratedFromCache, setHasHydratedFromCache] = useState(false)
   const scrollPositionRef = useRef(0)
   const hasRestoredState = useRef(false)
 
@@ -102,6 +103,40 @@ export default function SEOPropertyPage() {
   })
 
   useEffect(() => {
+    if (!propertyId || typeof window === 'undefined') {
+      return
+    }
+
+    const candidateKeys = new Set<string>([propertyId])
+    if (parsedUrl?.propertyId) {
+      candidateKeys.add(String(parsedUrl.propertyId))
+    }
+    if (segments && segments.length > 0) {
+      const lastSegment = segments[segments.length - 1]
+      candidateKeys.add(lastSegment)
+    }
+
+    for (const key of candidateKeys) {
+      try {
+        const cached = sessionStorage.getItem(`prefetched_property_${key}`)
+        if (!cached) {
+          continue
+        }
+        const parsed = JSON.parse(cached)
+        if (parsed?.data) {
+          setProperty(parsed.data)
+          setLoading(false)
+          setHasHydratedFromCache(true)
+          console.log('⚡ Restored property from prefetched cache:', key)
+          break
+        }
+      } catch (error) {
+        console.warn('⚠️ Failed to restore prefetched property:', error)
+      }
+    }
+  }, [propertyId, segmentsPath, parsedUrl?.propertyId])
+
+  useEffect(() => {
     const fetchProperty = async () => {
       try {
         if (!propertyId) {
@@ -110,7 +145,9 @@ export default function SEOPropertyPage() {
           return
         }
 
-        setLoading(true)
+        if (!hasHydratedFromCache) {
+          setLoading(true)
+        }
 
         // Check if this should open as a modal (from list navigation)
         const shouldOpenAsModal = sessionStorage.getItem('open_as_modal')
@@ -149,11 +186,24 @@ export default function SEOPropertyPage() {
           const fetchedProperty = data.data
           
           // Cache the property data for instant loading next time
-          const cacheKey = `property_${propertyId}`
-          sessionStorage.setItem(cacheKey, JSON.stringify({
+          const cachePayload = JSON.stringify({
             data: fetchedProperty,
             timestamp: Date.now()
-          }))
+          })
+
+          try {
+            const cacheKey = `property_${propertyId}`
+            sessionStorage.setItem(cacheKey, cachePayload)
+
+            if (fetchedProperty.propertyId) {
+              sessionStorage.setItem(`prefetched_property_${fetchedProperty.propertyId}`, cachePayload)
+            }
+            if (fetchedProperty._id) {
+              sessionStorage.setItem(`prefetched_property_${fetchedProperty._id}`, cachePayload)
+            }
+          } catch (cacheError) {
+            console.warn('⚠️ Failed to cache property details:', cacheError)
+          }
           
           // Generate the correct SEO URL for this property
           const correctSEOUrl = generateSEOUrl({
@@ -207,7 +257,7 @@ export default function SEOPropertyPage() {
     if (propertyId) {
       fetchProperty()
     }
-  }, [propertyId, segmentsPath, router, isReturningFromBack])
+  }, [propertyId, segmentsPath, router, isReturningFromBack, hasHydratedFromCache])
 
   // Separate effect for state restoration
   useEffect(() => {

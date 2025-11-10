@@ -308,7 +308,7 @@ export const FlexibleImage: React.FC<FlexibleImageProps> = ({
         fetchPriority={priority ? 'high' : 'low'}
         onError={handleImageError}
         onLoad={handleImageLoad}
-        className={`transition-all duration-500 ${
+        className={`transition-all duration-300 ${
           getObjectFitClass()
         } ${
           aspectRatio === 'auto' 
@@ -331,12 +331,12 @@ export const FlexibleImage: React.FC<FlexibleImageProps> = ({
           backfaceVisibility: 'hidden',
           transform: 'translateZ(0)'
         }}
-        initial={{ opacity: 0, scale: 1.05 }}
+        initial={{ opacity: 0, scale: 1.02 }}
         animate={{ 
           opacity: isLoading ? 0 : 1, 
           scale: isLoading ? 1.05 : (isZoomed ? 1.5 : 1)
         }}
-        transition={{ duration: 0.5 }}
+        transition={{ duration: 0.22 }}
       />
 
       {/* Watermark */}
@@ -519,9 +519,9 @@ export const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({
     const isRightSwipe = distance < -50;
 
     if (isLeftSwipe) {
-      setSelectedImage(selectedImage < images.length - 1 ? selectedImage + 1 : 0);
+      setSelectedImage((prev) => (prev < images.length - 1 ? prev + 1 : 0));
     } else if (isRightSwipe) {
-      setSelectedImage(selectedImage > 0 ? selectedImage - 1 : images.length - 1);
+      setSelectedImage((prev) => (prev > 0 ? prev - 1 : images.length - 1));
     }
 
     setTouchStart(null);
@@ -575,13 +575,15 @@ export const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({
         {images.length > 1 && (
           <>
             <motion.button
-              onClick={() => setSelectedImage(selectedImage > 0 ? selectedImage - 1 : images.length - 1)}
-              className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-transparent hover:bg-black/10 rounded-full p-2 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              onClick={() =>
+                setSelectedImage((prev) => (prev > 0 ? prev - 1 : images.length - 1))
+              }
+              className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-transparent hover:bg-black/10 rounded-full p-2 transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
               whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
+              whileTap={{ scale: 0.94 }}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.3 }}
+              transition={{ duration: 0.18 }}
             >
               <svg className="w-6 h-6 text-white drop-shadow-lg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -589,13 +591,15 @@ export const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({
             </motion.button>
 
             <motion.button
-              onClick={() => setSelectedImage(selectedImage < images.length - 1 ? selectedImage + 1 : 0)}
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-transparent hover:bg-black/10 rounded-full p-2 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              onClick={() =>
+                setSelectedImage((prev) => (prev < images.length - 1 ? prev + 1 : 0))
+              }
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-transparent hover:bg-black/10 rounded-full p-2 transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
               whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
+              whileTap={{ scale: 0.94 }}
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.3 }}
+              transition={{ duration: 0.18 }}
             >
               <svg className="w-6 h-6 text-white drop-shadow-lg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -610,7 +614,7 @@ export const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({
             className="absolute top-4 right-4 bg-black bg-opacity-70 text-white px-3 py-1 rounded-full text-sm font-medium"
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.18 }}
           >
             {selectedImage + 1} / {images.length}
           </motion.div>
@@ -620,12 +624,12 @@ export const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({
         {autoPlay && images.length > 1 && (
           <motion.button
             onClick={() => setIsAutoPlaying(!isAutoPlaying)}
-            className="absolute bottom-4 left-4 bg-black bg-opacity-70 hover:bg-opacity-90 text-white p-2 rounded-full transition-all duration-300"
+            className="absolute bottom-4 left-4 bg-black bg-opacity-70 hover:bg-opacity-90 text-white p-2 rounded-full transition-all duration-200"
             whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
+            whileTap={{ scale: 0.94 }}
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.18 }}
           >
             {isAutoPlaying ? (
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
@@ -653,10 +657,10 @@ export const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({
                   : 'opacity-70 hover:opacity-100'
               }`}
               whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileTap={{ scale: 0.94 }}
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: selectedImage === index ? 1 : 0.7, scale: 1 }}
-              transition={{ duration: 0.2 }}
+              transition={{ duration: 0.16 }}
             >
               <FlexibleImage
                 src={image}

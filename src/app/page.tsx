@@ -49,12 +49,12 @@ function HomePageContent() {
         <meta name="description" content="Discover luxury villas, modern apartments, and premium properties in Mogadishu. Kobac Real Estate offers the finest selection of homes for sale and rent. Find your dream property today." />
         <meta name="keywords" content="real estate, mogadishu, properties, villas, apartments, houses, luxury homes, for sale, for rent, somalia property" />
         <meta property="og:title" content="Kobac Real Estate - Premium Properties in Mogadishu" />
-        <meta property="og:description" content="Discover luxury villas, modern apartments, and premium properties in Mogadishu." />
+        <meta property="og:description" content="Discover luxury villas, modern apartments, and premium properties in Mogadishu. Kobac Real Estate offers the finest selection of homes for sale and rent." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content={`${typeof window !== 'undefined' ? window.location.origin : ''}`} />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Kobac Real Estate - Premium Properties" />
-        <meta name="twitter:description" content="Discover luxury villas and modern apartments in Mogadishu." />
+        <meta name="twitter:description" content="Discover luxury villas and modern apartments in Mogadishu. Find your dream property today." />
       </Head>
       <div className="min-h-screen">
         {/* Redirect Animation */}
@@ -85,7 +85,7 @@ function HomePageContent() {
               size="sm"
               className="bg-white/90 backdrop-blur-sm text-blue-600 hover:bg-white shadow-lg border border-blue-200 font-semibold transition-all duration-300 hover:scale-105 active:scale-95"
             >
-              <User className="w-4 h-4 mr-2" />
+              <User className="w-4 h-4 mr-2" aria-hidden="true" />
               Agent Dashboard
             </Button>
           </div>
@@ -97,8 +97,9 @@ function HomePageContent() {
               variant="secondary" 
               size="lg"
               className="bg-blue-600 hover:bg-blue-700 text-white shadow-2xl border-0 font-semibold w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95"
+              aria-label="Open Agent Dashboard"
             >
-              <User className="w-6 h-6" />
+              <User className="w-6 h-6" aria-hidden="true" />
             </Button>
             <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full font-bold shadow-lg">
               Agent

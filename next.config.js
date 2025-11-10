@@ -7,6 +7,8 @@ const withPWA = require('next-pwa')({
   register: true,
   skipWaiting: true,
   disable: shouldDisablePWA, // Disable PWA during build, enable at runtime
+  disableDevLogs: true,
+  buildExcludes: [/app-manifest\.json$/, /sw\.js\.map$/],
   runtimeCaching: [
     {
       urlPattern: /^https?.*/,
@@ -19,7 +21,6 @@ const withPWA = require('next-pwa')({
       },
     },
   ],
-  buildExcludes: [/app-manifest\.json$/],
 })
 
 /** @type {import('next').NextConfig} */
@@ -103,8 +104,8 @@ const nextConfig = {
     if (!isServer) {
       config.optimization = {
         ...config.optimization,
-        usedExports: true, // Enable tree shaking
-        sideEffects: false, // Mark as side-effect free for better tree shaking
+        // Removed usedExports and sideEffects - Next.js handles tree shaking internally
+        // These settings conflict with Next.js's cacheUnaffected optimization
         splitChunks: {
           chunks: 'all',
           cacheGroups: {

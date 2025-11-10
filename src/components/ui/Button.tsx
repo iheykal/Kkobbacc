@@ -111,6 +111,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
               className="w-full h-full"
               fill="none"
               viewBox="0 0 24 24"
+              aria-hidden="true"
             >
               <circle
                 className="opacity-25"
