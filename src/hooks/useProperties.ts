@@ -65,10 +65,12 @@ export const useProperties = (featured?: boolean, filters?: FilterOptions) => {
         return;
       }
       const parsed = JSON.parse(cached);
-      if (Array.isArray(parsed) && parsed.length > 0) {
+      if (Array.isArray(parsed)) {
         setProperties(parsed);
-        setLoading(false);
-        setHasHydratedFromCache(true);
+        if (parsed.length > 0) {
+          setLoading(false);
+          setHasHydratedFromCache(true);
+        }
       }
     } catch (error) {
       console.warn('⚠️ Failed to hydrate properties cache:', error);
@@ -82,8 +84,8 @@ export const useProperties = (featured?: boolean, filters?: FilterOptions) => {
       const isBrowser = typeof window !== 'undefined';
       const isMobile = isBrowser && (window.innerWidth < 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
 
-      // For mobile, use shorter cache time or skip cache to ensure fresh data
-      const cacheValidTime = isMobile ? 60000 : 300000; // 1 minute for mobile, 5 minutes for desktop
+      // Reduce cache time to ensure new properties appear quickly
+      const cacheValidTime = isMobile ? 30000 : 30000; // 30 seconds for all devices
 
       let cachedData: string | null = null;
       let cacheTimestamp: string | null = null;
@@ -108,9 +110,11 @@ export const useProperties = (featured?: boolean, filters?: FilterOptions) => {
       if (canUseCacheImmediately && cachedData) {
         try {
           const parsed = JSON.parse(cachedData);
-          setProperties(parsed);
-          setLoading(false);
-          setHasHydratedFromCache(true);
+          if (Array.isArray(parsed)) {
+            setProperties(parsed);
+            setLoading(false);
+            setHasHydratedFromCache(true);
+          }
           // Still fetch fresh data in background for mobile
           if (isMobile) {
             // Continue to fetch fresh data below
@@ -122,12 +126,12 @@ export const useProperties = (featured?: boolean, filters?: FilterOptions) => {
           // Continue to fetch fresh data
         }
       }
-      
+
       const params = new URLSearchParams();
       if (featured) {
         params.append('featured', 'true');
       }
-      
+
       // Add filter parameters
       if (filters) {
         if (filters.listingType && filters.listingType !== 'all') {
@@ -137,25 +141,25 @@ export const useProperties = (featured?: boolean, filters?: FilterOptions) => {
           params.append('district', filters.district);
         }
       }
-      
+
       // Always ask for latest first so new uploads surface immediately
       params.append('sort', 'latest');
-      
-      // Optimized limit for better performance - reduced from 100 to 20 for faster initial load
-      params.append('limit', '20'); // Reduced limit for faster initial load and smaller payload
-      
+
+      // Optimized limit for better performance - increased to 500 to show virtually all properties
+      params.append('limit', '500'); // Increased limit to support high volume (100+ per day)
+
       // Build headers for mobile detection
       const headers: HeadersInit = {
         'Content-Type': 'application/json',
       };
-      
+
       // Add mobile optimization header
       if (isMobile) {
         headers['x-mobile-optimized'] = 'true';
       }
-      
+
       console.log('📱 Fetching properties:', { isMobile, cacheKey, cacheValid, hasCache: !!cachedData });
-      
+
       const response = await fetch(`/api/properties?${params.toString()}`, {
         credentials: 'include',
         headers: headers,
@@ -164,7 +168,7 @@ export const useProperties = (featured?: boolean, filters?: FilterOptions) => {
         // Add cache-busting for mobile
         ...(isMobile ? { next: { revalidate: 0 } } : { next: { revalidate: 30 } })
       });
-      
+
       if (!response.ok) {
         let errorText = '';
         try {
@@ -176,15 +180,15 @@ export const useProperties = (featured?: boolean, filters?: FilterOptions) => {
         console.error('❌ API Error:', { status: response.status, statusText: response.statusText, error: errorText });
         throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
       }
-      
+
       const data = await response.json();
-      
-      console.log('✅ Properties fetched:', { 
-        success: data.success, 
+
+      console.log('✅ Properties fetched:', {
+        success: data.success,
         count: data.data?.length || 0,
-        hasMeta: !!data.meta 
+        hasMeta: !!data.meta
       });
-      
+
       if (data.success && Array.isArray(data.data)) {
         setProperties(data.data);
         // Cache the data (always update cache with fresh data)
@@ -202,8 +206,10 @@ export const useProperties = (featured?: boolean, filters?: FilterOptions) => {
         if (cachedData) {
           try {
             const parsed = JSON.parse(cachedData);
-            setProperties(parsed);
-            console.log('📦 Using cached data as fallback');
+            if (Array.isArray(parsed)) {
+              setProperties(parsed);
+              console.log('📦 Using cached data as fallback');
+            }
           } catch (parseError) {
             console.error('❌ Failed to parse cached fallback:', parseError);
           }
@@ -213,14 +219,16 @@ export const useProperties = (featured?: boolean, filters?: FilterOptions) => {
       const errorMsg = err instanceof Error ? err.message : 'Failed to fetch properties';
       console.error('❌ Fetch error:', err);
       setError(errorMsg);
-      
+
       // Try to use cached data as fallback
       try {
         const cachedData = sessionStorage.getItem(`cache_${cacheKey}`);
         if (cachedData) {
           const parsed = JSON.parse(cachedData);
-          setProperties(parsed);
-          console.log('📦 Using cached data due to fetch error');
+          if (Array.isArray(parsed)) {
+            setProperties(parsed);
+            console.log('📦 Using cached data due to fetch error');
+          }
         }
       } catch (parseError) {
         console.error('❌ Failed to parse cached fallback:', parseError);
@@ -288,7 +296,7 @@ export const useProperties = (featured?: boolean, filters?: FilterOptions) => {
       });
 
       const data = await response.json();
-      
+
       if (data.success) {
         setProperties(prev => [data.data, ...prev]);
         // Clear cache since we have new data
@@ -316,10 +324,10 @@ export const useProperties = (featured?: boolean, filters?: FilterOptions) => {
       });
 
       const data = await response.json();
-      
+
       if (data.success) {
-        setProperties(prev => 
-          prev.map(prop => 
+        setProperties(prev =>
+          prev.map(prop =>
             prop._id === id ? { ...prop, ...data.data } : prop
           )
         );
@@ -344,7 +352,7 @@ export const useProperties = (featured?: boolean, filters?: FilterOptions) => {
       });
 
       const data = await response.json();
-      
+
       if (data.success) {
         setProperties(prev => prev.filter(prop => prop._id !== id));
         // Clear cache since we have deleted data

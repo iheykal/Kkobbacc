@@ -1,5 +1,5 @@
 // Dynamic import to reduce bundle size
-import { getMongoose } from './dynamicImports';
+// import { getMongoose } from './dynamicImports'; // REMOVED to avoid circular dependency with sharp
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
@@ -35,13 +35,13 @@ async function connectDB() {
   }
 
   if (!cached.promise) {
-    // Dynamically import mongoose
-    const mongoose = await getMongoose();
-    
+    // Dynamically import mongoose directly here to avoid importing 'sharp' via dynamicImports.ts
+    const mongoose = (await import('mongoose')).default;
+
     // MongoDB will automatically use the database name from the URI
     // We don't need to specify dbName in options when it's already in the URI
     // This prevents conflicts and errors with database name parsing
-    
+
     const opts = {
       bufferCommands: false,
       // Optimized connection pool settings for Render
@@ -56,12 +56,12 @@ async function connectDB() {
       retryWrites: true,
       retryReads: true,
       compressors: 'zlib', // Enable compression
-      zlibCompressionLevel: 6, // Fast compression
+      zlibCompressionLevel: 6 as any, // Fast compression
       // Connection resilience settings
       maxConnecting: 2, // Minimal connecting
       waitQueueTimeoutMS: 30000, // Increased wait timeout
       // Read preferences
-      readPreference: 'primary', // Use primary for stability
+      readPreference: 'primary' as any, // Use primary for stability
       // Additional stability settings
       directConnection: false,
       // Note: maxStalenessSeconds cannot be used with primary read preference
@@ -72,7 +72,7 @@ async function connectDB() {
 
     cached.promise = mongoose.connect(MONGODB_URI, opts).then(async (mongooseInstance: any) => {
       console.log('✅ Connected to MongoDB with optimized settings');
-      
+
       // Ensure connection is fully ready (important when bufferCommands: false)
       // Wait until readyState is 1 (connected)
       if (mongooseInstance.connection.readyState !== 1) {
@@ -82,9 +82,9 @@ async function connectDB() {
             resolve();
             return;
           }
-          
+
           let timeoutId: NodeJS.Timeout | null = null;
-          
+
           const cleanup = () => {
             if (timeoutId) {
               clearTimeout(timeoutId);
@@ -93,21 +93,21 @@ async function connectDB() {
             mongooseInstance.connection.removeListener('connected', onConnected);
             mongooseInstance.connection.removeListener('error', onError);
           };
-          
+
           const onConnected = () => {
             console.log('✅ MongoDB connection confirmed ready');
             cleanup();
             resolve();
           };
-          
+
           const onError = (error: any) => {
             cleanup();
             reject(error);
           };
-          
+
           mongooseInstance.connection.once('connected', onConnected);
           mongooseInstance.connection.once('error', onError);
-          
+
           // Timeout after 10 seconds
           timeoutId = setTimeout(() => {
             if (mongooseInstance.connection.readyState !== 1) {
@@ -117,7 +117,7 @@ async function connectDB() {
           }, 10000);
         });
       }
-      
+
       return mongooseInstance;
     }).catch((error: any) => {
       console.error('❌ MongoDB connection failed:', error);
@@ -128,7 +128,7 @@ async function connectDB() {
 
   try {
     cached.conn = await cached.promise;
-    
+
     // Double-check connection is ready before returning
     if (cached.conn.connection && cached.conn.connection.readyState !== 1) {
       console.log('⏳ Waiting for connection to be fully ready...');
@@ -138,9 +138,9 @@ async function connectDB() {
           resolve();
           return;
         }
-        
+
         let timeoutId: NodeJS.Timeout | null = null;
-        
+
         const cleanup = () => {
           if (timeoutId) {
             clearTimeout(timeoutId);
@@ -149,20 +149,20 @@ async function connectDB() {
           cached.conn.connection.removeListener('connected', onConnected);
           cached.conn.connection.removeListener('error', onError);
         };
-        
+
         const onConnected = () => {
           cleanup();
           resolve();
         };
-        
+
         const onError = (error: any) => {
           cleanup();
           reject(error);
         };
-        
+
         cached.conn.connection.once('connected', onConnected);
         cached.conn.connection.once('error', onError);
-        
+
         // Timeout after 5 seconds
         timeoutId = setTimeout(() => {
           if (cached.conn.connection.readyState !== 1) {

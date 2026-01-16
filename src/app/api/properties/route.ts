@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
       console.error('❌ Database connection error:', dbError);
       throw new Error(`Database connection failed: ${dbError instanceof Error ? dbError.message : String(dbError)}`);
     }
-    
+
     // Get session for authorization (optional for public property viewing)
     let session;
     try {
@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
       }
       session = null;
     }
-    
+
     const { searchParams } = new URL(request.url);
     const featured = searchParams.get('featured');
     const limit = parseInt(searchParams.get('limit') || '10');
@@ -72,88 +72,47 @@ export async function GET(request: NextRequest) {
     const agentId = searchParams.get('agentId');
     const listingType = searchParams.get('listingType');
     const district = searchParams.get('district');
-    
+
     // Reduced logging for better performance - only log in development
     if (process.env.NODE_ENV === 'development') {
       console.log('🔍 GET /api/properties - Query:', { featured, limit, agentId, listingType, district });
     }
-    
-     // Check if this is an admin request (superadmin can see all properties)
-     const isAdminRequest = request.headers.get('x-admin-request') === 'true';
-     const isSuperadmin = session && (session.role === 'superadmin' || session.role === 'super_admin');
-     
-     // Create base query with authorization filter
-     // For superadmins and admin requests: show all properties (including expired/pending)
-     // For regular users: show only public properties (active, not expired, not deleted)
-     let query: any = {};
-     
-     // Only apply visibility filters for non-admin users
-     if (!isSuperadmin && !isAdminRequest) {
-       const now = new Date();
-       query.deletionStatus = { $nin: ['deleted', 'pending_deletion'] }; // Exclude deleted and pending deletion
-       
-       // STRICT expiration filter: Property must NOT be expired
-       // A property is expired if:
-       //   1. isExpired === true, OR
-       //   2. expiresAt exists AND expiresAt < now
-       //
-       // We need to INCLUDE only properties where:
-       // - isExpired !== true (or doesn't exist), AND
-       // - expiresAt >= now (if it exists) OR expiresAt doesn't exist
-       //
-       // We use $and to ensure BOTH conditions must be met
-       query.$and = (query.$and || []).concat([
-         {
-           // Condition 1: isExpired must not be true
-           $or: [
-             { isExpired: { $ne: true } },
-             { isExpired: { $exists: false } }
-           ]
-         },
-         {
-           // Condition 2: expiresAt must be >= now (if it exists) OR doesn't exist
-           $or: [
-             { expiresAt: { $gte: now } },
-             { expiresAt: { $exists: false } }
-           ]
-         }
-       ]);
-       
-       // CRITICAL: Also use $nor to explicitly exclude expired properties
-       // This ensures properties with isExpired=true OR expiresAt<now are excluded
-       query.$nor = [
-         { isExpired: true },
-         { expiresAt: { $lt: now } }
-       ];
-       
-       if (process.env.NODE_ENV === 'development') {
-         console.log('🔍 Public query - STRICT expiration filter (using $nor + $and):', {
-           now: now.toISOString(),
-           nowTimestamp: now.getTime(),
-           filters: {
-             deletionStatus: 'not deleted/pending',
-             isExpired: 'not true',
-             expiresAt: '>= now OR doesn\'t exist',
-             excludeIf: 'isExpired=true OR expiresAt<now'
-           },
-           query: JSON.stringify(query, null, 2)
-         });
-       }
-     } else {
-       // For superadmins/admin requests: only exclude actually deleted properties
-       query.deletionStatus = { $ne: 'deleted' };
-       if (process.env.NODE_ENV === 'development') {
-         console.log('🔍 Admin/Superadmin request - showing all properties including expired and pending');
-       }
-     }
-    
+
+    // Check if this is an admin request (superadmin can see all properties)
+    const isAdminRequest = request.headers.get('x-admin-request') === 'true';
+    const isSuperadmin = session && (session.role === 'superadmin' || session.role === 'super_admin');
+
+    // Create base query with authorization filter
+    // For superadmins and admin requests: show all properties (including expired/pending)
+    // For regular users: show only public properties (active, not expired, not deleted)
+    let query: any = {};
+
+    // Only apply visibility filters for non-admin users
+    if (!isSuperadmin && !isAdminRequest) {
+      const now = new Date();
+      query.deletionStatus = { $nin: ['deleted', 'pending_deletion'] }; // Exclude deleted and pending deletion
+
+      // Simplified visibility filter: Only check deletion status
+      // We no longer hide expired properties automatically
+
+      // if (process.env.NODE_ENV === 'development') {
+      //   console.log('🔍 Public query - Showing all non-deleted properties');
+      // }
+    } else {
+      // For superadmins/admin requests: only exclude actually deleted properties
+      query.deletionStatus = { $ne: 'deleted' };
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🔍 Admin/Superadmin request - showing all properties including expired and pending');
+      }
+    }
+
     // Apply authorization filter only if user is authenticated
     if (session) {
       try {
         const authFilter = createListFilter(session.role, 'read', 'property', session.userId);
         // Only merge authFilter if it's not empty (empty object means user can see all)
         if (authFilter && Object.keys(authFilter).length > 0) {
-        query = { ...query, ...authFilter };
+          query = { ...query, ...authFilter };
         }
       } catch (authError) {
         console.error('❌ Authorization filter creation error:', authError);
@@ -169,11 +128,11 @@ export async function GET(request: NextRequest) {
         console.log('🔍 Anonymous user - showing all public properties');
       }
     }
-    
+
     if (featured === 'true') {
       query.featured = true;
     }
-    
+
     if (agentId) {
       query.agentId = agentId;
       // For agent dashboard requests or admin requests, show all properties (including pending deletion)
@@ -188,7 +147,7 @@ export async function GET(request: NextRequest) {
           query.$and = query.$and.filter((condition: any) => {
             // Check if this condition is about isExpired or expiresAt
             if (condition.$or && Array.isArray(condition.$or)) {
-              const hasExpirationFilter = condition.$or.some((orCond: any) => 
+              const hasExpirationFilter = condition.$or.some((orCond: any) =>
                 orCond.isExpired !== undefined || orCond.expiresAt !== undefined
               );
               return !hasExpirationFilter;
@@ -210,27 +169,27 @@ export async function GET(request: NextRequest) {
       }
       // For public views, base query already has correct filters - no changes needed
     }
-    
+
     if (listingType) {
       query.listingType = listingType;
     }
-    
+
     if (district) {
       query.district = district;
     }
-    
+
     // Optimize query for dashboard loading
     const isDashboardRequest = limit <= 10; // Dashboard requests are small
     const isMobileOptimized = request.headers.get('x-mobile-optimized') === 'true';
-    
-    // Determine sort order: default by engagement, or latest first if requested
-    const sortOption: Record<string, SortOrder> = sort === 'latest' 
-      ? { createdAt: -1 }
-      : { uniqueViewCount: -1, createdAt: -1 };
+
+    // Determine sort order: default by latest, unless specific sort requested
+    const sortOption: Record<string, SortOrder> = sort === 'popular'
+      ? { uniqueViewCount: -1, createdAt: -1 }
+      : { createdAt: -1 }; // Default to latest as per user request
 
     // Mobile-optimized field selection
     // Include description for search functionality, images for gallery, and other essential fields
-    const selectFields = isMobileOptimized 
+    const selectFields = isMobileOptimized
       ? 'propertyId title location district price beds baths sqft propertyType listingType measurement status description features amenities thumbnailImage images agentId createdAt viewCount uniqueViewCount deletionStatus expiresAt isExpired'
       : 'propertyId title location district price beds baths sqft yearBuilt lotSize propertyType listingType measurement status description features amenities thumbnailImage images agentId createdAt viewCount uniqueViewCount agent deletionStatus expiresAt isExpired';
 
@@ -240,13 +199,13 @@ export async function GET(request: NextRequest) {
         .select(selectFields)
         .sort(sortOption)
         .lean(); // Use lean() for better performance - returns plain JavaScript objects
-      
+
       // Only populate agent data for non-dashboard requests to improve performance
       // Limit populated fields to essential data only for faster queries
       if (!isDashboardRequest) {
         propertiesQuery = propertiesQuery.populate('agentId', 'fullName phone profile.avatar');
       }
-      
+
       if (!agentId) {
         propertiesQuery = propertiesQuery.limit(limit);
       }
@@ -254,7 +213,7 @@ export async function GET(request: NextRequest) {
       console.error('❌ Query construction error:', queryError);
       throw new Error(`Query construction failed: ${queryError instanceof Error ? queryError.message : String(queryError)}`);
     }
-    
+
     let properties: any[] = [];
     try {
       // Execute query with lean() for performance
@@ -270,17 +229,17 @@ export async function GET(request: NextRequest) {
       console.error('❌ Query execution error:', queryExecError);
       throw new Error(`Query execution failed: ${queryExecError instanceof Error ? queryExecError.message : String(queryExecError)}`);
     }
-    
+
     // MongoDB query already handles all filtering efficiently - no need for post-query filtering
     // The query includes proper expiration and deletion status filters
     // This removes expensive JavaScript filtering that was redundant
-    
+
     // Only do expensive count queries for admin requests (not needed for regular users)
     // These queries are expensive and slow down the API response
     if ((isAdminRequest || isSuperadmin) && process.env.NODE_ENV === 'development') {
       const now = new Date();
       const totalPropertiesInDB = await Property.countDocuments({});
-      const activePropertiesInDB = await Property.countDocuments({ 
+      const activePropertiesInDB = await Property.countDocuments({
         deletionStatus: { $nin: ['deleted', 'pending_deletion'] },
         $and: [
           {
@@ -299,14 +258,14 @@ export async function GET(request: NextRequest) {
       });
       const deletedPropertiesInDB = await Property.countDocuments({ deletionStatus: 'deleted' });
       const pendingDeletionInDB = await Property.countDocuments({ deletionStatus: 'pending_deletion' });
-      const expiredPropertiesInDB = await Property.countDocuments({ 
+      const expiredPropertiesInDB = await Property.countDocuments({
         $or: [
           { isExpired: true },
           { expiresAt: { $lt: now } }
         ],
         deletionStatus: { $ne: 'deleted' }
       });
-      
+
       console.log('🔍 GET /api/properties - Admin query results:', {
         totalPropertiesFound: properties.length,
         totalPropertiesInDB,
@@ -326,145 +285,145 @@ export async function GET(request: NextRequest) {
         }
       });
     }
-    
+
     // Process properties to ensure consistent agent data
     // Since we're using .lean(), properties are already plain objects
     // Use populated agentId data directly - no async loops needed
     let processedProperties: any[];
-    
+
     try {
       // Process properties synchronously using populated data (much faster)
       processedProperties = properties.map((property) => {
         // .lean() already returns plain objects, no need for toObject()
         const propertyObj = property as any;
-      
-      // Store the original agentId as a string for navigation - CRITICAL for proper navigation
-      let originalAgentId: string | null = null;
-      if (propertyObj.agentId) {
-        if (typeof propertyObj.agentId === 'object' && propertyObj.agentId !== null) {
-          // Handle populated agent object - extract _id safely
-          const agentObj = propertyObj.agentId as any;
-          if (agentObj._id) {
-            // Has _id property
-            originalAgentId = typeof agentObj._id === 'string' 
-              ? agentObj._id 
-              : agentObj._id.toString?.() || String(agentObj._id);
-          } else if (agentObj.id) {
-            // Has id property
-            originalAgentId = typeof agentObj.id === 'string' 
-              ? agentObj.id 
-              : String(agentObj.id);
+
+        // Store the original agentId as a string for navigation - CRITICAL for proper navigation
+        let originalAgentId: string | null = null;
+        if (propertyObj.agentId) {
+          if (typeof propertyObj.agentId === 'object' && propertyObj.agentId !== null) {
+            // Handle populated agent object - extract _id safely
+            const agentObj = propertyObj.agentId as any;
+            if (agentObj._id) {
+              // Has _id property
+              originalAgentId = typeof agentObj._id === 'string'
+                ? agentObj._id
+                : agentObj._id.toString?.() || String(agentObj._id);
+            } else if (agentObj.id) {
+              // Has id property
+              originalAgentId = typeof agentObj.id === 'string'
+                ? agentObj.id
+                : String(agentObj.id);
+            } else {
+              // Try to extract any ID-like property
+              const possibleId = agentObj.id || agentObj._id || agentObj.userId || agentObj.agentId;
+              if (possibleId) {
+                originalAgentId = typeof possibleId === 'string'
+                  ? possibleId
+                  : possibleId.toString?.() || String(possibleId);
+              }
+            }
+
+            // Validate extracted ID is not [object Object]
+            if (originalAgentId && (originalAgentId === '[object Object]' || originalAgentId.includes('object Object'))) {
+              if (process.env.NODE_ENV === 'development') {
+                console.warn('⚠️ Extracted agentId is [object Object], property:', propertyObj.propertyId || propertyObj._id);
+              }
+              originalAgentId = null;
+            }
+          } else if (typeof propertyObj.agentId === 'string') {
+            // Handle string ID - validate it's not [object Object]
+            if (propertyObj.agentId === '[object Object]' || propertyObj.agentId.includes('object Object')) {
+              if (process.env.NODE_ENV === 'development') {
+                console.warn('⚠️ agentId is [object Object] string, property:', propertyObj.propertyId || propertyObj._id);
+              }
+              originalAgentId = null;
+            } else {
+              originalAgentId = propertyObj.agentId;
+            }
           } else {
-            // Try to extract any ID-like property
-            const possibleId = agentObj.id || agentObj._id || agentObj.userId || agentObj.agentId;
-            if (possibleId) {
-              originalAgentId = typeof possibleId === 'string' 
-                ? possibleId 
-                : possibleId.toString?.() || String(possibleId);
+            // Handle ObjectId or any other type - convert to string
+            const stringId = String(propertyObj.agentId);
+            if (stringId === '[object Object]' || stringId.includes('object Object')) {
+              if (process.env.NODE_ENV === 'development') {
+                console.warn('⚠️ agentId converted to [object Object], property:', propertyObj.propertyId || propertyObj._id);
+              }
+              originalAgentId = null;
+            } else {
+              originalAgentId = stringId;
             }
           }
-          
-          // Validate extracted ID is not [object Object]
-          if (originalAgentId && (originalAgentId === '[object Object]' || originalAgentId.includes('object Object'))) {
-            if (process.env.NODE_ENV === 'development') {
-              console.warn('⚠️ Extracted agentId is [object Object], property:', propertyObj.propertyId || propertyObj._id);
-            }
-            originalAgentId = null;
-          }
-        } else if (typeof propertyObj.agentId === 'string') {
-          // Handle string ID - validate it's not [object Object]
-          if (propertyObj.agentId === '[object Object]' || propertyObj.agentId.includes('object Object')) {
-            if (process.env.NODE_ENV === 'development') {
-              console.warn('⚠️ agentId is [object Object] string, property:', propertyObj.propertyId || propertyObj._id);
-            }
-            originalAgentId = null;
-          } else {
-          originalAgentId = propertyObj.agentId;
-          }
-        } else {
-          // Handle ObjectId or any other type - convert to string
-          const stringId = String(propertyObj.agentId);
-          if (stringId === '[object Object]' || stringId.includes('object Object')) {
-            if (process.env.NODE_ENV === 'development') {
-              console.warn('⚠️ agentId converted to [object Object], property:', propertyObj.propertyId || propertyObj._id);
-            }
-            originalAgentId = null;
-          } else {
-            originalAgentId = stringId;
-          }
         }
-      }
-      
-      // CRITICAL: Ensure originalAgentId is set even if agentId is an object
-      // This prevents navigation issues where agentId is an object
-      if (!originalAgentId && propertyObj.agentId && typeof propertyObj.agentId === 'object') {
-        if (process.env.NODE_ENV === 'development') {
-          console.warn('⚠️ Failed to extract agentId from object, property:', propertyObj.propertyId || propertyObj._id, 'agentId:', propertyObj.agentId);
-        }
-      }
-      
-      // Use populated agentId data directly (no async fetch needed)
-      // Since we're populating agentId for non-dashboard requests, we can use it directly
-      if (propertyObj.agentId && typeof propertyObj.agentId === 'object' && '_id' in propertyObj.agentId) {
-        // Use populated agent data directly
-        const agentData = propertyObj.agentId as any;
-        const agentAvatar = agentData.avatar || agentData.profile?.avatar;
-        
-        // Build agent name from available fields - prioritize fullName
-        let agentName = agentData.fullName;
-        if (!agentName || agentName.trim() === '') {
-          const firstName = agentData.firstName || '';
-          const lastName = agentData.lastName || '';
-          agentName = `${firstName} ${lastName}`.trim();
-        }
-        if (!agentName || agentName.trim() === '') {
-          agentName = 'Agent';
-        }
-        
-        propertyObj.agent = {
-          name: agentName,
-          phone: agentData.phone || 'N/A',
-          image: agentAvatar || DEFAULT_AVATAR_URL,
-          rating: 5.0
-        };
-      } else {
-        // Fallback to embedded agent data if no populated agentId
-        propertyObj.agent = {
-          name: propertyObj.agent?.name || 'Agent',
-          phone: propertyObj.agent?.phone || 'N/A',
-          image: propertyObj.agent?.image || DEFAULT_AVATAR_URL,
-          rating: propertyObj.agent?.rating || 5.0
-        };
-      }
-      
-      // CRITICAL: Always set agentId as a string, never as an object
-      // This prevents navigation issues where agentId becomes [object Object]
-      if (originalAgentId) {
-        propertyObj.agentId = originalAgentId;
-      } else if (propertyObj.agentId && typeof propertyObj.agentId === 'object') {
-        // Last resort: try to extract ID from object one more time
-        const agentObj = propertyObj.agentId as any;
-        const extractedId = agentObj._id?.toString?.() || agentObj.id?.toString?.() || agentObj._id || agentObj.id;
-        if (extractedId && extractedId !== '[object Object]' && !extractedId.includes('object Object')) {
-          propertyObj.agentId = String(extractedId);
-        } else {
-          // If we can't extract a valid ID, set to null to prevent [object Object] in navigation
+
+        // CRITICAL: Ensure originalAgentId is set even if agentId is an object
+        // This prevents navigation issues where agentId is an object
+        if (!originalAgentId && propertyObj.agentId && typeof propertyObj.agentId === 'object') {
           if (process.env.NODE_ENV === 'development') {
-            console.warn('⚠️ Cannot extract valid agentId from object, setting to null:', propertyObj.propertyId || propertyObj._id);
+            console.warn('⚠️ Failed to extract agentId from object, property:', propertyObj.propertyId || propertyObj._id, 'agentId:', propertyObj.agentId);
+          }
+        }
+
+        // Use populated agentId data directly (no async fetch needed)
+        // Since we're populating agentId for non-dashboard requests, we can use it directly
+        if (propertyObj.agentId && typeof propertyObj.agentId === 'object' && '_id' in propertyObj.agentId) {
+          // Use populated agent data directly
+          const agentData = propertyObj.agentId as any;
+          const agentAvatar = agentData.avatar || agentData.profile?.avatar;
+
+          // Build agent name from available fields - prioritize fullName
+          let agentName = agentData.fullName;
+          if (!agentName || agentName.trim() === '') {
+            const firstName = agentData.firstName || '';
+            const lastName = agentData.lastName || '';
+            agentName = `${firstName} ${lastName}`.trim();
+          }
+          if (!agentName || agentName.trim() === '') {
+            agentName = 'Agent';
+          }
+
+          propertyObj.agent = {
+            name: agentName,
+            phone: agentData.phone || 'N/A',
+            image: agentAvatar || DEFAULT_AVATAR_URL,
+            rating: 5.0
+          };
+        } else {
+          // Fallback to embedded agent data if no populated agentId
+          propertyObj.agent = {
+            name: propertyObj.agent?.name || 'Agent',
+            phone: propertyObj.agent?.phone || 'N/A',
+            image: propertyObj.agent?.image || DEFAULT_AVATAR_URL,
+            rating: propertyObj.agent?.rating || 5.0
+          };
+        }
+
+        // CRITICAL: Always set agentId as a string, never as an object
+        // This prevents navigation issues where agentId becomes [object Object]
+        if (originalAgentId) {
+          propertyObj.agentId = originalAgentId;
+        } else if (propertyObj.agentId && typeof propertyObj.agentId === 'object') {
+          // Last resort: try to extract ID from object one more time
+          const agentObj = propertyObj.agentId as any;
+          const extractedId = agentObj._id?.toString?.() || agentObj.id?.toString?.() || agentObj._id || agentObj.id;
+          if (extractedId && extractedId !== '[object Object]' && !extractedId.includes('object Object')) {
+            propertyObj.agentId = String(extractedId);
+          } else {
+            // If we can't extract a valid ID, set to null to prevent [object Object] in navigation
+            if (process.env.NODE_ENV === 'development') {
+              console.warn('⚠️ Cannot extract valid agentId from object, setting to null:', propertyObj.propertyId || propertyObj._id);
+            }
+            propertyObj.agentId = null;
+          }
+        }
+
+        // Final validation: ensure agentId is never [object Object]
+        if (propertyObj.agentId && (propertyObj.agentId === '[object Object]' || String(propertyObj.agentId).includes('object Object'))) {
+          if (process.env.NODE_ENV === 'development') {
+            console.error('❌ CRITICAL: agentId is [object Object], setting to null:', propertyObj.propertyId || propertyObj._id);
           }
           propertyObj.agentId = null;
         }
-      }
-      
-      // Final validation: ensure agentId is never [object Object]
-      if (propertyObj.agentId && (propertyObj.agentId === '[object Object]' || String(propertyObj.agentId).includes('object Object'))) {
-        if (process.env.NODE_ENV === 'development') {
-          console.error('❌ CRITICAL: agentId is [object Object], setting to null:', propertyObj.propertyId || propertyObj._id);
-        }
-        propertyObj.agentId = null;
-      }
-      
-      return propertyObj;
+
+        return propertyObj;
       });
     } catch (processError) {
       console.error('❌ Property processing error:', processError);
@@ -492,38 +451,38 @@ export async function GET(request: NextRequest) {
         }
       });
     }
-    
-     // Add caching headers for better performance
-     // For mobile, use shorter cache times to ensure fresh data
-     const isMobileRequest = request.headers.get('x-mobile-optimized') === 'true';
-     const cacheControl = isMobileRequest 
-       ? 'public, s-maxage=10, stale-while-revalidate=60, max-age=10' // Shorter cache for mobile
-       : 'public, s-maxage=30, stale-while-revalidate=600, max-age=30'; // Longer cache for desktop
-     
-     const response = NextResponse.json({ 
-      success: true, 
+
+    // Add caching headers for better performance
+    // For mobile, use shorter cache times to ensure fresh data
+    const isMobileRequest = request.headers.get('x-mobile-optimized') === 'true';
+    const cacheControl = isMobileRequest
+      ? 'public, s-maxage=10, stale-while-revalidate=60, max-age=10' // Shorter cache for mobile
+      : 'public, s-maxage=30, stale-while-revalidate=600, max-age=30'; // Longer cache for desktop
+
+    const response = NextResponse.json({
+      success: true,
       data: processedProperties || [],
-       meta: {
-         total: properties.length,
-         isMobile: isMobileRequest
-       }
-     });
-     
-     // Set cache headers based on device type
-     response.headers.set('Cache-Control', cacheControl);
-     // Add CORS headers to ensure mobile can access
-     response.headers.set('Access-Control-Allow-Credentials', 'true');
-     response.headers.set('Access-Control-Allow-Origin', '*');
-     
-     if (process.env.NODE_ENV === 'development') {
-       console.log('📱 Response headers:', { 
-         isMobile: isMobileRequest, 
-         cacheControl,
-         propertyCount: processedProperties?.length || 0 
-       });
-     }
-     
-     return response;
+      meta: {
+        total: properties.length,
+        isMobile: isMobileRequest
+      }
+    });
+
+    // Set cache headers based on device type
+    response.headers.set('Cache-Control', cacheControl);
+    // Add CORS headers to ensure mobile can access
+    response.headers.set('Access-Control-Allow-Credentials', 'true');
+    response.headers.set('Access-Control-Allow-Origin', '*');
+
+    if (process.env.NODE_ENV === 'development') {
+      console.log('📱 Response headers:', {
+        isMobile: isMobileRequest,
+        cacheControl,
+        propertyCount: processedProperties?.length || 0
+      });
+    }
+
+    return response;
   } catch (error) {
     // Log the actual error details for debugging
     console.error('❌ GET /api/properties - Error details:', {
@@ -532,10 +491,10 @@ export async function GET(request: NextRequest) {
       name: error instanceof Error ? error.name : typeof error,
       fullError: error
     });
-    
+
     return NextResponse.json(
-      { 
-        success: false, 
+      {
+        success: false,
         error: error instanceof Error ? error.message : 'Failed to fetch properties',
         details: process.env.NODE_ENV === 'development' ? {
           message: error instanceof Error ? error.message : String(error),
@@ -552,12 +511,12 @@ export async function POST(request: NextRequest) {
     if (process.env.NODE_ENV === 'development') {
       console.log('🔄 Starting property creation...');
     }
-    
+
     await connectDB();
     if (process.env.NODE_ENV === 'development') {
       console.log('✅ Database connected');
     }
-    
+
     // Get session for authorization
     const session = getSessionFromRequest(request);
     if (!session) {
@@ -566,11 +525,11 @@ export async function POST(request: NextRequest) {
       }
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
-    
+
     if (process.env.NODE_ENV === 'development') {
       console.log('📋 Session found:', { userId: session.userId, role: session.role });
     }
-    
+
     // Check authorization for creating properties
     // For create operations with "own" permissions, allow if user is creating for themselves
     const authResult = isAllowed({
@@ -580,21 +539,21 @@ export async function POST(request: NextRequest) {
       resource: 'property',
       ownerId: session.userId // Set ownerId to session user for create operations
     });
-    
+
     if (!authResult.allowed) {
       if (process.env.NODE_ENV === 'development') {
         console.log('❌ Authorization denied:', authResult.reason);
       }
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Forbidden: insufficient permissions' 
+      return NextResponse.json({
+        success: false,
+        error: 'Forbidden: insufficient permissions'
       }, { status: 403 });
     }
-    
+
     if (process.env.NODE_ENV === 'development') {
       console.log('✅ User authorized to create properties');
     }
-    
+
     // Get user profile for agent data (include agentProfile for superadmin)
     let user = await User.findById(session.userId).select('role fullName phone email profile avatar agentProfile')
     if (!user) {
@@ -613,7 +572,7 @@ export async function POST(request: NextRequest) {
         console.log('✅ Found superadmin user as fallback:', { id: user._id, role: user.role, fullName: user.fullName });
       }
     }
-    
+
     // Check if user has agent profile (superadmin should have enhanced agent profile)
     const hasAgentProfile = user.agentProfile && Object.keys(user.agentProfile).length > 0;
     if (!hasAgentProfile && (user.role === 'superadmin' || user.role === 'agent')) {
@@ -622,29 +581,29 @@ export async function POST(request: NextRequest) {
         console.log('📝 Note: Superadmin should have enhanced agent profile for full functionality');
       }
     }
-    
+
     if (process.env.NODE_ENV === 'development') {
       console.log('✅ User profile loaded:', { id: user._id, role: user.role, fullName: user.fullName });
     }
-    
+
     // Parse request body
     const body = await request.json();
     if (process.env.NODE_ENV === 'development') {
       console.log('📦 Request body:', body);
     }
-    
+
     // Validate required fields based on listing type
-    const baseRequiredFields = ['title', 'description', 'price', 'location', 'district'];
+    const baseRequiredFields = ['title', 'price', 'location', 'district'];
     const rentRequiredFields = ['bedrooms', 'bathrooms'];
-    
+
     // For rent properties, require bedrooms and bathrooms
     // For sale properties, bedrooms and bathrooms are optional
-    const requiredFields = body.listingType === 'rent' 
+    const requiredFields = body.listingType === 'rent'
       ? [...baseRequiredFields, ...rentRequiredFields]
       : baseRequiredFields;
-    
+
     const missingFields = requiredFields.filter(field => !body[field]);
-    
+
     if (missingFields.length > 0) {
       if (process.env.NODE_ENV === 'development') {
         console.log('❌ Missing required fields:', missingFields);
@@ -665,13 +624,13 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    
+
     // Generate next property ID
     const nextPropertyId = await getNextPropertyId();
     if (process.env.NODE_ENV === 'development') {
       console.log('🆔 Generated property ID:', nextPropertyId);
     }
-    
+
     // Company logo is now applied as a watermark overlay, not added to images array
     const companyLogoUrl = getCompanyLogoUrl();
     if (process.env.NODE_ENV === 'development') {
@@ -681,11 +640,11 @@ export async function POST(request: NextRequest) {
       console.log('  getCompanyLogoUrl() result:', companyLogoUrl);
       console.log('ℹ️ Company logo will be applied as watermark overlay on frontend');
     }
-    
+
     // Handle thumbnail and gallery images
     let thumbnailImage = body.thumbnailImage || '';
     let imagesArray: string[] = [];
-    
+
     // Get gallery images from various possible fields
     // Priority: images > additionalImages > uploadedImages
     if (body.images && Array.isArray(body.images)) {
@@ -695,16 +654,16 @@ export async function POST(request: NextRequest) {
     } else if (body.uploadedImages && Array.isArray(body.uploadedImages)) {
       imagesArray = [...body.uploadedImages];
     }
-    
+
     // If we have a listing ID, verify the images belong to this listing
     if (nextPropertyId && imagesArray.length > 0) {
-      imagesArray = imagesArray.filter(url => 
-        url.includes(`/properties/${nextPropertyId}/`) || 
+      imagesArray = imagesArray.filter(url =>
+        url.includes(`/properties/${nextPropertyId}/`) ||
         url.includes(`/properties/temp/`) ||
         url.includes('r2.dev') // Allow R2 URLs
       );
     }
-    
+
     // Handle thumbnail logic
     if (thumbnailImage && !imagesArray.includes(thumbnailImage)) {
       imagesArray.unshift(thumbnailImage); // Add thumbnail as first image
@@ -712,7 +671,7 @@ export async function POST(request: NextRequest) {
       // If no thumbnail provided but we have gallery images, use first one as thumbnail
       thumbnailImage = imagesArray[0];
     }
-    
+
     if (process.env.NODE_ENV === 'development') {
       console.log('📸 Image handling:', {
         thumbnailImage,
@@ -725,11 +684,11 @@ export async function POST(request: NextRequest) {
         nextPropertyId
       });
     }
-    
+
     // Prepare agent data for the property
     // Check both top-level avatar and profile.avatar
     const agentAvatar = user.avatar || user.profile?.avatar;
-    
+
     if (process.env.NODE_ENV === 'development') {
       console.log('🔍 User avatar debug:', {
         userId: user._id,
@@ -739,14 +698,14 @@ export async function POST(request: NextRequest) {
         hasAvatar: !!agentAvatar
       });
     }
-    
+
     const agentData = {
       name: user.fullName || user.firstName + ' ' + user.lastName || 'Agent',
       phone: user.phone || 'N/A',
       image: agentAvatar || DEFAULT_AVATAR_URL,
       rating: 5.0 // Default rating for new agents
     };
-    
+
     if (process.env.NODE_ENV === 'development') {
       console.log('👤 Agent data for property:', agentData);
     }
@@ -754,13 +713,13 @@ export async function POST(request: NextRequest) {
     // Automatically append Somali language suffix based on listing type
     let enhancedTitle = body.title;
     const listingType = body.listingType || 'sale';
-    
+
     if (listingType === 'rent') {
       enhancedTitle = `${body.title} Kiro ah`;
     } else if (listingType === 'sale') {
       enhancedTitle = `${body.title} iib ah`;
     }
-    
+
     if (process.env.NODE_ENV === 'development') {
       console.log('🏷️ Title enhancement:', {
         originalTitle: body.title,
@@ -775,9 +734,9 @@ export async function POST(request: NextRequest) {
       'area', 'sqft', 'yearBuilt', 'lotSize', 'propertyType', 'listingType', 'documentType', 'measurement',
       'status', 'description', 'features', 'amenities', 'thumbnailImage', 'additionalImages'
     ];
-    
+
     const sanitizedData = sanitizeUpdateData(body, allowedFields);
-    
+
     // Create property data with enforced ownership
     const propertyData: any = enforceOwnership({
       propertyId: nextPropertyId,
@@ -803,7 +762,7 @@ export async function POST(request: NextRequest) {
       agent: agentData,
       deletionStatus: 'active'
     }, session.userId, 'agentId' as any);
-    
+
     if (process.env.NODE_ENV === 'development') {
       console.log('🏗️ Creating property with data:', propertyData);
       console.log('📸 Final image data being saved:', {
@@ -820,7 +779,7 @@ export async function POST(request: NextRequest) {
         statusType: typeof propertyData.status
       });
     }
-    
+
     // Additional validation before saving
     if (propertyData.yearBuilt < 1800) {
       return NextResponse.json(
@@ -828,21 +787,21 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    
+
     if (propertyData.price < 0) {
       return NextResponse.json(
         { success: false, error: 'Price must be positive' },
         { status: 400 }
       );
     }
-    
+
     if (propertyData.beds < 0 || propertyData.baths < 0 || (propertyData.sqft && propertyData.sqft < 0)) {
       return NextResponse.json(
         { success: false, error: 'Bedrooms and bathrooms must be positive' },
         { status: 400 }
       );
     }
-    
+
     // Debug: Log the property data being saved
     if (process.env.NODE_ENV === 'development') {
       console.log('🔍 Property data being saved:', {
@@ -855,11 +814,11 @@ export async function POST(request: NextRequest) {
         thumbnailImageUndefined: propertyData.thumbnailImage === undefined
       });
     }
-    
+
     // Create and save property
     const property = new Property(propertyData);
     await property.save();
-    
+
     if (process.env.NODE_ENV === 'development') {
       console.log('✅ Property created successfully:', property._id);
       console.log('📋 Saved property details:', {
@@ -871,7 +830,7 @@ export async function POST(request: NextRequest) {
         createdAt: property.createdAt
       });
     }
-    
+
     // Verify the property was saved correctly by fetching it
     if (process.env.NODE_ENV === 'development') {
       const savedProperty = await Property.findById(property._id);
@@ -888,12 +847,12 @@ export async function POST(request: NextRequest) {
         });
       }
     }
-    
-    return NextResponse.json({ 
-      success: true, 
-      data: property 
+
+    return NextResponse.json({
+      success: true,
+      data: property
     }, { status: 201 });
-    
+
   } catch (error) {
     console.error('💥 Error creating property:', error);
     return NextResponse.json(

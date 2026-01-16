@@ -170,8 +170,9 @@ const PropertySchema: Schema = new Schema({
   },
   description: {
     type: String,
-    required: true,
-    trim: true
+    required: false, // Changed to optional as per user request
+    trim: true,
+    default: ''
   },
   features: [{
     type: String,
@@ -264,7 +265,7 @@ const PropertySchema: Schema = new Schema({
   expiresAt: {
     type: Date,
     required: true,
-    default: function() {
+    default: function () {
       // Set default expiration based on listing type
       const now = new Date();
       const doc = this as any;
@@ -324,7 +325,7 @@ const PropertySchema: Schema = new Schema({
 });
 
 // Pre-save middleware to set expiration date and check if expired
-PropertySchema.pre('save', function(next) {
+PropertySchema.pre('save', function (next) {
   // Set expiration date if not already set
   if (!this.expiresAt) {
     const now = new Date();
@@ -335,12 +336,12 @@ PropertySchema.pre('save', function(next) {
       this.expiresAt = new Date(now.getTime() + (90 * 24 * 60 * 60 * 1000)); // 90 days
     }
   }
-  
+
   // DISABLED: Don't auto-expire properties - let agents manage expiration manually
   // Update isExpired field
   // const doc = this as any;
   // doc.isExpired = new Date() > doc.expiresAt;
-  
+
   next();
 });
 
@@ -376,10 +377,10 @@ PropertySchema.index({ district: 1, listingType: 1, deletionStatus: 1 }); // Fil
 PropertySchema.index({ listingType: 1, deletionStatus: 1, createdAt: -1 }); // Listing type queries
 
 // Text search index for title and location
-PropertySchema.index({ 
-  title: 'text', 
-  location: 'text', 
-  description: 'text' 
+PropertySchema.index({
+  title: 'text',
+  location: 'text',
+  description: 'text'
 }, {
   weights: { title: 10, location: 5, description: 1 },
   name: 'property_text_search'

@@ -62,6 +62,7 @@ export const FlexibleImage: React.FC<FlexibleImageProps> = ({
 
   // Reset when src prop changes
   useEffect(() => {
+    console.log('🔄 FlexibleImage: src changed:', src);
     setDisplayedSrc(src);
     setImageError(false);
     setFallbackError(false);
@@ -69,11 +70,33 @@ export const FlexibleImage: React.FC<FlexibleImageProps> = ({
     setTriedAlternateFormat(false);
   }, [src]);
 
+  // Check for cached images or immediate load
+  useEffect(() => {
+    if (imgRef.current && imgRef.current.complete) {
+      if (imgRef.current.naturalWidth > 0) {
+        console.log('✅ FlexibleImage: Image already loaded (cached):', displayedSrc);
+        setImageAspectRatio(imgRef.current.naturalWidth / imgRef.current.naturalHeight);
+        setIsLoading(false);
+      }
+    }
+
+    // Safety timeout: If image doesn't load in 7 seconds, force disable loading state
+    const timer = setTimeout(() => {
+      if (isLoading) {
+        console.warn('⚠️ FlexibleImage: Loading timeout reached, forcing display:', displayedSrc);
+        setIsLoading(false);
+      }
+    }, 7000);
+
+    return () => clearTimeout(timer);
+  }, [displayedSrc, isLoading]);
+
   // Handle image load
   const handleImageLoad = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     const img = e.target as HTMLImageElement;
+    console.log('✅ FlexibleImage: loaded successfully:', displayedSrc);
     setIsLoading(false);
-    
+
     // Calculate and store natural aspect ratio
     if (img.naturalWidth && img.naturalHeight) {
       const naturalAspectRatio = img.naturalWidth / img.naturalHeight;
@@ -86,11 +109,11 @@ export const FlexibleImage: React.FC<FlexibleImageProps> = ({
         naturalHeight: img.naturalHeight,
         complete: img.complete
       });
-      
+
       // Set a default aspect ratio for R2 images that might have loading issues
-      setImageAspectRatio(16/9);
+      setImageAspectRatio(16 / 9);
     }
-    
+
     if (onLoad) {
       onLoad();
     }
@@ -112,7 +135,7 @@ export const FlexibleImage: React.FC<FlexibleImageProps> = ({
       crossOrigin: img.crossOrigin,
       loading: img.loading
     });
-    
+
     // Try alternate format (.webp) once if original ends with common raster extensions
     const tryWebpFallback = () => {
       // Handles both direct R2 URL and proxied /api/image-proxy?url=...
@@ -158,7 +181,7 @@ export const FlexibleImage: React.FC<FlexibleImageProps> = ({
 
     setImageError(true);
     setIsLoading(false);
-    
+
     if (onError) {
       onError(`Failed to load image: ${displayedSrc}`);
     }
@@ -232,7 +255,7 @@ export const FlexibleImage: React.FC<FlexibleImageProps> = ({
   if (!src || imageError) {
     if (fallbackError) {
       return (
-        <div 
+        <div
           className={`bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center ${containerClassName} w-full min-h-[200px]`}
           role="img"
           aria-label={alt || 'Image not available'}
@@ -251,7 +274,7 @@ export const FlexibleImage: React.FC<FlexibleImageProps> = ({
 
     // Show a proper "No Image" placeholder instead of villa-2.webp
     return (
-      <div 
+      <div
         className={`relative ${containerClassName} flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200`}
         style={containerStyles}
       >
@@ -268,10 +291,9 @@ export const FlexibleImage: React.FC<FlexibleImageProps> = ({
   }
 
   return (
-    <div 
-      className={`relative ${containerClassName} flex items-center justify-center overflow-hidden ${
-        enableZoom ? 'cursor-zoom-in' : ''
-      }`}
+    <div
+      className={`relative ${containerClassName} flex items-center justify-center overflow-hidden ${enableZoom ? 'cursor-zoom-in' : ''
+        }`}
       style={containerStyles}
       onClick={toggleZoom}
     >
@@ -287,7 +309,7 @@ export const FlexibleImage: React.FC<FlexibleImageProps> = ({
           >
             <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 animate-pulse" />
             <div className="absolute inset-0 flex items-center justify-center">
-              <motion.div 
+              <motion.div
                 className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full"
                 animate={{ rotate: 360 }}
                 transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
@@ -296,7 +318,7 @@ export const FlexibleImage: React.FC<FlexibleImageProps> = ({
           </motion.div>
         )}
       </AnimatePresence>
-      
+
       {/* Main Image */}
       <motion.img
         ref={imgRef}
@@ -308,17 +330,13 @@ export const FlexibleImage: React.FC<FlexibleImageProps> = ({
         fetchPriority={priority ? 'high' : 'low'}
         onError={handleImageError}
         onLoad={handleImageLoad}
-        className={`transition-all duration-300 ${
-          getObjectFitClass()
-        } ${
-          aspectRatio === 'auto' 
-            ? 'max-w-full max-h-full w-auto h-auto' 
+        className={`transition-all duration-300 ${getObjectFitClass()
+          } ${aspectRatio === 'auto'
+            ? 'max-w-full max-h-full w-auto h-auto'
             : 'w-full h-full'
-        } ${
-          isLoading ? 'opacity-0 scale-105' : 'opacity-100 scale-100'
-        } ${
-          isZoomed ? 'scale-150' : 'scale-100'
-        } ${className}`}
+          } ${isLoading ? 'opacity-0 scale-105' : 'opacity-100 scale-100'
+          } ${isZoomed ? 'scale-150' : 'scale-100'
+          } ${className}`}
         style={{
           ...(aspectRatio === 'auto' && {
             maxWidth: '100%',
@@ -332,8 +350,8 @@ export const FlexibleImage: React.FC<FlexibleImageProps> = ({
           transform: 'translateZ(0)'
         }}
         initial={{ opacity: 0, scale: 1.02 }}
-        animate={{ 
-          opacity: isLoading ? 0 : 1, 
+        animate={{
+          opacity: isLoading ? 0 : 1,
           scale: isLoading ? 1.05 : (isZoomed ? 1.5 : 1)
         }}
         transition={{ duration: 0.22 }}
@@ -423,6 +441,7 @@ export const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({
   const preloadedImagesRef = useRef<Set<string>>(new Set());
 
   // Preload images with priority hints for faster loading
+  // Preload only the first image with high priority
   useEffect(() => {
     if (images.length === 0) return;
 
@@ -436,29 +455,6 @@ export const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({
       document.head.appendChild(link);
       preloadedImagesRef.current.add(images[0]);
     }
-
-    // Preload remaining images in parallel with lower priority
-    images.slice(1).forEach((url: string, index: number) => {
-      if (!preloadedImagesRef.current.has(url)) {
-        // Use requestIdleCallback for non-critical images
-        if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
-          requestIdleCallback(() => {
-            const img = new Image();
-            img.fetchPriority = 'low';
-            img.src = url;
-            preloadedImagesRef.current.add(url);
-          }, { timeout: 2000 });
-        } else {
-          // Fallback: load with slight stagger
-          setTimeout(() => {
-            const img = new Image();
-            img.fetchPriority = 'low';
-            img.src = url;
-            preloadedImagesRef.current.add(url);
-          }, index * 30);
-        }
-      }
-    });
   }, [images]);
 
   // Preload adjacent images when selected image changes
@@ -552,7 +548,7 @@ export const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({
 
   const handleTouchEnd = () => {
     if (touchStart === null || touchEnd === null) return;
-    
+
     const distance = touchStart - touchEnd;
     const isLeftSwipe = distance > 50;
     const isRightSwipe = distance < -50;
@@ -586,7 +582,7 @@ export const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({
   return (
     <div className={`${containerClassName} space-y-4`}>
       {/* Main Image Display */}
-      <div 
+      <div
         className="relative rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-100 shadow-lg w-full flex items-center justify-center"
         style={{
           minHeight: '200px'
@@ -672,11 +668,11 @@ export const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({
           >
             {isAutoPlaying ? (
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
+                <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
               </svg>
             ) : (
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M8 5v14l11-7z"/>
+                <path d="M8 5v14l11-7z" />
               </svg>
             )}
           </motion.button>
@@ -690,11 +686,10 @@ export const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({
             <motion.button
               key={index}
               onClick={() => setSelectedImage(index)}
-              className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden transition-all duration-300 ${
-                selectedImage === index 
-                  ? 'ring-2 ring-blue-500 ring-offset-2' 
-                  : 'opacity-70 hover:opacity-100'
-              }`}
+              className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden transition-all duration-300 ${selectedImage === index
+                ? 'ring-2 ring-blue-500 ring-offset-2'
+                : 'opacity-70 hover:opacity-100'
+                }`}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.94 }}
               initial={{ opacity: 0, scale: 0.9 }}

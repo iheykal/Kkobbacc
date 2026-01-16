@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Card, CardContent } from '@/components/ui/Card'
 import { useUser } from '@/contexts/UserContext'
+import { GoogleLogin, CredentialResponse } from '@react-oauth/google'
+import { useRouter } from 'next/navigation'
 
 interface LoginFormProps {
   onSwitchToSignUp: () => void
@@ -21,30 +23,63 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToSignUp, onClose 
   const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
-  const { login } = useUser()
+  const [googleError, setGoogleError] = useState('')
+  const { login, checkAuth } = useUser()
+  const router = useRouter() // Use router if needed, though onClose handles modal
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
+  const handleGoogleSuccess = async (response: CredentialResponse) => {
+    setIsLoading(true);
+    setGoogleError('');
+    try {
+      console.log('Google credential received');
+
+      const res = await fetch('/api/auth/google', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ credential: response.credential })
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        console.log('Google login valid, checking auth...');
+        await checkAuth();
+        onClose(); // Close modal on success
+        // Optional: Redirect if needed, but usually closing modal is enough
+        // router.push('/dashboard'); 
+      } else {
+        setGoogleError(data.error || 'Google sign-in failed');
+      }
+    } catch (err: any) {
+      console.error('Google login error:', err);
+      setGoogleError(`Google login failed: ${err.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     // Basic validation - let the backend handle detailed validation
     if (!formData.password || formData.password.length < 1) {
       alert('Password is required (numbers only)')
       return
     }
-    
+
     // Phone number validation (9 digits only)
     const phoneDigits = formData.phone.replace(/\D/g, '');
     if (phoneDigits.length !== 9) {
       alert('Please enter a valid phone number (9 digits, e.g., 61xxxxxxx)')
       return
     }
-    
+
     setIsLoading(true)
-    
+
     try {
       // Let the backend handle phone number normalization
       const success = await login(formData.phone, formData.password)
@@ -59,16 +94,16 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToSignUp, onClose 
   }
 
   const containerVariants = {
-    hidden: { 
-      opacity: 0, 
-      y: 50, 
+    hidden: {
+      opacity: 0,
+      y: 50,
       scale: 0.8,
       rotateX: -15,
       filter: 'blur(10px)'
     },
-    visible: { 
-      opacity: 1, 
-      y: 0, 
+    visible: {
+      opacity: 1,
+      y: 0,
       scale: 1,
       rotateX: 0,
       filter: 'blur(0px)',
@@ -78,9 +113,9 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToSignUp, onClose 
         staggerChildren: 0.1
       }
     },
-    exit: { 
-      opacity: 0, 
-      y: -50, 
+    exit: {
+      opacity: 0,
+      y: -50,
       scale: 0.8,
       rotateX: 15,
       filter: 'blur(10px)',
@@ -90,20 +125,20 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToSignUp, onClose 
 
   const itemVariants = {
     hidden: { opacity: 0, y: 20, scale: 0.9 },
-    visible: { 
-      opacity: 1, 
-      y: 0, 
+    visible: {
+      opacity: 1,
+      y: 0,
       scale: 1,
       transition: { duration: 0.5, ease: "easeOut" }
     }
   }
 
   const buttonVariants = {
-    idle: { 
+    idle: {
       scale: 1,
       boxShadow: "0 0 0 0 rgba(99, 102, 241, 0.7)"
     },
-    hover: { 
+    hover: {
       scale: 1.02,
       boxShadow: "0 0 0 20px rgba(99, 102, 241, 0)",
       transition: { duration: 0.6, ease: "easeOut" }
@@ -117,7 +152,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToSignUp, onClose 
       initial="hidden"
       animate="visible"
       exit="exit"
-      className="w-full min-h-[520px] bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 rounded-3xl shadow-2xl border border-purple-500/20 backdrop-blur-xl"
+      className="w-full min-h-[600px] bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 rounded-3xl shadow-2xl border border-purple-500/20 backdrop-blur-xl"
       style={{
         background: 'linear-gradient(135deg, #0f172a 0%, #581c87 50%, #0f172a 100%)',
         boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(168, 85, 247, 0.1)'
@@ -149,18 +184,18 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToSignUp, onClose 
           }}
           className="absolute -bottom-20 -left-20 w-32 h-32 bg-gradient-to-br from-blue-500/30 to-cyan-500/30 rounded-full blur-3xl"
         />
-          </div>
+      </div>
 
       <Card className="w-full shadow-none border-0 bg-transparent">
         <CardContent className="p-6 relative">
           {/* Header */}
-          <motion.div 
+          <motion.div
             variants={itemVariants}
             className="text-center mb-6"
           >
-            <motion.div 
+            <motion.div
               className="relative w-20 h-20 bg-gradient-to-br from-purple-500 via-pink-500 to-red-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-2xl"
-              whileHover={{ 
+              whileHover={{
                 scale: 1.1,
                 rotate: 5,
                 boxShadow: "0 20px 40px rgba(168, 85, 247, 0.4)"
@@ -175,22 +210,22 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToSignUp, onClose 
               </motion.div>
               <motion.div
                 className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-400 rounded-full"
-                animate={{ 
+                animate={{
                   scale: [1, 1.5, 1],
                   opacity: [1, 0.5, 1]
                 }}
                 transition={{ duration: 2, repeat: Infinity }}
               />
             </motion.div>
-            
-            <motion.h2 
+
+            <motion.h2
               variants={itemVariants}
               className="text-3xl font-black text-white mb-3 bg-gradient-to-r from-purple-400 via-pink-400 to-red-400 bg-clip-text text-transparent"
             >
               WELCOME BACK
             </motion.h2>
-            
-            <motion.p 
+
+            <motion.p
               variants={itemVariants}
               className="text-purple-200/80 font-medium"
             >
@@ -198,10 +233,36 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToSignUp, onClose 
             </motion.p>
           </motion.div>
 
+          {/* Google Sign In */}
+          <motion.div variants={itemVariants} className="mb-6 flex justify-center flex-col items-center">
+            <div className="w-full max-w-[500px]">
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={() => setGoogleError('Google Login Failed')}
+                theme="filled_black"
+                size="large"
+                width="100%"
+                shape="rectangular"
+                text="continue_with"
+              />
+            </div>
+            {googleError && (
+              <p className="text-red-400 text-sm mt-2 font-medium bg-red-900/30 px-3 py-1 rounded">{googleError}</p>
+            )}
+            <div className="relative w-full max-w-[500px] mt-6 flex items-center justify-center">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-purple-500/20"></span>
+              </div>
+              <div className="relative bg-slate-900 px-4 text-sm text-purple-300">
+                Or continue with phone
+              </div>
+            </div>
+          </motion.div>
+
           {/* Form */}
-          <motion.form 
+          <motion.form
             variants={itemVariants}
-            onSubmit={handleSubmit} 
+            onSubmit={handleSubmit}
             className="space-y-6 mb-6"
           >
             {/* Phone */}
@@ -215,11 +276,11 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToSignUp, onClose 
                   <img src="/icons/somali-flag.jpg" alt="Somalia Flag" className="w-6 h-4 object-contain" />
                   <span className="text-purple-400 font-semibold">+252</span>
                 </div>
-            <Input
-              type="tel"
+                <Input
+                  type="tel"
                   inputMode="numeric"
                   placeholder="Enter phone number (9 digits)"
-              value={formData.phone}
+                  value={formData.phone}
                   onChange={(e) => {
                     // Allow flexible phone number input
                     const input = e.target.value;
@@ -227,9 +288,9 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToSignUp, onClose 
                     const cleaned = input.replace(/[^\d+\s]/g, '');
                     handleInputChange('phone', cleaned);
                   }}
-              required
+                  required
                   className="h-14 w-full max-w-[500px] mx-auto bg-slate-800/80 border-purple-500/30 text-white placeholder-purple-200/60 rounded-xl focus:border-purple-400 focus:ring-purple-400/20 transition-all duration-300 pl-24"
-            />
+                />
               </div>
             </motion.div>
 
@@ -240,18 +301,18 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToSignUp, onClose 
               whileTap={{ scale: 0.98 }}
               className="relative"
             >
-            <Input
+              <Input
                 type={showPassword ? "text" : "password"}
-              placeholder="Password (5+ chars, numbers or letters)"
-              value={formData.password}
-              onChange={(e) => {
-                handleInputChange('password', e.target.value)
-              }}
-              inputMode="text"
-              required
+                placeholder="Password (5+ chars, numbers or letters)"
+                value={formData.password}
+                onChange={(e) => {
+                  handleInputChange('password', e.target.value)
+                }}
+                inputMode="text"
+                required
                 icon={<Lock className="w-5 h-5 text-purple-400 flex-shrink-0" />}
                 className="h-14 w-full max-w-[500px] mx-auto bg-slate-800/80 border-purple-500/30 text-white placeholder-purple-200/60 rounded-xl focus:border-purple-400 focus:ring-purple-400/20 transition-all duration-300 pl-14 pr-12"
-            />
+              />
               <motion.button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
@@ -264,7 +325,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToSignUp, onClose 
             </motion.div>
 
             {/* Forgot Password */}
-            <motion.div 
+            <motion.div
               variants={itemVariants}
               className="text-right"
             >
@@ -289,13 +350,13 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToSignUp, onClose 
                 onHoverEnd={() => setIsHovered(false)}
                 className="relative overflow-hidden rounded-xl"
               >
-            <Button
-              type="submit"
-              variant="primary"
-              fullWidth
+                <Button
+                  type="submit"
+                  variant="primary"
+                  fullWidth
                   className="h-14 bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 hover:from-purple-700 hover:via-pink-700 hover:to-red-700 text-white font-bold text-lg rounded-xl relative overflow-hidden transition-all duration-300"
-              disabled={isLoading}
-            >
+                  disabled={isLoading}
+                >
                   <AnimatePresence mode="wait">
                     {isLoading ? (
                       <motion.div
@@ -325,8 +386,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToSignUp, onClose 
                       </motion.div>
                     )}
                   </AnimatePresence>
-            </Button>
-                
+                </Button>
+
                 {/* Button Glow Effect */}
                 <motion.div
                   className="pointer-events-none absolute inset-0 bg-gradient-to-r from-purple-400/20 via-pink-400/20 to-red-400/20 rounded-xl blur-xl"
@@ -341,7 +402,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToSignUp, onClose 
           </motion.form>
 
           {/* Switch to Sign Up */}
-          <motion.div 
+          <motion.div
             variants={itemVariants}
             className="text-center mt-6"
           >

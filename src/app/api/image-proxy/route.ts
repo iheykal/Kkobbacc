@@ -15,26 +15,33 @@ export async function GET(request: NextRequest) {
     const imageUrl = searchParams.get('url');
 
     if (!imageUrl) {
+      console.warn('⚠️ Image proxy: Missing URL parameter');
       return NextResponse.json({ error: 'URL parameter is required' }, { status: 400 });
     }
 
-  // Validate that it's an R2 URL (accept any pub-*.r2.dev or *.r2.cloudflarestorage.com)
-  const isR2 = /(^https?:\/\/)?([\w.-]*\.)?r2\.dev\//.test(imageUrl) || /(^https?:\/\/)?([\w.-]*\.)?r2\.cloudflarestorage\.com\//.test(imageUrl);
-  if (!isR2) {
-    return NextResponse.json({ error: 'Invalid image URL' }, { status: 400 });
-  }
+    console.log('🖼️ Image proxy: Request for:', imageUrl);
+
+    // Validate that it's an R2 URL (accept any pub-*.r2.dev or *.r2.cloudflarestorage.com)
+    const isR2 = /(^https?:\/\/)?([\w.-]*\.)?r2\.dev\//.test(imageUrl) || /(^https?:\/\/)?([\w.-]*\.)?r2\.cloudflarestorage\.com\//.test(imageUrl);
+    if (!isR2) {
+      return NextResponse.json({ error: 'Invalid image URL' }, { status: 400 });
+    }
 
     console.log('🖼️ Proxying image:', imageUrl);
 
-    // Fetch the image from R2
+    // Fetch the image from R2 with a timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
     const response = await fetch(imageUrl, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (compatible; NextJS-Image-Proxy/1.0)'
-      }
-    });
+      },
+      signal: controller.signal
+    }).finally(() => clearTimeout(timeoutId));
 
     if (!response.ok) {
-      console.error('❌ Failed to fetch image:', response.status, response.statusText);
+      console.error('❌ Image proxy: Fetch failed for:', imageUrl, 'Status:', response.status, response.statusText);
       return NextResponse.json({ error: 'Image not found' }, { status: 404 });
     }
 

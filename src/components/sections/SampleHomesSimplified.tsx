@@ -23,13 +23,13 @@ import { getAgentProfileClickHandler } from '@/lib/agentNavigation'
 // Helper function to format price
 const formatPrice = (price: number, listingType?: string) => {
   if (!price) return 'Price on request'
-  
+
   const formattedPrice = price.toLocaleString()
-  
+
   if (listingType === 'rent') {
     return `$${formattedPrice}<span class="text-xs text-black font-thin tracking-wide">/Bishii</span>`
   }
-  
+
   return `$${formattedPrice}`
 }
 
@@ -92,19 +92,19 @@ const BeautifulPropertyCard = ({ property, index, viewMode }: { property: any; i
       // Cache property data BEFORE navigation for instant display
       if (typeof window !== 'undefined') {
         setPreviousPage(window.location.pathname)
-        
+
         // Save scroll position as backup (only if we're scrolled down)
         const currentScrollY = window.scrollY
         if (currentScrollY > 100) {
           sessionStorage.setItem('home_scroll_position', currentScrollY.toString())
         }
-        
+
         // Cache property data for instant loading on detail page
         const cachePayload = JSON.stringify({
           data: property,
           timestamp: Date.now()
         })
-        
+
         try {
           // Cache with multiple keys for fast lookup
           sessionStorage.setItem(`prefetched_property_${propertyId}`, cachePayload)
@@ -117,7 +117,7 @@ const BeautifulPropertyCard = ({ property, index, viewMode }: { property: any; i
           console.warn('⚠️ Failed to cache property:', cacheError)
         }
       }
-      
+
       // Use SEO-friendly URL format - navigate directly (no redirect chain)
       const targetUrl = getPropertyUrl(property)
       router.push(targetUrl)
@@ -129,7 +129,7 @@ const BeautifulPropertyCard = ({ property, index, viewMode }: { property: any; i
   // Prefetch property data on hover for instant loading
   const handleMouseEnter = () => {
     if (typeof window === 'undefined') return
-    
+
     const propertyId = property.propertyId || property._id
     if (!propertyId) return
 
@@ -151,7 +151,7 @@ const BeautifulPropertyCard = ({ property, index, viewMode }: { property: any; i
 
     // Prefetch property data in background
     const targetUrl = getPropertyUrl(property)
-    
+
     // Prefetch the route (Next.js will handle this)
     if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
       requestIdleCallback(() => {
@@ -195,7 +195,7 @@ const BeautifulPropertyCard = ({ property, index, viewMode }: { property: any; i
         const img = new Image();
         img.src = url;
       });
-      
+
       // Also prefetch property data (reuse parent function logic)
       handleMouseEnter();
     };
@@ -211,7 +211,7 @@ const BeautifulPropertyCard = ({ property, index, viewMode }: { property: any; i
           animationFillMode: 'forwards'
         }}
       >
-        <div 
+        <div
           className="relative bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1"
           onMouseEnter={handleGridMouseEnter}
           onClick={(e) => {
@@ -235,10 +235,10 @@ const BeautifulPropertyCard = ({ property, index, viewMode }: { property: any; i
               property={property}
               watermarkSize="small"
             />
-            
+
             {/* Overlay Elements */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-            
+
             {/* Top Badges */}
             <div className="absolute top-2 left-2 flex flex-col gap-1">
               <div className="bg-blue-500/90 backdrop-blur-sm text-white px-2 py-1 rounded-full text-xs font-semibold shadow-lg">
@@ -275,17 +275,17 @@ const BeautifulPropertyCard = ({ property, index, viewMode }: { property: any; i
                 </div>
               )}
               <div className="flex items-center text-slate-600 mb-2 sm:mb-3 md:mb-4">
-                <img 
-                  src="/icons/adress.png" 
-                  alt="Location" 
+                <img
+                  src="/icons/adress.png"
+                  alt="Location"
                   className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 mr-1 sm:mr-2 flex-shrink-0 object-contain"
                 />
                 <span className="text-xs sm:text-sm md:text-base lg:text-lg line-clamp-1">{property.location}</span>
               </div>
-              
+
               {/* Price Display */}
               <div className="mb-2 sm:mb-3 md:mb-4">
-                <div 
+                <div
                   className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold text-green-700"
                   dangerouslySetInnerHTML={{ __html: formatPrice(property.price, property.listingType) }}
                 />
@@ -299,21 +299,21 @@ const BeautifulPropertyCard = ({ property, index, viewMode }: { property: any; i
                 <>
                   <div className="text-center group/stat">
                     <div className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 xl:w-16 xl:h-16 flex items-center justify-center mx-auto mb-1 sm:mb-2 md:mb-3 group-hover/stat:scale-110 transition-transform duration-300">
-                      <img 
-                        src="/icons/sharci.gif" 
-                        alt="Document" 
+                      <img
+                        src="/icons/sharci.gif"
+                        alt="Document"
                         className="w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 object-contain"
                       />
                     </div>
                     <div className="text-xs sm:text-xs md:text-sm lg:text-base font-bold text-slate-900 mb-0.5 sm:mb-1">{property.documentType || 'Siyaad Barre'}</div>
                     <div className="text-blue-800 text-xs sm:text-sm font-medium">Sharciga</div>
                   </div>
-                  
+
                   <div className="text-center group/stat">
                     <div className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 xl:w-16 xl:h-16 flex items-center justify-center mx-auto mb-1 sm:mb-2 md:mb-3 group-hover/stat:scale-110 transition-transform duration-300">
-                      <img 
-                        src="/icons/ruler2.gif" 
-                        alt="Measurement" 
+                      <img
+                        src="/icons/ruler2.gif"
+                        alt="Measurement"
                         className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 lg:w-12 lg:h-12 object-contain"
                       />
                     </div>
@@ -329,9 +329,9 @@ const BeautifulPropertyCard = ({ property, index, viewMode }: { property: any; i
                   {property.beds > 0 && (
                     <div className="text-center group/stat">
                       <div className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 xl:w-16 xl:h-16 flex items-center justify-center mx-auto mb-1 sm:mb-2 md:mb-3 group-hover/stat:scale-110 transition-transform duration-300">
-                        <NextImage 
-                          src="/icons/bed.png" 
-                          alt="Bed" 
+                        <NextImage
+                          src="/icons/bed.png"
+                          alt="Bed"
                           width={32}
                           height={32}
                           className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 lg:w-10 lg:h-10 object-contain"
@@ -342,15 +342,15 @@ const BeautifulPropertyCard = ({ property, index, viewMode }: { property: any; i
                       <div className="text-blue-800 text-xs sm:text-sm font-medium">QOL</div>
                     </div>
                   )}
-                  
+
                   {property.baths > 0 && (
                     <div className="text-center group/stat">
                       <div className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 xl:w-16 xl:h-16 flex items-center justify-center mx-auto mb-1 sm:mb-2 md:mb-3 group-hover/stat:scale-110 transition-transform duration-300">
-                        <video 
-                          src="/icons/shower1.mp4" 
-                          autoPlay 
-                          loop 
-                          muted 
+                        <video
+                          src="/icons/shower1.mp4"
+                          autoPlay
+                          loop
+                          muted
                           playsInline
                           className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 lg:w-10 lg:h-10 object-contain"
                         />
@@ -367,7 +367,7 @@ const BeautifulPropertyCard = ({ property, index, viewMode }: { property: any; i
 
             {/* Agent Profile */}
             {property.agent && (
-              <div 
+              <div
                 className="flex items-center space-x-2 p-2 bg-gray-50 rounded-lg mb-3"
                 data-agent-profile
                 onClick={(e) => e.stopPropagation()}
@@ -382,7 +382,7 @@ const BeautifulPropertyCard = ({ property, index, viewMode }: { property: any; i
                       agentId: property.agentId,
                       agent: property.agent
                     });
-                    
+
                     // Navigate directly
                     const agentId = property.agentId || property.agent?._id || property.agent?.id;
                     if (agentId && typeof window !== 'undefined') {
@@ -436,7 +436,7 @@ const BeautifulPropertyCard = ({ property, index, viewMode }: { property: any; i
         animationFillMode: 'forwards'
       }}
     >
-      <div 
+      <div
         className="relative bg-white rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1"
         onClick={(e) => {
           // Only navigate to property if click is not on agent profile
@@ -460,10 +460,10 @@ const BeautifulPropertyCard = ({ property, index, viewMode }: { property: any; i
               property={property}
               watermarkSize="medium"
             />
-            
+
             {/* Overlay Elements */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-            
+
             {/* Top Badges */}
             <div className="absolute top-4 left-4 flex flex-col gap-1">
               <div className="bg-blue-500/90 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm font-semibold shadow-lg">
@@ -481,7 +481,7 @@ const BeautifulPropertyCard = ({ property, index, viewMode }: { property: any; i
               )}
             </div>
           </div>
-          
+
           {/* Content Section */}
           <div className="flex-1 p-6 md:p-8">
             <div className="flex flex-col h-full">
@@ -498,23 +498,23 @@ const BeautifulPropertyCard = ({ property, index, viewMode }: { property: any; i
                   </div>
                 )}
                 <div className="flex items-center text-gray-600 mb-3">
-                  <img 
-                    src="/icons/adress.png" 
-                    alt="Location" 
+                  <img
+                    src="/icons/adress.png"
+                    alt="Location"
                     className="w-4 h-4 mr-2 flex-shrink-0 object-contain"
                   />
                   <span className="text-sm">{property.location}</span>
                 </div>
                 {/* Description removed - only shown on detail page */}
               </div>
-              
+
               {/* Property Stats */}
               <div className="flex items-center space-x-4 mb-4">
                 {property.beds > 0 && (
                   <div className="flex items-center text-gray-600">
-                    <NextImage 
-                      src="/icons/bed.png" 
-                      alt="Bed" 
+                    <NextImage
+                      src="/icons/bed.png"
+                      alt="Bed"
                       width={16}
                       height={16}
                       className="w-4 h-4 mr-1 object-contain"
@@ -525,11 +525,11 @@ const BeautifulPropertyCard = ({ property, index, viewMode }: { property: any; i
                 )}
                 {property.baths > 0 && (
                   <div className="flex items-center text-gray-600">
-                    <video 
-                      src="/icons/shower1.mp4" 
-                      autoPlay 
-                      loop 
-                      muted 
+                    <video
+                      src="/icons/shower1.mp4"
+                      autoPlay
+                      loop
+                      muted
                       playsInline
                       className="w-4 h-4 mr-1 object-contain"
                     />
@@ -541,17 +541,17 @@ const BeautifulPropertyCard = ({ property, index, viewMode }: { property: any; i
                   <span className="text-sm">{property.sqft} sqft</span>
                 </div>
               </div>
-              
+
               {/* Price */}
-              <div 
+              <div
                 className="text-2xl md:text-3xl font-bold text-green-700"
                 dangerouslySetInnerHTML={{ __html: formatPrice(property.price, property.listingType) }}
               />
 
               {/* Agent Profile */}
               {property.agent && (
-                <div 
-                  className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg mt-4" 
+                <div
+                  className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg mt-4"
                   data-agent-profile
                   onClick={(e) => e.stopPropagation()}
                 >
@@ -565,7 +565,7 @@ const BeautifulPropertyCard = ({ property, index, viewMode }: { property: any; i
                         agentId: property.agentId,
                         agent: property.agent
                       });
-                      
+
                       // Navigate directly - ensure agentId is a string
                       let agentId: string | undefined;
                       if (property.agentId) {
@@ -580,20 +580,20 @@ const BeautifulPropertyCard = ({ property, index, viewMode }: { property: any; i
                       if (!agentId) {
                         agentId = property.agent?._id || property.agent?.id;
                       }
-                      
+
                       // Ensure it's a string and not [object Object]
                       if (agentId && typeof agentId !== 'string') {
                         agentId = typeof agentId === 'object' && agentId !== null
                           ? (agentId as any)?._id || (agentId as any)?.id || String(agentId)
                           : String(agentId);
                       }
-                      
+
                       if (!agentId || agentId === '[object Object]' || agentId.includes('object Object')) {
                         console.error('❌ Invalid agentId:', agentId);
                         alert('Invalid agent information. Please try again.');
                         return;
                       }
-                      
+
                       if (agentId && typeof window !== 'undefined') {
                         // Get agent slug for URL-friendly navigation
                         try {
@@ -644,7 +644,7 @@ const BeautifulPropertyCard = ({ property, index, viewMode }: { property: any; i
                   </div>
                 </div>
               )}
-              
+
             </div>
           </div>
         </div>
@@ -692,7 +692,7 @@ export const SampleHomesSimplified: React.FC = () => {
     district: ''
   })
   const [currentPropertyIndex, setCurrentPropertyIndex] = useState(0)
-  
+
   const { isAnimating, startRedirect, animationProps } = useRedirectAnimation({
     destination: "Agent Dashboard",
     message: "Taking you to your dashboard..."
@@ -702,24 +702,27 @@ export const SampleHomesSimplified: React.FC = () => {
     e.preventDefault()
     startRedirect('/agent')
   }
-  
+
   const { properties, loading, error } = useProperties(false, filters)
-  
+
   // Get all properties for calculating available districts
   const { properties: allProperties } = useProperties(false, undefined)
 
-  // Get unique districts
-  const districts = Array.from(new Set(allProperties.map(p => p.district).filter(Boolean)))
-  const availableDistricts = districts
-  
   // Check if user is agent
   const isAgent = isAuthenticated && user?.role === 'agent'
-  
+
+  // Safe properties array
+  const safeProperties = Array.isArray(properties) ? properties : []
+
   // Filter properties for agents
-  const agentProperties = properties.filter(p => p.agentId === user?.id)
-  const otherProperties = properties.filter(p => p.agentId !== user?.id)
-  const displayProperties = isAgent ? [...agentProperties, ...otherProperties] : properties
-  
+  const agentProperties = safeProperties.filter(p => p.agentId === user?.id)
+  const otherProperties = safeProperties.filter(p => p.agentId !== user?.id)
+  const displayProperties = isAgent ? [...agentProperties, ...otherProperties] : safeProperties
+
+  // Get unique districts
+  const districts = Array.from(new Set(Array.isArray(allProperties) ? allProperties.map(p => p.district).filter(Boolean) : []))
+  const availableDistricts = districts
+
   // Reset carousel index when properties change
   useEffect(() => {
     setCurrentPropertyIndex(0)
@@ -755,7 +758,7 @@ export const SampleHomesSimplified: React.FC = () => {
       </section>
     )
   }
-  
+
   // Check for active filters
   const hasActiveFilters = filters.listingType !== 'all' || filters.district !== ''
 
@@ -763,7 +766,7 @@ export const SampleHomesSimplified: React.FC = () => {
     <>
       {/* Redirect Animation */}
       <RedirectAnimation {...animationProps} />
-      
+
       <section className="relative pt-8 sm:pt-12 md:pt-16 lg:pt-20 pb-16 sm:pb-20 md:pb-24 lg:pb-32 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 overflow-hidden" data-properties-section>
         {/* Background Elements */}
         <div className="absolute inset-0">
@@ -779,9 +782,9 @@ export const SampleHomesSimplified: React.FC = () => {
             {/* Mobile Agent Dashboard Button */}
             {isAuthenticated && user?.role === 'agent' && (
               <div className="sm:hidden mb-6 text-center">
-                <Button 
+                <Button
                   onClick={handleAgentDashboardClick}
-                  variant="secondary" 
+                  variant="secondary"
                   size="lg"
                   className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-full shadow-2xl border-0 w-full max-w-xs transition-all duration-300 hover:scale-105"
                 >
@@ -790,7 +793,7 @@ export const SampleHomesSimplified: React.FC = () => {
                 </Button>
               </div>
             )}
-            
+
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-6">
               <div className="flex flex-col sm:flex-row sm:items-center sm:gap-6">
                 <div>
@@ -798,17 +801,17 @@ export const SampleHomesSimplified: React.FC = () => {
                     {isAgent ? 'My Listings' : 'Featured Properties'}
                   </h2>
                   <p className="text-slate-600 text-lg">
-                    {isAgent 
+                    {isAgent
                       ? `You have ${agentProperties.length} properties listed. Browse all available properties below.`
                       : 'Discover our curated selection of premium properties'
                     }
                   </p>
                 </div>
-                
+
                 {/* Agents Link */}
                 <div className="mt-4 sm:mt-0">
-                  <Link 
-                    href="/agents" 
+                  <Link
+                    href="/agents"
                     className="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg"
                   >
                     <Users className="w-4 h-4 mr-2" />
@@ -816,7 +819,7 @@ export const SampleHomesSimplified: React.FC = () => {
                   </Link>
                 </div>
               </div>
-              
+
               {/* View Toggle and Refresh */}
               <div className="flex items-center space-x-4">
                 {/* Refresh Button */}
@@ -828,14 +831,14 @@ export const SampleHomesSimplified: React.FC = () => {
                   <RefreshCw className="w-4 h-4" />
                   <span className="hidden sm:inline">Refresh</span>
                 </button>
-                
+
                 <div className="hidden sm:flex items-center bg-white rounded-2xl p-1 shadow-lg">
                   <button
                     onClick={() => setViewMode('grid')}
                     className={cn(
                       "flex items-center space-x-2 px-4 py-2 rounded-xl transition-all duration-300",
-                      viewMode === 'grid' 
-                        ? "bg-blue-600 text-white shadow-md" 
+                      viewMode === 'grid'
+                        ? "bg-blue-600 text-white shadow-md"
                         : "text-slate-600 hover:text-slate-900"
                     )}
                   >
@@ -848,8 +851,8 @@ export const SampleHomesSimplified: React.FC = () => {
                     onClick={() => setViewMode('list')}
                     className={cn(
                       "flex items-center space-x-2 px-4 py-2 rounded-xl transition-all duration-300",
-                      viewMode === 'list' 
-                        ? "bg-blue-600 text-white shadow-md" 
+                      viewMode === 'list'
+                        ? "bg-blue-600 text-white shadow-md"
                         : "text-slate-600 hover:text-slate-900"
                     )}
                   >
@@ -859,21 +862,21 @@ export const SampleHomesSimplified: React.FC = () => {
                     <span className="text-sm font-medium">List</span>
                   </button>
                 </div>
-                
+
                 {/* District Info */}
                 <div className="flex items-center space-x-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-semibold">
                   <MapPin className="w-4 h-4" />
                   <span>{availableDistricts.length} Degmo</span>
                 </div>
-                
+
                 {/* Mobile View Toggle */}
                 <div className="sm:hidden flex items-center bg-white rounded-2xl p-1 shadow-lg">
                   <button
                     onClick={() => setViewMode('grid')}
                     className={cn(
                       "p-2 rounded-xl transition-all duration-300",
-                      viewMode === 'grid' 
-                        ? "bg-blue-600 text-white shadow-md" 
+                      viewMode === 'grid'
+                        ? "bg-blue-600 text-white shadow-md"
                         : "text-slate-600 hover:text-slate-900"
                     )}
                   >
@@ -885,8 +888,8 @@ export const SampleHomesSimplified: React.FC = () => {
                     onClick={() => setViewMode('list')}
                     className={cn(
                       "p-2 rounded-xl transition-all duration-300",
-                      viewMode === 'list' 
-                        ? "bg-blue-600 text-white shadow-md" 
+                      viewMode === 'list'
+                        ? "bg-blue-600 text-white shadow-md"
                         : "text-slate-600 hover:text-slate-900"
                     )}
                   >
@@ -900,45 +903,45 @@ export const SampleHomesSimplified: React.FC = () => {
           </div>
 
           {/* Filters Section */}
-            <div className="bg-white rounded-2xl p-6 shadow-lg mb-6">
-              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
-                {/* Search and Filters */}
-                <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
-                  <div className="flex items-center space-x-2">
-                    <Filter className="w-5 h-5 text-gray-500" />
-                    <select
-                      value={filters.listingType}
-                      onChange={(e) => setFilters(prev => ({ ...prev, listingType: e.target.value as any }))}
-                      className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                      <option value="all">All Types</option>
-                      <option value="sale">For Sale</option>
-                      <option value="rent">For Rent</option>
-                    </select>
-                  </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    <MapPin className="w-5 h-5 text-gray-500" />
-                    <select
-                      value={filters.district}
-                      onChange={(e) => setFilters(prev => ({ ...prev, district: e.target.value }))}
-                      className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                      <option value="">All Districts</option>
-                      {availableDistricts.map(district => (
-                        <option key={district} value={district}>{district}</option>
-                      ))}
-                    </select>
-                  </div>
+          <div className="bg-white rounded-2xl p-6 shadow-lg mb-6">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+              {/* Search and Filters */}
+              <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
+                <div className="flex items-center space-x-2">
+                  <Filter className="w-5 h-5 text-gray-500" />
+                  <select
+                    value={filters.listingType}
+                    onChange={(e) => setFilters(prev => ({ ...prev, listingType: e.target.value as any }))}
+                    className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="all">All Types</option>
+                    <option value="sale">For Sale</option>
+                    <option value="rent">For Rent</option>
+                  </select>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <MapPin className="w-5 h-5 text-gray-500" />
+                  <select
+                    value={filters.district}
+                    onChange={(e) => setFilters(prev => ({ ...prev, district: e.target.value }))}
+                    className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="">All Districts</option>
+                    {availableDistricts.map(district => (
+                      <option key={district} value={district}>{district}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
             </div>
-            
-            {/* Results Count */}
-            {!loading && !error && (
-              <div className="flex items-center justify-between mb-6">
-                <div className="text-slate-600">
-                  {isAgent ? (
+          </div>
+
+          {/* Results Count */}
+          {!loading && !error && (
+            <div className="flex items-center justify-between mb-6">
+              <div className="text-slate-600">
+                {isAgent ? (
                   <>
                     {agentProperties.length > 0 && (
                       <span className="font-semibold text-blue-600">{agentProperties.length} my properties</span>
@@ -953,31 +956,31 @@ export const SampleHomesSimplified: React.FC = () => {
                 ) : (
                   <span className="font-semibold text-slate-900">{displayProperties.length} properties</span>
                 )}
-                  {hasActiveFilters && (
-                    <span className="text-slate-500">
-                      {' '}matching your filters
-                    </span>
-                  )}
-                </div>
-                
-                {/* Clear Filters Button */}
                 {hasActiveFilters && (
-                  <button
-                    onClick={() => setFilters({ listingType: 'all', district: '' })}
-                    className="text-blue-600 hover:text-blue-700 text-sm font-medium transition-colors"
-                  >
-                    Clear filters
-                  </button>
+                  <span className="text-slate-500">
+                    {' '}matching your filters
+                  </span>
                 )}
               </div>
-            )}
+
+              {/* Clear Filters Button */}
+              {hasActiveFilters && (
+                <button
+                  onClick={() => setFilters({ listingType: 'all', district: '' })}
+                  className="text-blue-600 hover:text-blue-700 text-sm font-medium transition-colors"
+                >
+                  Clear filters
+                </button>
+              )}
+            </div>
+          )}
 
           {/* Properties Grid/List */}
           {displayProperties.length > 0 ? (
             <div className={cn(
               "grid gap-3 sm:gap-4 md:gap-6",
-              viewMode === 'grid' 
-                ? "grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-3" 
+              viewMode === 'grid'
+                ? "grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-3"
                 : "grid-cols-1"
             )}>
               {displayProperties.map((property, index) => (
@@ -994,7 +997,7 @@ export const SampleHomesSimplified: React.FC = () => {
               <div className="text-gray-400 text-6xl mb-4">🏠</div>
               <h3 className="text-2xl font-bold text-gray-900 mb-2">No Properties Found</h3>
               <p className="text-gray-600 mb-6">Try adjusting your filters to see more properties</p>
-              <Button 
+              <Button
                 onClick={() => setFilters({ listingType: 'all', district: '' })}
                 variant="secondary"
               >
@@ -1006,7 +1009,7 @@ export const SampleHomesSimplified: React.FC = () => {
           {/* Agent Dashboard Access */}
           {!isAuthenticated && user?.role === 'agent' && (
             <div className="mt-12 text-center">
-              <Button 
+              <Button
                 onClick={handleAgentDashboardClick}
                 variant="secondary"
                 className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl font-semibold"

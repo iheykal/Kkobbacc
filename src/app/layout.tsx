@@ -11,8 +11,9 @@ import { ScrollToTopButton } from '@/components/ui/ScrollToTopButton'
 import { ClientLayoutWrapper } from '@/components/providers/ClientLayoutWrapper'
 import GoogleAnalyticsComponent from '@/components/analytics/GoogleAnalytics'
 import { StructuredData } from '@/components/seo/StructuredData'
+import { GoogleAuthProviderWrapper } from '@/components/providers/GoogleAuthProviderWrapper'
 
-const inter = Inter({ 
+const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
   display: 'swap',
@@ -20,7 +21,7 @@ const inter = Inter({
   adjustFontFallback: true,
 })
 
-const playfair = Playfair_Display({ 
+const playfair = Playfair_Display({
   subsets: ['latin'],
   variable: '--font-playfair',
   display: 'swap',
@@ -28,7 +29,7 @@ const playfair = Playfair_Display({
   adjustFontFallback: true,
 })
 
-const cormorant = Cormorant_Garamond({ 
+const cormorant = Cormorant_Garamond({
   subsets: ['latin'],
   variable: '--font-cormorant',
   display: 'swap',
@@ -108,7 +109,7 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://api.dicebear.com" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        
+
         {/* PWA Meta Tags */}
         <meta name="application-name" content="Kobac Real Estate" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -117,7 +118,7 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="msapplication-TileColor" content="#2563eb" />
         <meta name="msapplication-config" content="/browserconfig.xml" />
-        
+
         {/* Favicon - Google Search looks for /favicon.ico specifically */}
         <link rel="icon" href="/favicon.ico" type="image/png" />
         <link rel="icon" href="/icons/header.png" sizes="16x16" type="image/png" />
@@ -130,7 +131,7 @@ export default function RootLayout({
         <link rel="icon" href="/icons/header.png" sizes="384x384" type="image/png" />
         <link rel="icon" href="/icons/header.png" sizes="512x512" type="image/png" />
         <link rel="shortcut icon" href="/favicon.ico" />
-        
+
         {/* Apple Touch Icons */}
         <link rel="apple-touch-icon" sizes="180x180" href="/icons/header.png" />
         <link rel="apple-touch-icon" sizes="152x152" href="/icons/header.png" />
@@ -142,7 +143,7 @@ export default function RootLayout({
         <link rel="apple-touch-icon" sizes="60x60" href="/icons/header.png" />
         <link rel="apple-touch-icon" sizes="57x57" href="/icons/header.png" />
         <link rel="apple-touch-icon" href="/icons/header.png" />
-        
+
         {/* Only preload GA if ID is provided and not in development */}
         {gaId && process.env.NODE_ENV === 'production' && (
           <link
@@ -151,27 +152,29 @@ export default function RootLayout({
             as="script"
           />
         )}
-        
+
         {/* Structured Data for Google Search Sitelinks */}
         <StructuredData />
       </head>
       <body className="font-sans antialiased bg-white text-primary-900">
-        <UserProvider>
-          <NavigationProvider>
-            <ScrollPreservationProvider>
-              <ScrollToTopProvider>
-                <ClientLayoutWrapper>
-                  <Header />
-                  <main>
-                    {children}
-                  </main>
-                  <Footer />
-                  <ScrollToTopButton />
-                </ClientLayoutWrapper>
-              </ScrollToTopProvider>
-            </ScrollPreservationProvider>
-          </NavigationProvider>
-        </UserProvider>
+        <GoogleAuthProviderWrapper>
+          <UserProvider>
+            <NavigationProvider>
+              <ScrollPreservationProvider>
+                <ScrollToTopProvider>
+                  <ClientLayoutWrapper>
+                    <Header />
+                    <main>
+                      {children}
+                    </main>
+                    <Footer />
+                    <ScrollToTopButton />
+                  </ClientLayoutWrapper>
+                </ScrollToTopProvider>
+              </ScrollPreservationProvider>
+            </NavigationProvider>
+          </UserProvider>
+        </GoogleAuthProviderWrapper>
         {gaId && <GoogleAnalyticsComponent gaId={gaId} />}
       </body>
     </html>

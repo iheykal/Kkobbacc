@@ -15,7 +15,7 @@ export interface FeatureIcon {
  */
 export const getFeatureIcon = (featureName: string): FeatureIcon => {
   const normalizedFeature = featureName.toLowerCase().trim()
-  
+
   // Special mappings for features that have specific icons
   const iconMap: Record<string, FeatureIcon> = {
     // Deal feature - use unscreen version for transparency
@@ -24,42 +24,42 @@ export const getFeatureIcon = (featureName: string): FeatureIcon => {
       alt: 'Deal',
       className: 'h-16 w-16 mr-4 bg-transparent relative z-10'
     },
-    
+
     // Shower feature - transparent version
     'shower': {
-      src: '/icons/shower.png',
+      src: '/icons/shower.webp',
       alt: 'Shower',
       className: 'h-16 w-16 mr-4 bg-transparent relative z-10'
     },
-    
+
     // Bed feature - transparent version
     'bed': {
-      src: '/icons/bed.png',
+      src: '/icons/bed.webp',
       alt: 'Bed',
       className: 'h-16 w-16 mr-4 bg-transparent relative z-10'
     },
-    
+
     // Ruler feature - using WebP for better performance
     'ruler': {
       src: '/icons/ruler2.gif',
       alt: 'Ruler',
       className: 'h-16 w-16 mr-4 bg-transparent relative z-10'
     },
-    
+
     // Location feature - use the refreshed address pin graphic
     'location': {
-      src: '/icons/adress.png',
+      src: '/icons/adress.webp',
       alt: 'Location',
       className: 'h-16 w-16 mr-4 bg-transparent relative z-10'
     },
-    
+
     // Contact feature
     'contact': {
-      src: '/icons/contactgif.gif',
+      src: '/icons/header.webp',
       alt: 'Contact',
       className: 'h-16 w-16 mr-4 bg-transparent relative z-10'
     },
-    
+
     // Profile feature
     'profile': {
       src: '/icons/profile.gif',
@@ -67,7 +67,7 @@ export const getFeatureIcon = (featureName: string): FeatureIcon => {
       className: 'h-16 w-16 mr-4 bg-transparent relative z-10'
     }
   }
-  
+
   // Return the mapped icon or a default one
   return iconMap[normalizedFeature] || {
     src: '/icons/deal-unscreen.gif', // Default to deal-unscreen for unknown features
@@ -83,10 +83,10 @@ export const getFeatureIcon = (featureName: string): FeatureIcon => {
 export const getFeatureIconClasses = (size: 'sm' | 'md' | 'lg' = 'md'): string => {
   const sizeClasses = {
     sm: 'h-8 w-8',
-    md: 'h-12 w-12', 
+    md: 'h-12 w-12',
     lg: 'h-16 w-16'
   }
-  
+
   return `${sizeClasses[size]} mr-4 bg-transparent relative z-10`
 }
 

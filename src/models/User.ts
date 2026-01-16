@@ -20,9 +20,11 @@ export enum UserStatus {
 
 export interface IUser extends Document {
   fullName: string;
-  phone: string;
+  email: string;
+  phone?: string;
   passwordHash?: string; // Made optional for plain password support
   password?: string; // Added for plain password support
+  authProvider?: string; // e.g., 'local', 'google'
   passwordChangedAt: Date;
   role: UserRole;
   status: UserStatus;
@@ -34,6 +36,7 @@ export interface IUser extends Document {
     gender?: 'male' | 'female' | 'other';
     occupation?: string;
     company?: string;
+    slug?: string;
   };
   avatarChangeRequest?: {
     requestedAvatar?: string;
@@ -136,13 +139,24 @@ const UserSchema: Schema = new Schema({
     minlength: 2,
     maxlength: 100
   },
+  email: {
+    type: String,
+    unique: true,
+    sparse: true,
+    trim: true,
+    lowercase: true
+  },
   phone: {
     type: String,
-    required: true,
+    required: false, // Made optional for Google Auth users
     unique: true,
     sparse: true,
     trim: true,
     minlength: 10
+  },
+  authProvider: {
+    type: String,
+    default: 'local'
   },
   passwordHash: {
     type: String,
@@ -286,10 +300,11 @@ const UserSchema: Schema = new Schema({
 });
 
 // Validate that at least one password field is provided (only for new documents)
-UserSchema.pre('save', function(next) {
+UserSchema.pre('save', function (next) {
   // Only validate for new documents
   if (this.isNew) {
-    if (!this.passwordHash && !this.password) {
+    // If authProvider is NOT google, verify password
+    if (this.authProvider !== 'google' && !this.passwordHash && !this.password) {
       return next(new Error('Either passwordHash or password must be provided for new users'));
     }
   }
@@ -297,7 +312,7 @@ UserSchema.pre('save', function(next) {
 });
 
 // Set permissions based on role (supporting legacy and new role strings)
-UserSchema.pre('save', function(next) {
+UserSchema.pre('save', function (next) {
   if (this.isModified('role')) {
     switch (this.role) {
       case UserRole.SUPER_ADMIN:
@@ -314,7 +329,7 @@ UserSchema.pre('save', function(next) {
         };
         this.status = UserStatus.ACTIVE;
         break;
-      
+
       case UserRole.AGENT:
       case UserRole.AGENCY:
         this.permissions = {
@@ -330,7 +345,7 @@ UserSchema.pre('save', function(next) {
         // Automatically set agent status to ACTIVE when promoted
         this.status = UserStatus.ACTIVE;
         break;
-      
+
       case UserRole.NORMAL_USER:
       case UserRole.USER:
         this.permissions = {

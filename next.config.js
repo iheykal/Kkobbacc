@@ -1,12 +1,11 @@
-// Conditionally enable PWA - disable during build to prevent build issues
-// PWA will be disabled during build (when SKIP_PWA_BUILD=true) but enabled at runtime
-const shouldDisablePWA = process.env.SKIP_PWA_BUILD === 'true'
+// Disable PWA in development or when SKIP_PWA_BUILD is true
+const shouldDisablePWA = process.env.NODE_ENV === 'development' || process.env.SKIP_PWA_BUILD === 'true'
 
 const withPWA = require('next-pwa')({
   dest: 'public',
   register: true,
   skipWaiting: true,
-  disable: shouldDisablePWA, // Disable PWA during build, enable at runtime
+  disable: shouldDisablePWA,
   disableDevLogs: true,
   buildExcludes: [/app-manifest\.json$/, /sw\.js\.map$/],
   runtimeCaching: [
@@ -34,19 +33,19 @@ const nextConfig = {
       },
     ]
   },
-  
+
   // Enable experimental features properly
   experimental: {
     serverComponentsExternalPackages: ['mongoose', 'argon2', 'bcryptjs', '@aws-sdk/client-s3', '@aws-sdk/s3-request-presigner', 'formidable', 'sharp'],
     // Optimize package imports for better tree shaking
     optimizePackageImports: ['framer-motion', 'recharts', 'lucide-react'],
   },
-  
+
   // Environment variables for deployment
   env: {
     VERCEL: process.env.VERCEL,
   },
-  
+
   // Image configuration for Cloudflare R2 with optimization
   images: {
     remotePatterns: [
@@ -93,7 +92,7 @@ const nextConfig = {
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     minimumCacheTTL: 60,
   },
-  
+
   // Optimized webpack config
   webpack: (config, { isServer, dev }) => {
     // Only externalize heavy packages for server in production
@@ -158,7 +157,7 @@ const nextConfig = {
 
     return config;
   },
-  
+
   // Compiler optimizations
   compiler: {
     // Remove console.log in production (keep errors and warnings)
@@ -166,26 +165,26 @@ const nextConfig = {
       exclude: ['error', 'warn'],
     } : false,
   },
-  
+
   // Enable proper build optimizations
   productionBrowserSourceMaps: false,
   swcMinify: true,
-  
+
   // Performance optimizations
   compress: true,
   poweredByHeader: false,
-  
+
   // SEO and metadata optimizations
   reactStrictMode: true,
-  
+
   // Skip static generation for pages that use dynamic data
   // This prevents build failures when pages try to access UserContext or MongoDB during build
   output: 'standalone',
-  
+
   // Disable static page generation to prevent build errors
   // All pages will be rendered dynamically at runtime
   distDir: '.next',
-  
+
   // Skip static generation errors - allow build to continue even if some pages fail to prerender
   // Pages will be rendered dynamically at runtime instead
   typescript: {
@@ -194,14 +193,14 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: false,
   },
-  
+
   // Disable static optimization - all pages will be rendered dynamically
   // This prevents Next.js from trying to prerender pages during build
   generateBuildId: async () => {
     // Use a timestamp-based build ID to ensure dynamic rendering
     return `build-${Date.now()}`
   },
-  
+
   // Standard output for reliable deployment
 }
 

@@ -9,16 +9,16 @@ import { useUser } from '@/contexts/UserContext'
 import { uploadToR2, uploadMultipleToR2, uploadPropertyImagesToR2 } from '@/lib/r2-upload'
 import { formatPrice, handlePriceInputChange, parsePriceFromInput, resolveMeasurementValue } from '@/lib/utils'
 import { propertyEventManager } from '@/lib/propertyEvents'
-import { 
-  Plus, 
-  Edit, 
-  Trash2, 
-  Home, 
-  Upload, 
-  Eye, 
-  DollarSign, 
-  Bed, 
-  Bath, 
+import {
+  Plus,
+  Edit,
+  Trash2,
+  Home,
+  Upload,
+  Eye,
+  DollarSign,
+  Bed,
+  Bath,
   LogOut,
   User,
   Settings,
@@ -63,16 +63,16 @@ interface UserData {
 
 export default function AgentDashboard() {
   console.log('🔍 Agent Dashboard: Component rendering...')
-  
+
   const router = useRouter()
   const { user: contextUser, isAuthenticated, isLoading: contextLoading, logout, validateSession } = useUser()
-  
+
   console.log('🔍 Agent Dashboard: UserContext state:', {
     contextUser: contextUser ? { id: contextUser.id, role: contextUser.role } : null,
     isAuthenticated,
     contextLoading
   })
-  
+
   const [user, setUser] = useState<UserData | null>(null)
   const [properties, setProperties] = useState<Property[]>([])
   const [loading, setLoading] = useState(true)
@@ -80,6 +80,7 @@ export default function AgentDashboard() {
   const [showUploadModal, setShowUploadModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null)
   const [totalViews, setTotalViews] = useState(0)
   const [viewMode, setViewMode] = useState<'current' | 'cumulative'>('cumulative')
@@ -114,13 +115,13 @@ export default function AgentDashboard() {
       isAuthenticated,
       contextUser: contextUser ? { id: contextUser.id, role: contextUser.role } : null
     })
-    
+
     // Wait for UserContext to finish loading
     if (contextLoading) {
       console.log('🔍 Agent Dashboard: Still loading context...')
       return
     }
-    
+
     // If not authenticated, show error
     if (!isAuthenticated || !contextUser) {
       console.log('🔍 Agent Dashboard: Not authenticated')
@@ -128,7 +129,7 @@ export default function AgentDashboard() {
       setLoading(false)
       return
     }
-    
+
     // Check if user has agent role or is SuperAdmin
     if (contextUser.role !== 'agent' && contextUser.role !== 'agency' && contextUser.role !== 'superadmin') {
       console.log('🔍 Agent Dashboard: Access denied for role:', contextUser.role)
@@ -136,9 +137,9 @@ export default function AgentDashboard() {
       setLoading(false)
       return
     }
-    
+
     console.log('🔍 Agent Dashboard: User authenticated with correct role:', contextUser.role)
-    
+
     // User is authenticated and has correct role
     setUser({
       id: contextUser.id,
@@ -148,18 +149,18 @@ export default function AgentDashboard() {
       status: 'active',
       avatar: contextUser.avatar
     })
-    
+
     console.log('🔍 Agent Dashboard: Fetching data for user:', contextUser.id)
-    
+
     // Optimized: Fetch all data in parallel with mobile-specific optimizations
     fetchAgentDataOptimized(contextUser.id)
-    
+
     // Set a fallback timeout to ensure loading doesn't hang forever
     const fallbackTimeout = setTimeout(() => {
       console.log('🔍 Agent Dashboard: Fallback timeout triggered - setting loading to false')
       setLoading(false)
     }, 8000) // Reduced to 8s for better mobile UX
-    
+
     // Clear timeout when component unmounts or when loading is set to false
     return () => clearTimeout(fallbackTimeout)
   }, [contextUser, isAuthenticated, contextLoading]) // Depend on UserContext state
@@ -170,13 +171,13 @@ export default function AgentDashboard() {
       console.log('🚀 Agent Dashboard: Starting optimized data fetch for agentId:', agentId)
       setLoading(true)
       setError(null)
-      
+
       // Detect mobile device for optimizations
       const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
       const limit = isMobile ? 6 : 12 // Load fewer properties on mobile
-      
+
       console.log('📱 Mobile detection:', { isMobile, limit, windowWidth: typeof window !== 'undefined' ? window.innerWidth : 'undefined' })
-      
+
       // Fetch properties and views in parallel with mobile optimizations
       const [propertiesResponse, viewsResponse] = await Promise.allSettled([
         fetch(`/api/properties?agentId=${agentId}&limit=${limit}`, {
@@ -194,14 +195,14 @@ export default function AgentDashboard() {
           next: { revalidate: 300 } // Cache views for 5 minutes
         })
       ])
-      
+
       // Process properties response
       if (propertiesResponse.status === 'fulfilled' && propertiesResponse.value.ok) {
         const result = await propertiesResponse.value.json()
         const mappedProperties = (result.data || [])
           .filter((property: any) => {
-            const isVisible = property.deletionStatus !== 'pending_deletion' && 
-                             property.deletionStatus !== 'deleted'
+            const isVisible = property.deletionStatus !== 'pending_deletion' &&
+              property.deletionStatus !== 'deleted'
             return isVisible
           })
           .map((property: any) => ({
@@ -211,14 +212,14 @@ export default function AgentDashboard() {
             bathrooms: property.baths?.toString() || '0',
             area: property.sqft?.toString() || '0'
           }))
-        
+
         setProperties(mappedProperties)
         console.log('✅ Properties loaded:', mappedProperties.length)
       } else {
         console.error('❌ Properties fetch failed:', propertiesResponse.status)
         setProperties([])
       }
-      
+
       // Process views response
       if (viewsResponse.status === 'fulfilled' && viewsResponse.value.ok) {
         const result = await viewsResponse.value.json()
@@ -231,7 +232,7 @@ export default function AgentDashboard() {
         // Fallback to calculating from properties
         setTotalViews(properties.reduce((total, property) => total + (property.viewCount || 0), 0))
       }
-      
+
     } catch (error) {
       console.error('❌ Optimized data fetch error:', error)
       setError('Failed to load dashboard data. Please try again.')
@@ -245,11 +246,11 @@ export default function AgentDashboard() {
   const fetchAgentProperties = async (agentId: string) => {
     try {
       console.log('🔍 Agent Dashboard: Starting fetchAgentProperties for agentId:', agentId)
-      
+
       // Add timeout to prevent hanging
       const controller = new AbortController()
       const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 second timeout
-      
+
       const response = await fetch(`/api/properties?agentId=${agentId}`, {
         credentials: 'include',
         headers: {
@@ -257,10 +258,10 @@ export default function AgentDashboard() {
         },
         signal: controller.signal
       })
-      
+
       clearTimeout(timeoutId)
       console.log('🔍 Agent Dashboard: Properties API response status:', response.status)
-      
+
       const result = await response.json()
       console.log('🔍 Agent Dashboard: Properties API response data:', {
         status: response.status,
@@ -268,13 +269,13 @@ export default function AgentDashboard() {
         result: result,
         dataLength: result.data?.length || 0
       })
-      
+
       if (response.ok) {
         // Map backend field names to frontend display names - hide pending deletions from agent view
         const mappedProperties = (result.data || [])
           .filter((property: any) => {
-            const isVisible = property.deletionStatus !== 'pending_deletion' && 
-                             property.deletionStatus !== 'deleted'
+            const isVisible = property.deletionStatus !== 'pending_deletion' &&
+              property.deletionStatus !== 'deleted'
             console.log('🔍 Property visibility check:', {
               propertyId: property._id || property.propertyId,
               title: property.title,
@@ -290,7 +291,7 @@ export default function AgentDashboard() {
             bathrooms: property.baths?.toString() || '0',
             area: property.sqft?.toString() || '0'
           }))
-        
+
         console.log('🔍 Mapped properties:', {
           total: mappedProperties.length,
           properties: mappedProperties.map((p: any) => ({
@@ -299,7 +300,7 @@ export default function AgentDashboard() {
             deletionStatus: p.deletionStatus
           }))
         })
-        
+
         setProperties(mappedProperties)
         setError(null) // Clear any previous errors
       } else {
@@ -308,7 +309,7 @@ export default function AgentDashboard() {
       }
     } catch (error) {
       console.error('❌ Agent Dashboard: Error fetching agent properties:', error)
-      
+
       if (error instanceof Error && error.name === 'AbortError') {
         setError('Request timed out. Please try again.')
       } else {
@@ -348,57 +349,54 @@ export default function AgentDashboard() {
     return viewMode === 'cumulative' ? totalViews : getCurrentViews();
   };
 
-      const handleUploadProperty = async () => {
-      if (!user || !propertyData.propertyType || !propertyData.description || !propertyData.district) {
-        alert('Please fill in all required fields including district')
-        return
-      }
-      
-      // Enhanced validation
-      if (!propertyData.location) {
-        alert('Please enter the property location')
-        return
-      }
-      
-      if (!propertyData.price || propertyData.price.trim() === '') {
-        alert('Please enter a valid price for the property')
-        return
-      }
-      
-      // Check for duplicate images
-      if (propertyData.thumbnailImage && propertyData.additionalImages.some(file => file.name === propertyData.thumbnailImage?.name)) {
-        const duplicateCount = propertyData.additionalImages.filter(file => file.name === propertyData.thumbnailImage?.name).length
-        alert(`Warning: You've selected the same image "${propertyData.thumbnailImage.name}" for both thumbnail and additional images (${duplicateCount} times). Duplicates will be automatically removed, but you should select different images for better property presentation.`)
-      }
-      
-      
-      // Check authentication before proceeding
-      if (!isAuthenticated) {
-        alert('You must be logged in to upload properties. Please log in again.')
-        logout();
-        return;
-      }
-      
-      console.log('🔍 Pre-upload authentication check:', {
-        user: user,
-        isAuthenticated: isAuthenticated,
-        userRole: user?.role
-      });
-      
-      if (propertyData.listingType === 'sale' && !propertyData.measurement) {
-        alert('Please enter the measurement (Cabirka) for sale properties')
-        return
-      }
-      
-      // Validate price
-      if (!propertyData.price || propertyData.price.trim() === '') {
-        alert('Please enter a valid price for the property')
-        return
-      }
+  const handleUploadProperty = async () => {
+    if (!user || !propertyData.propertyType || !propertyData.district) {
+      alert('Please fill in all required fields including district')
+      return
+    }
+
+    // Enhanced validation
+    if (!propertyData.location) {
+      alert('Please enter the property location')
+      return
+    }
+
+    if (!propertyData.price || propertyData.price.trim() === '') {
+      alert('Please enter a valid price for the property')
+      return
+    }
+
+    // Duplicate image check removed as per user request
+
+
+
+    // Check authentication before proceeding
+    if (!isAuthenticated) {
+      alert('You must be logged in to upload properties. Please log in again.')
+      logout();
+      return;
+    }
+
+    console.log('🔍 Pre-upload authentication check:', {
+      user: user,
+      isAuthenticated: isAuthenticated,
+      userRole: user?.role
+    });
+
+    if (propertyData.listingType === 'sale' && !propertyData.measurement) {
+      alert('Please enter the measurement (Cabirka) for sale properties')
+      return
+    }
+
+    // Validate price
+    if (!propertyData.price || propertyData.price.trim() === '') {
+      alert('Please enter a valid price for the property')
+      return
+    }
 
     try {
       setUploadingImages(true)
-      
+
       // First, create the property without images to get the property ID
       // Parse and validate the price
       let parsedPrice = 0;
@@ -406,19 +404,19 @@ export default function AgentDashboard() {
         const cleanPrice = propertyData.price.replace(/[^\d.]/g, ''); // Remove non-numeric characters
         parsedPrice = parseFloat(cleanPrice) || 0;
       }
-      
+
       console.log('💰 Price parsing:', {
         original: propertyData.price,
         cleaned: propertyData.price?.replace(/[^\d.]/g, ''),
         parsed: parsedPrice
       });
-      
+
       // Validate parsed price
       if (parsedPrice <= 0) {
         alert('Please enter a valid price greater than 0')
         return
       }
-      
+
       const propertyPayload = {
         title: propertyData.title || propertyData.propertyType,
         propertyType: propertyData.propertyType,
@@ -437,10 +435,10 @@ export default function AgentDashboard() {
         agentName: user.fullName || 'Agent',
         agentPhone: user.phone || ''
       }
-      
+
       console.log('🔍 Creating property first to get ID...')
       console.log('🔍 Property payload being sent:', propertyPayload)
-      
+
       const createResponse = await fetch('/api/properties', {
         method: 'POST',
         headers: {
@@ -449,10 +447,10 @@ export default function AgentDashboard() {
         credentials: 'include',
         body: JSON.stringify(propertyPayload)
       })
-      
+
       console.log('🔍 Property creation response status:', createResponse.status)
       console.log('🔍 Property creation response headers:', Object.fromEntries(createResponse.headers.entries()))
-      
+
       // Check if response is JSON
       const contentType = createResponse.headers.get('content-type')
       if (!contentType || !contentType.includes('application/json')) {
@@ -460,18 +458,18 @@ export default function AgentDashboard() {
         console.error('❌ Non-JSON response received:', textResponse.substring(0, 500))
         throw new Error(`Server returned non-JSON response: ${createResponse.status}`)
       }
-      
+
       const createResult = await createResponse.json()
       console.log('🔍 Property creation response:', {
         status: createResponse.status,
         ok: createResponse.ok,
         result: createResult
       })
-      
+
       if (!createResponse.ok) {
         throw new Error(createResult.error || 'Failed to create property')
       }
-      
+
       const propertyId = createResult.data?._id
       console.log('✅ Property created with ID:', propertyId)
       console.log('✅ Property creation result data:', {
@@ -480,7 +478,7 @@ export default function AgentDashboard() {
         data_id: createResult.data?._id,
         finalPropertyId: propertyId
       })
-      
+
       // Optimistically add the new property to the list so it shows immediately
       try {
         const tempProperty: Property = {
@@ -506,29 +504,26 @@ export default function AgentDashboard() {
       } catch (e) {
         console.warn('⚠️ Failed to optimistically add property, continuing...', e)
       }
-      
+
       // Now upload images to R2 with the property ID
       let imageUrls: string[] = []
-      
+
       // Combine thumbnail and additional images, avoiding duplicates
       const allImages: File[] = []
       const addedFiles = new Set<string>() // Track file names to avoid duplicates
-      
+
       if (propertyData.thumbnailImage) {
         allImages.push(propertyData.thumbnailImage)
         addedFiles.add(propertyData.thumbnailImage.name)
       }
-      
-      // Add additional images, skipping any that are the same as the thumbnail
+
+      // Add additional images, allowing duplicates as per request
       propertyData.additionalImages.forEach(file => {
-        if (!addedFiles.has(file.name)) {
-          allImages.push(file)
-          addedFiles.add(file.name)
-        } else {
-          console.log('🔄 Skipping duplicate file:', file.name)
-        }
+        // We now allow all files, even if they are same as thumbnail
+        allImages.push(file)
+        addedFiles.add(file.name)
       })
-      
+
       console.log('📸 Image upload summary:', {
         thumbnailImage: propertyData.thumbnailImage?.name,
         additionalImages: propertyData.additionalImages.map(f => f.name),
@@ -539,7 +534,7 @@ export default function AgentDashboard() {
         allImagesFiles: allImages,
         duplicatesRemoved: (propertyData.thumbnailImage ? 1 : 0) + propertyData.additionalImages.length - allImages.length
       })
-      
+
       // Show user what will be uploaded
       if (allImages.length > 0) {
         const duplicatesRemoved = (propertyData.thumbnailImage ? 1 : 0) + propertyData.additionalImages.length - allImages.length
@@ -549,7 +544,7 @@ export default function AgentDashboard() {
           console.log(`📸 Upload summary: ${allImages.length} images will be uploaded`)
         }
       }
-      
+
       if (allImages.length > 0) {
         try {
           console.log('📸 Uploading images to R2 with property ID:', propertyId)
@@ -575,7 +570,7 @@ export default function AgentDashboard() {
           // Don't use placeholder images - let the property be created without images
           // The user can upload images later
           imageUrls = []
-          
+
           // Show user-friendly error message
           const errorMessage = error instanceof Error ? error.message : 'Unknown error'
           console.warn(`⚠️ Image upload failed: ${errorMessage}. Property will be created without images.`)
@@ -599,12 +594,12 @@ export default function AgentDashboard() {
             remainingUrls: imageUrls.slice(1),
             remainingCount: imageUrls.slice(1).length
           })
-          
+
           const updatePayload = {
             thumbnailImage: imageUrls[0],
             images: imageUrls.slice(1) // Store only the additional images (excluding the thumbnail)
           }
-          
+
           console.log('🔄 Update payload:', updatePayload)
           console.log('🔄 Image URLs being saved:', {
             thumbnailImage: updatePayload.thumbnailImage,
@@ -616,7 +611,7 @@ export default function AgentDashboard() {
             additionalImagesStartIndex: 1
           })
           console.log('🔄 Property ID for update:', propertyId)
-          
+
           const updateResponse = await fetch(`/api/properties/${propertyId}`, {
             method: 'PATCH',
             headers: {
@@ -625,18 +620,18 @@ export default function AgentDashboard() {
             credentials: 'include',
             body: JSON.stringify(updatePayload)
           })
-          
+
           const updateResult = await updateResponse.json()
           console.log('🔄 Property update response:', {
             status: updateResponse.status,
             ok: updateResponse.ok,
             result: updateResult
           })
-          
+
           if (updateResponse.ok) {
             console.log('✅ Property updated with images successfully')
             console.log('✅ Updated property data:', updateResult.data)
-            
+
             // Notify other components about the property update
             if (propertyId) {
               console.log('🔔 Notifying other components about property update:', propertyId)
@@ -671,15 +666,12 @@ export default function AgentDashboard() {
       } else {
         console.log('⚠️ No image URLs to save to property - property will have empty images')
       }
-      
+
       console.log('✅ Property creation and image upload completed successfully')
-      
+
       // Show success message and refresh properties
-      const successMessage = imageUrls.length > 0 
-        ? `Property uploaded successfully with ${imageUrls.length} images!`
-        : 'Property uploaded successfully! (No images uploaded)'
-      
-      alert(successMessage)
+      // Show success modal instead of alert
+      setShowSuccessModal(true)
       setShowUploadModal(false)
       setPropertyData({
         title: '',
@@ -696,14 +688,14 @@ export default function AgentDashboard() {
         thumbnailImage: null,
         additionalImages: []
       })
-      
+
       // Force refresh properties immediately
       console.log('🔄 Refreshing agent properties after successful upload...')
       await fetchAgentProperties(user.id)
-      
+
       // Re-fetch total views after successful upload
       fetchAgentTotalViews(user.id)
-      
+
       // Force refresh the main page properties as well
       console.log('🔄 Triggering main page property refresh...')
       propertyEventManager.notifyRefresh()
@@ -717,14 +709,14 @@ export default function AgentDashboard() {
   }
 
   const handleEditProperty = async () => {
-    if (!editData.title || !editData.description) {
+    if (!editData.title) {
       alert('Please fill in all required fields')
       return
     }
 
     try {
       setUploadingImages(true)
-      
+
       // Prepare the update payload
       let updatePayload: any = {
         title: editData.title,
@@ -760,14 +752,14 @@ export default function AgentDashboard() {
 
         if (allImages.length > 0) {
           console.log('📸 Uploading images for property edit:', allImages.map(f => f.name))
-          
+
           try {
             // Upload images to R2
             const uploadResults = await uploadPropertyImagesToR2(allImages, editData.id)
             const imageUrls = uploadResults.map(result => result.url)
-            
+
             console.log('✅ Images uploaded for edit:', imageUrls)
-            
+
             // Add image data to update payload - only if we have valid URLs
             if (imageUrls.length > 0) {
               updatePayload.thumbnailImage = imageUrls[0] || null
@@ -795,7 +787,7 @@ export default function AgentDashboard() {
         ok: response.ok,
         result: result
       })
-      
+
       if (response.ok) {
         alert('Property updated successfully!')
         setShowEditModal(false)
@@ -889,7 +881,7 @@ export default function AgentDashboard() {
               </div>
             </div>
           </div>
-          
+
           {/* Stats skeleton */}
           <div className="grid grid-cols-2 gap-4">
             {[1, 2, 3, 4].map((i) => (
@@ -899,7 +891,7 @@ export default function AgentDashboard() {
               </div>
             ))}
           </div>
-          
+
           {/* Properties skeleton */}
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
@@ -962,7 +954,7 @@ export default function AgentDashboard() {
             </div>
             <h1 className="text-2xl font-bold text-gray-900 mb-4">Agent Dashboard Access</h1>
             <p className="text-gray-600 mb-6">You need to be logged in as an agent to access the dashboard.</p>
-            
+
             <div className="space-y-4">
               <div className="text-sm text-gray-500 bg-gray-50 p-3 rounded-lg">
                 <p className="font-semibold mb-2">To access the agent dashboard:</p>
@@ -972,7 +964,7 @@ export default function AgentDashboard() {
                   <li>3. Log in with your credentials</li>
                 </ol>
               </div>
-              
+
               <div className="space-y-3">
                 <a
                   href="/test-auth"
@@ -1037,7 +1029,7 @@ export default function AgentDashboard() {
                 <p className="text-sm text-gray-600">Manage your properties</p>
               </div>
             </div>
-            
+
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-3">
                 <div className="w-8 h-8 rounded-full bg-white border-2 border-gray-200 flex items-center justify-center">
@@ -1054,7 +1046,7 @@ export default function AgentDashboard() {
                   <p className="text-xs text-gray-500">Agent</p>
                 </div>
               </div>
-              
+
               <button
                 onClick={() => router.push('/agent/profile')}
                 className="p-2 rounded-lg bg-purple-100 text-purple-600 hover:bg-purple-200 transition-colors"
@@ -1062,7 +1054,7 @@ export default function AgentDashboard() {
               >
                 <User className="w-5 h-5" />
               </button>
-              
+
               <button
                 onClick={handleLogout}
                 className="p-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
@@ -1097,7 +1089,7 @@ export default function AgentDashboard() {
               </div>
             </div>
           </div>
-          
+
           {/* SuperAdmin Navigation */}
           {user?.role === 'superadmin' && (
             <div className="flex space-x-3">
@@ -1115,7 +1107,7 @@ export default function AgentDashboard() {
               </button>
             </div>
           )}
-          
+
           {/* Regular Agent Navigation */}
           {user?.role !== 'superadmin' && (
             <button
@@ -1205,14 +1197,12 @@ export default function AgentDashboard() {
                 <p className="text-sm text-gray-600">Total views</p>
                 <button
                   onClick={() => setViewMode(viewMode === 'current' ? 'cumulative' : 'current')}
-                  className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-                    viewMode === 'cumulative' ? 'bg-purple-600' : 'bg-gray-300'
-                  }`}
+                  className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${viewMode === 'cumulative' ? 'bg-purple-600' : 'bg-gray-300'
+                    }`}
                 >
                   <span
-                    className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
-                      viewMode === 'cumulative' ? 'translate-x-5' : 'translate-x-1'
-                    }`}
+                    className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${viewMode === 'cumulative' ? 'translate-x-5' : 'translate-x-1'
+                      }`}
                   />
                 </button>
               </div>
@@ -1319,10 +1309,10 @@ export default function AgentDashboard() {
                         showWatermark={false}
                         property={property as any}
                       />
-                      
+
                       {/* Price Badge */}
                       <div className="absolute top-4 right-4">
-                        <div 
+                        <div
                           className="px-4 py-2 bg-white/95 backdrop-blur-sm rounded-2xl text-sm font-bold text-gray-900 shadow-lg"
                           dangerouslySetInnerHTML={{ __html: formatPrice(parseFloat(property.price) || 0, property.listingType) }}
                         />
@@ -1330,11 +1320,10 @@ export default function AgentDashboard() {
 
                       {/* Status Badge */}
                       <div className="absolute top-4 left-4">
-                        <span className={`px-3 py-1 rounded-xl text-xs font-semibold ${
-                          property.listingType === 'rent' 
-                            ? 'bg-emerald-100 text-emerald-700' 
-                            : 'bg-blue-100 text-blue-700'
-                        }`}>
+                        <span className={`px-3 py-1 rounded-xl text-xs font-semibold ${property.listingType === 'rent'
+                          ? 'bg-emerald-100 text-emerald-700'
+                          : 'bg-blue-100 text-blue-700'
+                          }`}>
                           {property.listingType === 'rent' ? 'Kiro' : 'Iib'}
                         </span>
                       </div>
@@ -1356,9 +1345,9 @@ export default function AgentDashboard() {
                           </span>
                         </div>
                         <div className="flex items-center space-x-2 text-gray-600">
-                          <img 
-                            src="/icons/adress.png" 
-                            alt="Location" 
+                          <img
+                            src="/icons/adress.png"
+                            alt="Location"
                             className="w-4 h-4 object-contain"
                           />
                           <span className="text-sm">{property.location || 'Location not specified'}</span>
@@ -1369,7 +1358,7 @@ export default function AgentDashboard() {
                       <p className="text-gray-600 text-sm mb-6 line-clamp-2 leading-relaxed">
                         {property.description}
                       </p>
-                      
+
                       {/* Property Features */}
                       <div className="grid grid-cols-2 gap-4 mb-6">
                         {/* For Sale properties: Show Sharciga instead of QOL/Suuli */}
@@ -1377,9 +1366,9 @@ export default function AgentDashboard() {
                           <>
                             <div className="flex items-center space-x-2 text-gray-600">
                               <div className="p-2 rounded-lg bg-blue-50">
-                                <img 
-                                  src="/icons/sharci.gif" 
-                                  alt="Document" 
+                                <img
+                                  src="/icons/sharci.gif"
+                                  alt="Document"
                                   className="w-6 h-6 object-contain"
                                 />
                               </div>
@@ -1390,9 +1379,9 @@ export default function AgentDashboard() {
                             </div>
                             <div className="flex items-center space-x-2 text-gray-600">
                               <div className="p-2 rounded-lg bg-emerald-50">
-                                <img 
-                                  src="/icons/ruler2.gif" 
-                                  alt="Measurement" 
+                                <img
+                                  src="/icons/ruler2.gif"
+                                  alt="Measurement"
                                   className="w-6 h-6 object-contain"
                                 />
                               </div>
@@ -1431,7 +1420,7 @@ export default function AgentDashboard() {
                             )}
                           </>
                         )}
-                        
+
                         <div className="flex items-center space-x-2 text-gray-600">
                           <div className="p-2 rounded-lg bg-purple-50">
                             <Home className="w-4 h-4 text-purple-600" />
@@ -1522,7 +1511,7 @@ export default function AgentDashboard() {
                   <X className="w-5 h-5 text-gray-600 group-hover:text-gray-800" />
                 </button>
               </div>
-              
+
               {/* Form Fields */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-2">
@@ -1544,8 +1533,8 @@ export default function AgentDashboard() {
                     value={propertyData.listingType}
                     onChange={(e) => {
                       const newListingType = e.target.value;
-                      setPropertyData(prev => ({ 
-                        ...prev, 
+                      setPropertyData(prev => ({
+                        ...prev,
                         listingType: newListingType,
                         // Clear documentType when switching to rent
                         documentType: newListingType === 'rent' ? '' : prev.documentType
@@ -1557,7 +1546,7 @@ export default function AgentDashboard() {
                     <option value="rent">Kiro (Rent)</option>
                   </select>
                 </div>
-                
+
                 {/* Document Type - Only show for sale properties */}
                 {propertyData.listingType === 'sale' && (
                   <div className="space-y-2">
@@ -1606,7 +1595,7 @@ export default function AgentDashboard() {
                     <p className="text-sm text-gray-500 mt-2">Enter length and width measurements (e.g., 20 × 20)</p>
                   </div>
                 )}
-                
+
                 <div className="space-y-2">
                   <label className="block text-sm font-semibold text-gray-800 mb-3">Price *</label>
                   <input
@@ -1617,7 +1606,7 @@ export default function AgentDashboard() {
                     placeholder="Kuqor Qiimaha"
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <label className="block text-sm font-semibold text-gray-800 mb-3">Location</label>
                   <div className="relative">
@@ -1633,7 +1622,7 @@ export default function AgentDashboard() {
                     />
                   </div>
                 </div>
-                
+
                 <div className="space-y-2">
                   <label className="block text-sm font-semibold text-gray-800 mb-3">District *</label>
                   <select
@@ -1664,7 +1653,7 @@ export default function AgentDashboard() {
                     <option value="Garasbaley">Garasbaley</option>
                   </select>
                 </div>
-                
+
                 {/* Qol and Suuli fields - Required for rent, Optional for sale */}
                 <div className="space-y-2">
                   <label className="block text-sm font-semibold text-gray-800 mb-3">
@@ -1678,7 +1667,7 @@ export default function AgentDashboard() {
                     placeholder="Number of bedrooms"
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <label className="block text-sm font-semibold text-gray-800 mb-3">
                     Suuli (Bathrooms) {propertyData.listingType === 'rent' ? '*' : '(Optional)'}
@@ -1692,9 +1681,9 @@ export default function AgentDashboard() {
                   />
                 </div>
               </div>
-              
+
               <div className="mt-8">
-                <label className="block text-sm font-semibold text-gray-800 mb-3">Description *</label>
+                <label className="block text-sm font-semibold text-gray-800 mb-3">Description (Optional)</label>
                 <textarea
                   value={propertyData.description}
                   onChange={(e) => setPropertyData(prev => ({ ...prev, description: e.target.value }))}
@@ -1703,7 +1692,7 @@ export default function AgentDashboard() {
                   placeholder="Enter property description"
                 />
               </div>
-              
+
               {/* Modern Image Upload Sections */}
               <div className="mt-10 space-y-8">
                 {/* Thumbnail Image Upload */}
@@ -1778,9 +1767,9 @@ export default function AgentDashboard() {
                             return (
                               <li key={index} className={`flex items-center space-x-2 ${isDuplicate ? 'text-red-600' : ''}`}>
                                 <span className={`w-1.5 h-1.5 rounded-full ${isDuplicate ? 'bg-red-500' : 'bg-emerald-500'}`}></span>
-                              <span>{file.name}</span>
+                                <span>{file.name}</span>
                                 {isDuplicate && <span className="text-red-600 text-xs">(Same as thumbnail - will be skipped)</span>}
-                            </li>
+                              </li>
                             )
                           })}
                         </ul>
@@ -1796,7 +1785,7 @@ export default function AgentDashboard() {
                   </div>
                 </div>
               </div>
-              
+
               {/* Modern Modal Buttons */}
               <div className="flex justify-end space-x-4 mt-12 pt-6 border-t border-gray-200">
                 <button
@@ -1848,7 +1837,7 @@ export default function AgentDashboard() {
               <h3 className="text-2xl font-bold text-gray-900 mb-6">
                 Edit Property
               </h3>
-              
+
               <div className="space-y-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Property Title *</label>
@@ -1860,9 +1849,9 @@ export default function AgentDashboard() {
                     placeholder="Enter property title"
                   />
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Description *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Description (Optional)</label>
                   <textarea
                     value={editData.description}
                     onChange={(e) => setEditData(prev => ({ ...prev, description: e.target.value }))}
@@ -1938,7 +1927,7 @@ export default function AgentDashboard() {
                   </div>
                 </div>
               </div>
-              
+
               <div className="flex justify-end space-x-4 mt-8">
                 <button
                   onClick={() => setShowEditModal(false)}
@@ -1949,11 +1938,10 @@ export default function AgentDashboard() {
                 <button
                   onClick={handleEditProperty}
                   disabled={uploadingImages}
-                  className={`px-6 py-3 rounded-xl transition-all duration-300 font-medium ${
-                    uploadingImages 
-                      ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
-                      : 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700'
-                  }`}
+                  className={`px-6 py-3 rounded-xl transition-all duration-300 font-medium ${uploadingImages
+                    ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                    : 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700'
+                    }`}
                 >
                   {uploadingImages ? (
                     <div className="flex items-center space-x-2">
@@ -1988,11 +1976,11 @@ export default function AgentDashboard() {
               <h3 className="text-2xl font-bold text-gray-900 mb-6">
                 Request Property Deletion
               </h3>
-              
+
               <p className="text-gray-600 mb-6">
                 This will immediately remove the property from public view and send it to admin for review. The property will be permanently deleted after admin confirmation.
               </p>
-              
+
               <div className="flex justify-end space-x-4">
                 <button
                   onClick={() => setShowDeleteModal(false)}
@@ -2007,6 +1995,41 @@ export default function AgentDashboard() {
                   Request Deletion
                 </button>
               </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      {/* Success Modal */}
+      <AnimatePresence>
+        {showSuccessModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4"
+            onClick={() => setShowSuccessModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              transition={{ type: "spring", damping: 20, stiffness: 300 }}
+              className="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl text-center"
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg className="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">Success!</h3>
+              <p className="text-gray-600 mb-6">Property uploaded successfully.</p>
+              <button
+                onClick={() => setShowSuccessModal(false)}
+                className="w-full py-3 px-6 bg-green-600 hover:bg-green-700 text-white rounded-xl font-semibold transition-colors shadow-lg hover:shadow-green-500/30"
+              >
+                Continue
+              </button>
             </motion.div>
           </motion.div>
         )}

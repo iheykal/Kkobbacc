@@ -7,14 +7,14 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import { useCallback } from 'react'
 import { incrementPropertyView } from '@/lib/viewIncrement'
-import { 
-  Bed, 
-  Bath, 
+import {
+  Bed,
+  Bath,
   MapPin,
-  Heart, 
-  Share2, 
-  Phone, 
-  Mail, 
+  Heart,
+  Share2,
+  Phone,
+  Mail,
   ArrowLeft,
   ArrowRight,
   Home,
@@ -43,7 +43,7 @@ function resolveAgentId(property: any): string | number | undefined {
     agent: property.agent,
     agentKeys: property.agent ? Object.keys(property.agent) : 'no agent object'
   });
-  
+
   // Try all possible ID fields in order of preference
   const possibleIds = [
     property.agentId, // Top-level agentId
@@ -54,7 +54,7 @@ function resolveAgentId(property: any): string | number | undefined {
     (property.agent as any)?.['user_id'], // agent.user_id
     (property.agent as any)?.['agent_id'] // agent.agent_id
   ];
-  
+
   // Find the first valid ID
   for (const id of possibleIds) {
     console.log('🔍 Checking possible ID:', id, 'type:', typeof id);
@@ -63,7 +63,7 @@ function resolveAgentId(property: any): string | number | undefined {
       return String(id); // Ensure it's a string
     }
   }
-  
+
   // If agentId is an object (populated reference), extract the ID
   if (property.agentId && typeof property.agentId === 'object' && property.agentId !== null) {
     const objectId = (property.agentId as any)._id || (property.agentId as any).id;
@@ -72,14 +72,14 @@ function resolveAgentId(property: any): string | number | undefined {
       return String(objectId);
     }
   }
-  
+
   // Special case: If we have agentId but no real user exists, use the agentId anyway
   // This handles cases where properties have agentId but the user was deleted
   if (property.agentId && typeof property.agentId === 'string' && property.agentId.length > 0) {
     console.log('✅ Found agent ID string (may not exist in users):', property.agentId);
     return String(property.agentId);
   }
-  
+
   // If agent is an object with nested ID fields
   if (property.agent && typeof property.agent === 'object') {
     // Check for nested ID fields (only if they exist)
@@ -89,7 +89,7 @@ function resolveAgentId(property: any): string | number | undefined {
       (property.agent as any).agentId,
       (property.agent as any).userId
     ];
-    
+
     for (const id of nestedIds) {
       if (id && (typeof id === 'string' || typeof id === 'number')) {
         console.log('✅ Found agent ID from nested object:', id);
@@ -97,17 +97,17 @@ function resolveAgentId(property: any): string | number | undefined {
       }
     }
   }
-  
+
   console.log('❌ No valid agent ID found');
   console.log('🔍 Final check - property.agentId:', property.agentId, 'type:', typeof property.agentId);
   console.log('🔍 Final check - property.agent:', property.agent);
-  
+
   // Last resort: if we have any agentId at all, use it
   if (property.agentId && String(property.agentId).length > 0) {
     console.log('✅ Using agentId as last resort:', property.agentId);
     return String(property.agentId);
   }
-  
+
   return undefined;
 }
 
@@ -152,7 +152,7 @@ interface PropertyDetailProps {
 export const PropertyDetail: React.FC<PropertyDetailProps> = ({ property, onClose, onPropertyClick }) => {
   const router = useRouter()
   const [selectedImage, setSelectedImage] = useState(0)
-  
+
   // Get all image URLs
   const allImageUrls = React.useMemo(() => {
     console.log('🔍 PropertyDetail: Getting image URLs for property:', {
@@ -166,19 +166,19 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ property, onClos
       hasImages: !!property.images,
       imagesArray: Array.isArray(property.images) ? property.images : 'not an array'
     });
-    
+
     const urls = getAllImageUrls(property);
     console.log('🔍 PropertyDetail: Resolved image URLs:', {
       urls,
       urlsLength: urls.length,
       urlsDetails: urls.map((url, index) => ({ index, url, type: typeof url }))
     });
-    
+
     return urls;
   }, [property]);
   const [isFavorite, setIsFavorite] = useState(false)
 
-  // Preload images with priority hints for faster loading
+  // Preload only the first image with high priority for LCP
   useEffect(() => {
     if (allImageUrls.length === 0) return;
 
@@ -191,25 +191,7 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ property, onClos
       link.setAttribute('fetchpriority', 'high');
       document.head.appendChild(link);
     }
-
-    // Preload remaining images in parallel with lower priority
-    allImageUrls.slice(1).forEach((url: string, index: number) => {
-      // Use requestIdleCallback for non-critical images
-      if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
-        requestIdleCallback(() => {
-          const img = new Image();
-          img.fetchPriority = 'low';
-          img.src = url;
-        }, { timeout: 2000 });
-      } else {
-        // Fallback for browsers without requestIdleCallback
-        setTimeout(() => {
-          const img = new Image();
-          img.fetchPriority = 'low';
-          img.src = url;
-        }, index * 50); // Stagger slightly to avoid overwhelming
-      }
-    });
+    // Removed aggressive preloading of all other images to save bandwidth
   }, [allImageUrls]);
 
   // Increment view count when property detail is opened
@@ -239,7 +221,7 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ property, onClos
     }
 
     window.addEventListener('closePropertyDetail', handleCloseEvent)
-    
+
     return () => {
       window.removeEventListener('closePropertyDetail', handleCloseEvent)
     }
@@ -258,14 +240,14 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ property, onClos
       e.preventDefault();
       e.stopPropagation();
     }
-    
+
     console.log('🔍 PropertyDetail: Agent card clicked:', {
       propertyId: property.propertyId || property._id,
       agentId: property.agentId,
       agent: property.agent,
       agentName: property.agent?.name
     });
-    
+
     // Navigate directly using window.location.href
     const agentId = property.agentId || property.agent?.id;
     if (agentId && typeof window !== 'undefined') {
@@ -299,7 +281,7 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ property, onClos
         <div className="flex-1 py-4 sm:py-8 transition-all duration-300 ease-out overflow-hidden">
           <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 w-full">
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 sm:gap-6 lg:gap-8">
-              
+
               {/* Left Side - Flexible Property Images */}
               <div className="space-y-4 sm:space-y-6 lg:col-span-2 w-full">
                 {allImageUrls.length > 0 ? (
@@ -354,9 +336,9 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ property, onClos
                     </div>
                   </div>
                   <div className="flex items-center space-x-2 text-slate-600">
-                    <img 
-                      src="/icons/adress.png" 
-                      alt="Location" 
+                    <img
+                      src="/icons/adress.png"
+                      alt="Location"
                       className="w-4 h-4 sm:w-5 sm:h-5 object-contain flex-shrink-0"
                     />
                     <span className="text-sm sm:text-base truncate">{property.location}</span>
@@ -367,7 +349,7 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ property, onClos
                       <span className="text-sm sm:text-base font-medium truncate">{property.district}</span>
                     </div>
                   )}
-                  <div 
+                  <div
                     className="text-2xl sm:text-3xl lg:text-4xl font-bold text-green-600"
                     dangerouslySetInnerHTML={{ __html: formatPrice(property.price) }}
                   />
@@ -386,9 +368,9 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ property, onClos
                     <>
                       <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl">
                         <div className="w-16 h-16 md:w-12 md:h-12 flex items-center justify-center mx-auto mb-2">
-                          <img 
-                            src="/icons/sharci.gif" 
-                            alt="Document" 
+                          <img
+                            src="/icons/sharci.gif"
+                            alt="Document"
                             className="w-12 h-12 md:w-8 md:h-8 object-contain"
                           />
                         </div>
@@ -397,9 +379,9 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ property, onClos
                       </div>
                       <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl">
                         <div className="w-20 h-20 md:w-14 md:h-14 flex items-center justify-center mx-auto mb-2">
-                          <img 
-                            src="/icons/ruler2.gif" 
-                            alt="Measurement" 
+                          <img
+                            src="/icons/ruler2.gif"
+                            alt="Measurement"
                             className="w-16 h-16 md:w-10 md:h-10 object-contain"
                           />
                         </div>
@@ -413,9 +395,9 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ property, onClos
                       {property.beds > 0 && (
                         <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl">
                           <div className="w-16 h-16 md:w-12 md:h-12 flex items-center justify-center mx-auto mb-2">
-                            <img 
-                              src="/icons/bed.png" 
-                              alt="Bed" 
+                            <img
+                              src="/icons/bed.png"
+                              alt="Bed"
                               className="w-10 h-10 md:w-7 md:h-7 object-contain"
                             />
                           </div>
@@ -426,11 +408,11 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ property, onClos
                       {property.baths > 0 && (
                         <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl">
                           <div className="w-20 h-20 md:w-14 md:h-14 flex items-center justify-center mx-auto mb-2">
-                            <video 
-                              src="/icons/shower1.mp4" 
-                              autoPlay 
-                              loop 
-                              muted 
+                            <video
+                              src="/icons/shower1.mp4"
+                              autoPlay
+                              loop
+                              muted
                               playsInline
                               className="w-12 h-12 md:w-8 md:h-8 object-contain mix-blend-multiply"
                               style={{ filter: 'contrast(1.2) brightness(1.1)' }}
@@ -442,16 +424,16 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ property, onClos
                       )}
                     </>
                   )}
-                  
+
                   {/* For Sale properties: Show QOL and Suuli only if values > 0 */}
                   {property.status === 'For Sale' && (
                     <>
                       {property.beds > 0 && (
                         <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl">
                           <div className="w-16 h-16 md:w-12 md:h-12 flex items-center justify-center mx-auto mb-2">
-                            <img 
-                              src="/icons/bed.png" 
-                              alt="Bed" 
+                            <img
+                              src="/icons/bed.png"
+                              alt="Bed"
                               className="w-10 h-10 md:w-7 md:h-7 object-contain"
                             />
                           </div>
@@ -462,11 +444,11 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ property, onClos
                       {property.baths > 0 && (
                         <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl">
                           <div className="w-20 h-20 md:w-14 md:h-14 flex items-center justify-center mx-auto mb-2">
-                            <video 
-                              src="/icons/shower1.mp4" 
-                              autoPlay 
-                              loop 
-                              muted 
+                            <video
+                              src="/icons/shower1.mp4"
+                              autoPlay
+                              loop
+                              muted
                               playsInline
                               className="w-12 h-12 md:w-8 md:h-8 object-contain mix-blend-multiply"
                               style={{ filter: 'contrast(1.2) brightness(1.1)' }}
@@ -489,7 +471,7 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ property, onClos
                 )}
 
                 {/* Agent Card */}
-                <motion.div 
+                <motion.div
                   className="bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 rounded-2xl border border-slate-200 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden"
                   animate={{
                     boxShadow: [
@@ -509,7 +491,7 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ property, onClos
                   <div className="bg-gradient-to-r from-blue-500 to-indigo-600 px-6 py-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
-                        <motion.div 
+                        <motion.div
                           className="flex items-center justify-center"
                           animate={{
                             rotate: [0, -5, 5, -5, 0],
@@ -522,9 +504,9 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ property, onClos
                             repeatDelay: 4
                           }}
                         >
-                          <img 
-                            src="/icons/contactgif.gif" 
-                            alt="Contact" 
+                          <img
+                            src="/icons/header.webp"
+                            alt="Contact"
                             className="w-7 h-7 md:w-5 md:h-5 object-contain"
                           />
                         </motion.div>
@@ -546,11 +528,11 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ property, onClos
                       </div>
                     </div>
                   </div>
-                  
+
                   {/* Agent Content */}
                   <div className="p-4 sm:p-6">
                     <div className="flex items-center space-x-4 mb-6">
-                      <div 
+                      <div
                         className="relative group cursor-pointer"
                         onClick={async (e) => {
                           e.preventDefault();
@@ -569,20 +551,20 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ property, onClos
                           if (!agentId) {
                             agentId = property.agent?.id;
                           }
-                          
+
                           // Ensure it's a string and not [object Object]
                           if (agentId && typeof agentId !== 'string') {
                             agentId = typeof agentId === 'object' && agentId !== null
                               ? (agentId as any)?._id || (agentId as any)?.id || String(agentId)
                               : String(agentId);
                           }
-                          
+
                           if (!agentId || agentId === '[object Object]' || agentId.includes('object Object')) {
                             console.error('❌ Invalid agentId:', agentId);
                             alert('Invalid agent information. Please try again.');
                             return;
                           }
-                          
+
                           // Get agent slug for URL-friendly navigation
                           try {
                             const agentName = property.agent?.name || '';
@@ -613,7 +595,7 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ property, onClos
                       >
                         <div className="relative">
                           {/* Decorative outer circle */}
-                          <motion.div 
+                          <motion.div
                             className="absolute -inset-2 rounded-full bg-white opacity-70 blur-sm"
                             animate={{
                               rotate: 360,
@@ -632,7 +614,7 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ property, onClos
                               }
                             }}
                           ></motion.div>
-                          
+
                           {/* Main profile circle */}
                           <div className="relative w-20 h-20 rounded-full p-1 transition-all duration-300 bg-white">
                             <img
@@ -651,11 +633,11 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ property, onClos
                           <ExternalLink className="w-3 h-3 md:w-2.5 md:h-2.5" />
                         </div>
                       </div>
-                      
+
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-2 flex-nowrap">
                           <div className="flex items-center gap-1 flex-nowrap min-w-0">
-                            <h3 
+                            <h3
                               className="text-xl font-bold text-slate-800 transition-colors cursor-pointer hover:text-blue-600 whitespace-nowrap"
                               onClick={(e) => {
                                 e.preventDefault();
@@ -673,17 +655,17 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ property, onClos
                             >
                               {capitalizeName(property.agent?.name || 'Agent')}
                             </h3>
-                            {(property.agent?.name?.toLowerCase().includes('kobac real estate') || 
+                            {(property.agent?.name?.toLowerCase().includes('kobac real estate') ||
                               property.agent?.name?.toLowerCase().includes('kobac real')) && (
-                              <div className="flex items-center justify-center w-4 h-4 rounded-full shadow-lg border flex-shrink-0" style={{backgroundColor: '#1877F2', borderColor: '#1877F2'}}>
-                                <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                </svg>
-                              </div>
-                            )}
+                                <div className="flex items-center justify-center w-4 h-4 rounded-full shadow-lg border flex-shrink-0" style={{ backgroundColor: '#1877F2', borderColor: '#1877F2' }}>
+                                  <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                  </svg>
+                                </div>
+                              )}
                           </div>
                         </div>
-                        
+
                         <div className="mb-3">
                           <span className="text-sm text-slate-500 font-medium">
                             Mogadishu - Somalia
@@ -692,10 +674,10 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ property, onClos
 
                       </div>
                     </div>
-                    
+
                     {/* Contact Buttons */}
                     <div className="space-y-3">
-                      <button 
+                      <button
                         onClick={() => {
                           if (property.agent?.phone) {
                             // Clean the phone number for tel: link and format with 061
@@ -726,16 +708,16 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ property, onClos
                           className="flex items-center justify-center bg-transparent"
                           style={{ backgroundColor: 'transparent' }}
                         >
-                          <img 
-                            src="/icons/contactgif.gif" 
-                            alt="Contact" 
+                          <img
+                            src="/icons/header.webp"
+                            alt="Contact"
                             className="w-8 h-8 md:w-6 md:h-6 object-contain group-hover:scale-110 transition-transform"
                           />
                         </motion.div>
                         <span>{property.agent?.phone ? formatPhoneNumber(property.agent.phone) : 'Contact Agent'}</span>
                       </button>
-                      
-                      <button 
+
+                      <button
                         className="w-full border-2 py-3 px-4 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center space-x-2 group bg-white border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300 cursor-pointer"
                         onClick={(e) => {
                           e.preventDefault();
@@ -749,15 +731,15 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ property, onClos
                         }}
                         title="View agent profile"
                       >
-                        <img 
-                          src="/icons/profile.gif" 
-                          alt="Profile" 
+                        <img
+                          src="/icons/profile.gif"
+                          alt="Profile"
                           className="w-9 h-9 md:w-7 md:h-7 object-contain group-hover:scale-110 transition-transform"
                         />
                         <span>{`Ciwaanka - ${capitalizeName(property.agent?.name || 'Agent').split(' ')[0]}`}</span>
                       </button>
                     </div>
-                    
+
                     {/* Additional Info */}
                     <div className="mt-4 pt-4 border-t border-green-100">
                       <div className="flex items-center justify-center space-x-4 text-xs text-slate-500">
@@ -848,7 +830,7 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ property, onClos
         {property.district && (
           <>
             {console.log('🔍 PropertyDetail: Rendering recommendations for district:', property.district)}
-            <PropertyRecommendations 
+            <PropertyRecommendations
               currentProperty={{
                 _id: property._id,
                 propertyId: property.propertyId,
@@ -866,8 +848,8 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ property, onClos
                     // Trigger the property click event for the recommended property
                     // This will be handled by the parent component
                     if (typeof window !== 'undefined') {
-                      const event = new CustomEvent('propertyClick', { 
-                        detail: recommendedProperty 
+                      const event = new CustomEvent('propertyClick', {
+                        detail: recommendedProperty
                       })
                       window.dispatchEvent(event)
                     }

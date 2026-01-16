@@ -1,21 +1,22 @@
 {
-  "generated": "2025-09-15T21:52:04.048Z",
-  "totalFiles": 14,
+  "generated": "2026-01-16T12:59:01.969Z",
+  "totalFiles": 15,
   "totalSavings": {
-    "bytes": 18500660,
-    "percentage": "85.6",
-    "originalSize": 21613618,
-    "webpSize": 3112958
+    "bytes": 13389487,
+    "percentage": "85.7",
+    "originalSize": 15621041,
+    "webpSize": 2231554
   },
   "mapping": {
+    "public\\icons\\adress.png": "public\\icons\\adress.webp",
     "public\\icons\\bed.png": "public\\icons\\bed.webp",
-    "public\\icons\\bg-1.png": "public\\icons\\bg-1.webp",
     "public\\icons\\duwaq.jpg": "public\\icons\\duwaq.webp",
     "public\\icons\\haanta-dheer.jpg": "public\\icons\\haanta-dheer.webp",
     "public\\icons\\happy-family.png": "public\\icons\\happy-family.webp",
     "public\\icons\\header.png": "public\\icons\\header.webp",
     "public\\icons\\kobac.png": "public\\icons\\kobac.webp",
     "public\\icons\\line.png": "public\\icons\\line.webp",
+    "public\\icons\\logo.png": "public\\icons\\logo.webp",
     "public\\icons\\shower.png": "public\\icons\\shower.webp",
     "public\\icons\\somali-flag.jpg": "public\\icons\\somali-flag.webp",
     "public\\icons\\uze.png": "public\\icons\\uze.webp",

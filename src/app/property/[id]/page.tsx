@@ -1,61 +1,59 @@
-'use client'
+import { redirect } from 'next/navigation';
+import connectDB from '@/lib/mongodb';
+import Property from '@/models/Property';
+import { generateSEOUrl } from '@/lib/seoUrlUtils';
 
+interface PageProps {
+  params: {
+    id: string;
+  };
+}
 
 export const dynamic = 'force-dynamic';
-import { useState, useEffect } from 'react'
-import { useParams, useRouter } from 'next/navigation'
-import { PropertyLoadingAnimation } from '@/components/ui/PropertyLoadingAnimation'
-import { useNavigation } from '@/contexts/NavigationContext'
 
-export default function PropertyPage() {
-  const params = useParams()
-  const router = useRouter()
-  const { goBack } = useNavigation()
-  const [loading, setLoading] = useState(true)
+export default async function PropertyPage({ params }: PageProps) {
+  const propertyId = params.id;
 
-  const propertyId = params.id
-
-  useEffect(() => {
-    const redirectToNewUrl = async () => {
-      try {
-        setLoading(true)
-
-        // Fetch property to determine correct URL
-        const response = await fetch(`/api/properties/${propertyId}`)
-
-        if (!response.ok) {
-          throw new Error('Property not found')
-        }
-
-        const data = await response.json()
-
-        if (data.success && data.data) {
-          const property = data.data
-          // Determine type based on status: "Kiro" for rent, "Iib" for sale
-          const propertyType = property.status === 'For Rent' ? 'kiro' : 'iib'
-          // Redirect to new URL format
-          router.replace(`/${propertyType}/${propertyId}`)
-        } else {
-          throw new Error('Property not found')
-        }
-      } catch (error) {
-        console.error('Error fetching property:', error)
-        // Redirect to home page if property not found
-        router.replace('/')
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    if (propertyId) {
-      redirectToNewUrl()
-    }
-  }, [propertyId, router])
-
-
-  if (loading) {
-    return <PropertyLoadingAnimation propertyType="iib" />
+  if (!propertyId) {
+    redirect('/');
   }
 
-  return null
+  try {
+    await connectDB();
+
+    // Find property by _id or propertyId
+    let property = null;
+
+    if (propertyId.match(/^[0-9a-fA-F]{24}$/)) {
+      property = await Property.findById(propertyId).select('status listingType propertyType district location propertyId title').lean();
+    }
+
+    // If not found by _id, try propertyId (numeric)
+    if (!property && !isNaN(Number(propertyId))) {
+      property = await Property.findOne({ propertyId: Number(propertyId) }).select('status listingType propertyType district location propertyId title').lean();
+    }
+
+    if (property) {
+      // Generate full SEO URL directly on server
+      const { seoUrl } = generateSEOUrl({
+        propertyType: (property as any).propertyType,
+        status: (property as any).status,
+        listingType: (property as any).listingType,
+        district: (property as any).district,
+        location: (property as any).location,
+        propertyId: (property as any).propertyId || (property as any)._id,
+        _id: (property as any)._id
+      });
+
+      // Redirect immediately to the final destination
+      redirect(seoUrl);
+    } else {
+      // Not found - redirect to home page
+      redirect('/');
+    }
+
+  } catch (error) {
+    console.error('Error in property redirect:', error);
+    redirect('/');
+  }
 }

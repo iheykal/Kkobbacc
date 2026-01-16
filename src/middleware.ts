@@ -14,8 +14,8 @@ function addSecurityHeaders(response: NextResponse): NextResponse {
     'Content-Security-Policy',
     "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' https://api.dicebear.com https://www.google-analytics.com; frame-src 'self';"
   )
-  response.headers.set('Cross-Origin-Opener-Policy', 'same-origin-allow-popups')
-  response.headers.set('Cross-Origin-Embedder-Policy', 'require-corp')
+  // response.headers.set('Cross-Origin-Opener-Policy', 'same-origin-allow-popups')
+  // response.headers.set('Cross-Origin-Embedder-Policy', 'require-corp')
   return response
 }
 
@@ -27,13 +27,13 @@ export function middleware(request: NextRequest) {
   // Define protected routes that require authentication
   const protectedRoutes = ['/admin', '/dashboard', '/profile']
   const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route))
-  
+
   // Special handling: /agent is protected (dashboard), but /agent/[id] is public (agent profile)
   const isAgentDashboard = pathname === '/agent'
   const isAgentProfile = pathname.startsWith('/agent/') && pathname !== '/agent'
 
   // Check if this is a public route
-  const isPublicRoute = 
+  const isPublicRoute =
     pathname.startsWith('/api/') ||
     pathname.startsWith('/_next/') ||
     pathname.startsWith('/favicon.ico') ||
@@ -45,6 +45,7 @@ export function middleware(request: NextRequest) {
     pathname === '/agents' ||
     pathname === '/login' ||
     pathname === '/signup' ||
+    pathname === '/otp-login' ||
     pathname === '/register-agent' ||
     pathname.startsWith('/debug') ||
     pathname.startsWith('/test') ||
@@ -69,10 +70,10 @@ export function middleware(request: NextRequest) {
   if (!raw) {
     raw = request.cookies.get('kobac_session_alt')?.value
   }
-  
+
   console.log('🔍 Middleware - Session cookie exists:', !!raw)
   console.log('🔍 Middleware - Available cookies:', request.cookies.getAll().map(c => c.name))
-  
+
   if (!raw) {
     // No session - redirect to home page
     console.log('❌ Middleware - No session cookie found, redirecting to home')
@@ -83,12 +84,12 @@ export function middleware(request: NextRequest) {
   }
 
   try {
-    const session = JSON.parse(decodeURIComponent(raw)) as { 
-      userId?: string; 
+    const session = JSON.parse(decodeURIComponent(raw)) as {
+      userId?: string;
       role?: string;
       sessionId?: string;
     }
-    
+
     if (!session?.userId || !session?.role) {
       // Invalid session - redirect to home page
       const url = request.nextUrl.clone()
@@ -99,11 +100,11 @@ export function middleware(request: NextRequest) {
 
     const role = session.role
     console.log('🔍 Middleware - User role:', role, 'Requested path:', pathname)
-    
+
     // Check if user can access the requested route (normalizeRole is called inside canAccessRoute)
     const canAccess = canAccessRoute(role as Role, pathname)
     console.log('🔍 Middleware - Can access route:', canAccess)
-    
+
     if (!canAccess) {
       // User doesn't have permission - redirect to their default route
       const defaultRoute = getDefaultRoute(role as any)
