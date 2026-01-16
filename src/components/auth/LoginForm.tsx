@@ -24,7 +24,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToSignUp, onClose 
   const [showPassword, setShowPassword] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
   const [googleError, setGoogleError] = useState('')
-  const { login, checkAuth } = useUser()
+  const { login, validateSession } = useUser()
   const router = useRouter() // Use router if needed, though onClose handles modal
 
   const handleInputChange = (field: string, value: string) => {
@@ -47,7 +47,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToSignUp, onClose 
 
       if (data.success) {
         console.log('Google login valid, checking auth...');
-        await checkAuth();
+        await validateSession();
         onClose(); // Close modal on success
         // Optional: Redirect if needed, but usually closing modal is enough
         // router.push('/dashboard'); 

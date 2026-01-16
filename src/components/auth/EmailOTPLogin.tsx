@@ -16,7 +16,7 @@ export default function EmailOTPLogin() {
     const [success, setSuccess] = useState('');
     const [countdown, setCountdown] = useState(0);
     const router = useRouter();
-    const { checkAuth } = useUser();
+    const { validateSession } = useUser();
 
     // Countdown timer
     React.useEffect(() => {
@@ -42,7 +42,7 @@ export default function EmailOTPLogin() {
 
             if (data.success) {
                 console.log('Google login valid, checking auth...');
-                await checkAuth(); // Update global context
+                await validateSession(); // Update global context
                 router.push('/dashboard');
             } else {
                 setError(data.error || 'Google sign-in failed');
@@ -104,7 +104,7 @@ export default function EmailOTPLogin() {
 
             if (data.success) {
                 setSuccess('Success! Redirecting...');
-                await checkAuth();
+                await validateSession(); // Update global context
                 router.push('/dashboard');
             } else {
                 setError(data.error || 'Invalid code');
