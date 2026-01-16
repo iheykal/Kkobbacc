@@ -44,22 +44,23 @@ async function connectDB() {
 
     const opts = {
       bufferCommands: false,
-      // Optimized connection pool settings for Render
-      maxPoolSize: 5, // Further reduced for Render free tier
-      minPoolSize: 1, // Minimal pool size
-      serverSelectionTimeoutMS: 30000, // Increased timeout
-      socketTimeoutMS: 60000, // Increased socket timeout
-      connectTimeoutMS: 30000, // Increased connection timeout
-      family: 4, // Use IPv4 only
-      maxIdleTimeMS: 300000, // 5 minutes idle time
-      heartbeatFrequencyMS: 10000, // Standard heartbeat
+      // Optimized connection pool settings for Render (Serverless)
+      // Setting maxPoolSize to 1 is critical for serverless functions to avoid hitting DB connection limits
+      maxPoolSize: 1,
+      minPoolSize: 0, // Allow pool to scale down to 0
+      serverSelectionTimeoutMS: 60000, // Further increased to 60s
+      socketTimeoutMS: 60000,
+      connectTimeoutMS: 60000, // Increased to 60s
+      family: 4,
+      maxIdleTimeMS: 60000, // Reduced idle time to free connections faster
+      heartbeatFrequencyMS: 10000,
       retryWrites: true,
       retryReads: true,
-      compressors: 'zlib', // Enable compression
-      zlibCompressionLevel: 6 as any, // Fast compression
+      compressors: 'zlib',
+      zlibCompressionLevel: 6 as any,
       // Connection resilience settings
-      maxConnecting: 2, // Minimal connecting
-      waitQueueTimeoutMS: 30000, // Increased wait timeout
+      maxConnecting: 1, // Only 1 connection at a time
+      waitQueueTimeoutMS: 60000, // Increased wait timeout
       // Read preferences
       readPreference: 'primary' as any, // Use primary for stability
       // Additional stability settings
