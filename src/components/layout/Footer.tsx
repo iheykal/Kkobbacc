@@ -19,9 +19,9 @@ export const Footer: React.FC = () => {
               title="Click to go to homepage"
             >
               <div className="w-12 h-12 flex items-center justify-center">
-                <HybridImage 
-                  src="/icons/header.png" 
-                  alt="Kobac Logo" 
+                <HybridImage
+                  src="/icons/header.png"
+                  alt="Kobac Logo"
                   width={48}
                   height={48}
                   className="w-full h-full object-contain"
@@ -29,15 +29,15 @@ export const Footer: React.FC = () => {
               </div>
               <div>
                 <h3 className="text-xl font-serif font-bold text-white">
-                  Kobac Real Estate
+                  Kobac Property
                 </h3>
                 <p className="text-sm text-primary-200">
-                  Premium Real Estate
+                  Premium Property
                 </p>
               </div>
             </Link>
             <p className="text-primary-200 text-sm leading-relaxed">
-              Helping you make the right property choice with our premium real estate services.
+              Helping you make the right property choice with our premium property services.
             </p>
           </div>
 
@@ -46,24 +46,24 @@ export const Footer: React.FC = () => {
             <h4 className="text-lg font-semibold text-white">Quick Links</h4>
             <ul className="space-y-2">
               <li>
-                <Link 
-                  href="/properties" 
+                <Link
+                  href="/properties"
                   className="text-primary-200 hover:text-white transition-colors duration-200 text-sm"
                 >
                   Properties
                 </Link>
               </li>
               <li>
-                <Link 
-                  href="/agents" 
+                <Link
+                  href="/agents"
                   className="text-primary-200 hover:text-white transition-colors duration-200 text-sm"
                 >
                   Agents
                 </Link>
               </li>
               <li>
-                <Link 
-                  href="/about" 
+                <Link
+                  href="/about"
                   className="text-primary-200 hover:text-white transition-colors duration-200 text-sm"
                 >
                   About Us
@@ -86,7 +86,7 @@ export const Footer: React.FC = () => {
                 <span className="text-primary-200 text-sm">Property Management</span>
               </li>
               <li>
-                <span className="text-primary-200 text-sm">Real Estate Consulting</span>
+                <span className="text-primary-200 text-sm">Property Consulting</span>
               </li>
             </ul>
           </div>
@@ -115,17 +115,17 @@ export const Footer: React.FC = () => {
         <div className="border-t border-primary-700 mt-8 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <p className="text-primary-200 text-sm">
-              © {new Date().getFullYear()} Kobac Real Estate. All rights reserved.
+              © {new Date().getFullYear()} Kobac Property. All rights reserved.
             </p>
             <div className="flex space-x-6">
-              <Link 
-                href="/privacy" 
+              <Link
+                href="/privacy"
                 className="text-primary-200 hover:text-white transition-colors duration-200 text-sm"
               >
                 Privacy Policy
               </Link>
-              <Link 
-                href="/terms" 
+              <Link
+                href="/terms"
                 className="text-primary-200 hover:text-white transition-colors duration-200 text-sm"
               >
                 Terms of Service

@@ -25,13 +25,13 @@ interface Agent {
 
 // Ultimate superadmin protection constants
 const ULTIMATE_SUPERADMIN_PHONE = '0610251014'
-const ULTIMATE_SUPERADMIN_NAME = 'Kobac Real Estate'
+const ULTIMATE_SUPERADMIN_NAME = 'Kobac Property'
 
 // Helper function to check if user is ultimate superadmin
 const isUltimateSuperadmin = (agent: Agent) => {
-  return agent.phone === ULTIMATE_SUPERADMIN_PHONE || 
-         agent.fullName === ULTIMATE_SUPERADMIN_NAME ||
-         agent.fullName.toLowerCase().includes('kobac')
+  return agent.phone === ULTIMATE_SUPERADMIN_PHONE ||
+    agent.fullName === ULTIMATE_SUPERADMIN_NAME ||
+    agent.fullName.toLowerCase().includes('kobac')
 }
 
 export default function SuperAdminAgentsPage() {
@@ -53,7 +53,7 @@ export default function SuperAdminAgentsPage() {
         credentials: 'include'
       })
       const result = await response.json()
-      
+
       if (response.ok) {
         setAgents(result.data || [])
       } else {
@@ -69,57 +69,57 @@ export default function SuperAdminAgentsPage() {
   const handleAvatarUpdate = async (agentId: string, file: File) => {
     try {
       setUploading(agentId)
-      
+
       console.log('📤 Starting avatar upload for agent:', agentId);
       console.log('📁 File details:', {
         name: file.name,
         size: file.size,
         type: file.type
       });
-      
+
       const formData = new FormData()
       formData.append('avatar', file)
-      
+
       const response = await fetch(`/api/admin/agents/${agentId}/avatar`, {
         method: 'PUT',
         credentials: 'include',
         body: formData,
       })
-      
+
       console.log('📥 Upload response status:', response.status);
-      
+
       const result = await response.json()
       console.log('📥 Upload response data:', result);
-      
+
       if (response.ok) {
         console.log('✅ Avatar upload successful!');
         console.log('📊 Upload info:', result.uploadInfo);
         console.log('👤 Updated agent data:', result.data);
-        
+
         // Update the agent in the list
         setAgents(prev => {
-          const updated = prev.map(agent => 
-          agent._id === agentId 
-            ? { ...agent, profile: { ...agent.profile, avatar: result.data.profile.avatar } }
-            : agent
+          const updated = prev.map(agent =>
+            agent._id === agentId
+              ? { ...agent, profile: { ...agent.profile, avatar: result.data.profile.avatar } }
+              : agent
           );
-          
+
           const updatedAgent = updated.find(a => a._id === agentId);
           console.log('🔄 Updated agent in list:', {
             id: updatedAgent?._id,
             name: updatedAgent?.fullName,
             avatar: updatedAgent?.profile?.avatar,
-            avatarType: updatedAgent?.profile?.avatar ? 
-              (updatedAgent.profile.avatar.includes('r2.dev') ? 'R2' : 
-               updatedAgent.profile.avatar.includes('unsplash') ? 'Fallback' : 'Local') : 'None'
+            avatarType: updatedAgent?.profile?.avatar ?
+              (updatedAgent.profile.avatar.includes('r2.dev') ? 'R2' :
+                updatedAgent.profile.avatar.includes('unsplash') ? 'Fallback' : 'Local') : 'None'
           });
-          
+
           return updated;
         });
-        
+
         const uploadMethod = result.uploadInfo?.method || 'Unknown';
         const isR2 = result.uploadInfo?.isR2 || false;
-        
+
         if (isR2) {
           alert('Agent avatar updated successfully and saved to Cloudflare R2!');
         } else if (uploadMethod === 'Fallback') {
@@ -173,7 +173,7 @@ export default function SuperAdminAgentsPage() {
           <p className="text-xl text-purple-200 max-w-2xl mx-auto mb-8">
             Manage agents and their profile images
           </p>
-          
+
           {/* Register New Agent Button */}
           <motion.button
             onClick={() => router.push('/register-agent')}
@@ -181,7 +181,7 @@ export default function SuperAdminAgentsPage() {
           >
             👤 Register New Agent (Auto Cloudflare R2)
           </motion.button>
-          
+
           {/* Test Authentication Button */}
           <motion.button
             onClick={async () => {
@@ -195,7 +195,7 @@ export default function SuperAdminAgentsPage() {
                 console.log('🔐 Auth result.data:', result.data);
                 console.log('🔐 Auth result.user:', result.user);
                 console.log('🔐 Response status:', response.status);
-                
+
                 if (response.ok && result.user) {
                   alert(`✅ Authenticated as: ${result.user.fullName} (${result.user.role})`);
                 } else if (response.ok && result.data) {
@@ -212,18 +212,18 @@ export default function SuperAdminAgentsPage() {
           >
             🔐 Test Authentication
           </motion.button>
-          
+
           {/* Test Restore Button */}
           <motion.button
             onClick={async () => {
               try {
                 console.log('🧪 Testing restore functionality...');
-                                 const response = await fetch('/api/admin/test-restore', {
-                   credentials: 'include'
-                 });
+                const response = await fetch('/api/admin/test-restore', {
+                  credentials: 'include'
+                });
                 const result = await response.json();
                 console.log('🧪 Test result:', result);
-                
+
                 if (response.ok) {
                   alert(`✅ Test successful!\n\nAuthenticated: ${result.data.authenticated}\nRole: ${result.data.userRole}\nAgents found: ${result.data.totalAgents}`);
                 } else {
@@ -248,11 +248,11 @@ export default function SuperAdminAgentsPage() {
                   credentials: 'include'
                 });
                 const result = await response.json();
-                
+
                 if (response.ok && result.data) {
                   const agents = result.data;
                   let debugInfo = `Found ${agents.length} agents:\n\n`;
-                  
+
                   agents.forEach((agent: any, index: number) => {
                     const avatarUrl = agent.profile?.avatar || 'No avatar';
                     const isCloudflare = avatarUrl.includes('r2.dev') || avatarUrl.includes('cloudflarestorage.com');
@@ -260,7 +260,7 @@ export default function SuperAdminAgentsPage() {
                     debugInfo += `   Avatar: ${avatarUrl}\n`;
                     debugInfo += `   Cloudflare: ${isCloudflare ? '✅ Yes' : '❌ No'}\n\n`;
                   });
-                  
+
                   alert(debugInfo);
                 } else {
                   alert(`❌ Failed to fetch agents: ${result.error}`);
@@ -284,7 +284,7 @@ export default function SuperAdminAgentsPage() {
                   credentials: 'include'
                 });
                 const result = await response.json();
-                
+
                 if (response.ok) {
                   alert(`✅ R2 Connection Test Successful!\n\n${JSON.stringify(result, null, 2)}`);
                 } else {
@@ -300,202 +300,202 @@ export default function SuperAdminAgentsPage() {
             🧪 Test R2 Connection
           </motion.button>
 
-                       {/* Test Local Images Button */}
-             <motion.button
-               onClick={async () => {
-                 try {
-                   console.log('🧪 Testing local images...');
-                   const response = await fetch('/api/admin/test-local-images', {
-                     credentials: 'include'
-                   });
-                   const result = await response.json();
+          {/* Test Local Images Button */}
+          <motion.button
+            onClick={async () => {
+              try {
+                console.log('🧪 Testing local images...');
+                const response = await fetch('/api/admin/test-local-images', {
+                  credentials: 'include'
+                });
+                const result = await response.json();
 
-                   if (response.ok) {
-                     let message = `Local Image Test Results:\n\n`;
-                     result.data.results.forEach((agent: any) => {
-                       message += `${agent.agentName}:\n`;
-                       message += `  Status: ${agent.status}\n`;
-                       if (agent.status === 'accessible') {
-                         message += `  Size: ${agent.imageSize} bytes\n`;
-                       } else if (agent.error) {
-                         message += `  Error: ${agent.error}\n`;
-                       }
-                       message += `  URL: ${agent.imageUrl}\n\n`;
-                     });
-                     alert(message);
-                   } else {
-                     alert(`❌ Local image test failed: ${result.error}`);
-                   }
-                 } catch (error) {
-                   console.error('❌ Local image test error:', error);
-                   alert(`❌ Local image test failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
-                 }
-               }}
-               className="bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white px-4 py-2 rounded-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-xl mb-4"
-             >
-               🧪 Test Local Images
-             </motion.button>
+                if (response.ok) {
+                  let message = `Local Image Test Results:\n\n`;
+                  result.data.results.forEach((agent: any) => {
+                    message += `${agent.agentName}:\n`;
+                    message += `  Status: ${agent.status}\n`;
+                    if (agent.status === 'accessible') {
+                      message += `  Size: ${agent.imageSize} bytes\n`;
+                    } else if (agent.error) {
+                      message += `  Error: ${agent.error}\n`;
+                    }
+                    message += `  URL: ${agent.imageUrl}\n\n`;
+                  });
+                  alert(message);
+                } else {
+                  alert(`❌ Local image test failed: ${result.error}`);
+                }
+              } catch (error) {
+                console.error('❌ Local image test error:', error);
+                alert(`❌ Local image test failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+              }
+            }}
+            className="bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white px-4 py-2 rounded-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-xl mb-4"
+          >
+            🧪 Test Local Images
+          </motion.button>
 
-             {/* Test R2 Upload Button */}
-             <motion.button
-               onClick={async () => {
-                 try {
-                   console.log('🧪 Testing R2 upload...');
-                   const response = await fetch('/api/test-r2-upload', {
-                     method: 'POST',
-                     credentials: 'include'
-                   });
-                   const result = await response.json();
+          {/* Test R2 Upload Button */}
+          <motion.button
+            onClick={async () => {
+              try {
+                console.log('🧪 Testing R2 upload...');
+                const response = await fetch('/api/test-r2-upload', {
+                  method: 'POST',
+                  credentials: 'include'
+                });
+                const result = await response.json();
 
-                   if (response.ok) {
-                     alert(`✅ R2 Upload Test Successful!\n\nURL: ${result.data.url}\nKey: ${result.data.key}\nBucket: ${result.data.bucket}`);
-                   } else {
-                     alert(`❌ R2 Upload Test Failed:\n\n${JSON.stringify(result, null, 2)}`);
-                   }
-                 } catch (error) {
-                   console.error('❌ R2 upload test error:', error);
-                   alert(`❌ R2 upload test failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
-                 }
-               }}
-               className="bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 text-white px-4 py-2 rounded-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-xl mb-4"
-             >
-               🧪 Test R2 Upload
-             </motion.button>
+                if (response.ok) {
+                  alert(`✅ R2 Upload Test Successful!\n\nURL: ${result.data.url}\nKey: ${result.data.key}\nBucket: ${result.data.bucket}`);
+                } else {
+                  alert(`❌ R2 Upload Test Failed:\n\n${JSON.stringify(result, null, 2)}`);
+                }
+              } catch (error) {
+                console.error('❌ R2 upload test error:', error);
+                alert(`❌ R2 upload test failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+              }
+            }}
+            className="bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 text-white px-4 py-2 rounded-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-xl mb-4"
+          >
+            🧪 Test R2 Upload
+          </motion.button>
 
-                           {/* Test Agent Image Button */}
-              <motion.button
-                onClick={async () => {
+          {/* Test Agent Image Button */}
+          <motion.button
+            onClick={async () => {
+              try {
+                console.log('🧪 Testing agent image download and upload...');
+                const response = await fetch('/api/test-agent-image', {
+                  method: 'POST',
+                  credentials: 'include'
+                });
+                const result = await response.json();
+
+                if (response.ok) {
+                  let message = `🧪 Agent Image Test Results:\n\n`;
+                  message += `Total Tested: ${result.data.totalTested}\n`;
+                  message += `Successful: ${result.data.successful}\n`;
+                  message += `Failed: ${result.data.failed}\n\n`;
+
+                  result.data.results.forEach((img: any) => {
+                    message += `Image ${img.imageNumber}:\n`;
+                    message += `  Status: ${img.status}\n`;
+                    if (img.status === 'success') {
+                      message += `  Size: ${img.size} bytes\n`;
+                      message += `  Uploaded: ${img.uploadedUrl}\n`;
+                    } else {
+                      message += `  Error: ${img.error}\n`;
+                    }
+                    message += `  Original: ${img.originalUrl}\n\n`;
+                  });
+
+                  alert(message);
+                } else {
+                  alert(`❌ Agent Image Test Failed:\n\n${JSON.stringify(result, null, 2)}`);
+                }
+              } catch (error) {
+                console.error('❌ Agent image test error:', error);
+                alert(`❌ Agent image test failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+              }
+            }}
+            className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white px-4 py-2 rounded-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-xl mb-4"
+          >
+            🧪 Test Multiple Agent Images
+          </motion.button>
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            {/* Backup Agent Images Button */}
+            <motion.button
+              onClick={async () => {
+                if (confirm('This will backup all agent images to Cloudflare R2 to prevent data loss. Continue?')) {
                   try {
-                    console.log('🧪 Testing agent image download and upload...');
-                    const response = await fetch('/api/test-agent-image', {
+                    const response = await fetch('/api/admin/backup-agent-images', {
                       method: 'POST',
-                      credentials: 'include'
+                      credentials: 'include',
                     });
                     const result = await response.json();
 
                     if (response.ok) {
-                      let message = `🧪 Agent Image Test Results:\n\n`;
-                      message += `Total Tested: ${result.data.totalTested}\n`;
-                      message += `Successful: ${result.data.successful}\n`;
-                      message += `Failed: ${result.data.failed}\n\n`;
-                      
-                      result.data.results.forEach((img: any) => {
-                        message += `Image ${img.imageNumber}:\n`;
-                        message += `  Status: ${img.status}\n`;
-                        if (img.status === 'success') {
-                          message += `  Size: ${img.size} bytes\n`;
-                          message += `  Uploaded: ${img.uploadedUrl}\n`;
-                        } else {
-                          message += `  Error: ${img.error}\n`;
-                        }
-                        message += `  Original: ${img.originalUrl}\n\n`;
-                      });
-                      
-                      alert(message);
+                      alert(`✅ Successfully backed up ${result.data.backupCount} agent images to Cloudflare R2!\n\nErrors: ${result.data.errorCount}`);
+                      window.location.reload();
                     } else {
-                      alert(`❌ Agent Image Test Failed:\n\n${JSON.stringify(result, null, 2)}`);
+                      alert(`❌ Error: ${result.error}`);
                     }
                   } catch (error) {
-                    console.error('❌ Agent image test error:', error);
-                    alert(`❌ Agent image test failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+                    alert('❌ Error backing up agent images');
                   }
-                }}
-                className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white px-4 py-2 rounded-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-xl mb-4"
-              >
-                🧪 Test Multiple Agent Images
-              </motion.button>
-                     {/* Action Buttons */}
-           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-             {/* Backup Agent Images Button */}
-             <motion.button
-               onClick={async () => {
-                 if (confirm('This will backup all agent images to Cloudflare R2 to prevent data loss. Continue?')) {
-                                       try {
-                      const response = await fetch('/api/admin/backup-agent-images', {
-                        method: 'POST',
-                        credentials: 'include',
-                      });
-                     const result = await response.json();
-                     
-                     if (response.ok) {
-                       alert(`✅ Successfully backed up ${result.data.backupCount} agent images to Cloudflare R2!\n\nErrors: ${result.data.errorCount}`);
-                       window.location.reload();
-                     } else {
-                       alert(`❌ Error: ${result.error}`);
-                     }
-                   } catch (error) {
-                     alert('❌ Error backing up agent images');
-                   }
-                 }
-               }}
-               className="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl"
-             >
-               💾 Backup All Agent Images to Cloudflare R2
-             </motion.button>
+                }
+              }}
+              className="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl"
+            >
+              💾 Backup All Agent Images to Cloudflare R2
+            </motion.button>
 
-             {/* Restore Agent Images Button */}
-             <motion.button
-               onClick={async () => {
-                 console.log('🔄 Restore button clicked');
-                 if (confirm('This will restore all agent images to Cloudflare R2 and update all properties. This may take a few minutes. Continue?')) {
-                   try {
-                     console.log('📡 Sending restore request...');
-                     const response = await fetch('/api/admin/restore-agent-images', {
-                       method: 'POST',
-                       credentials: 'include',
-                       headers: {
-                         'Content-Type': 'application/json',
-                       },
-                     });
-                     console.log('📡 Response status:', response.status);
-                     
-                     const result = await response.json();
-                     console.log('📡 Response result:', result);
-                     
-                     if (response.ok) {
-                       alert(`✅ Successfully restored ${result.data.restoredCount} agent images to Cloudflare R2!\n\nUpdated ${result.data.propertyUpdateCount} properties.\n\nErrors: ${result.data.errorCount}`);
-                       window.location.reload();
-                     } else {
-                       alert(`❌ Error: ${result.error}\n\nStatus: ${response.status}`);
-                     }
-                   } catch (error) {
-                     console.error('❌ Restore error:', error);
-                     alert(`❌ Error restoring agent images: ${error instanceof Error ? error.message : 'Unknown error'}`);
-                   }
-                 }
-               }}
-               className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl"
-             >
-               🔄 Restore All Agent Images to Cloudflare R2
-             </motion.button>
+            {/* Restore Agent Images Button */}
+            <motion.button
+              onClick={async () => {
+                console.log('🔄 Restore button clicked');
+                if (confirm('This will restore all agent images to Cloudflare R2 and update all properties. This may take a few minutes. Continue?')) {
+                  try {
+                    console.log('📡 Sending restore request...');
+                    const response = await fetch('/api/admin/restore-agent-images', {
+                      method: 'POST',
+                      credentials: 'include',
+                      headers: {
+                        'Content-Type': 'application/json',
+                      },
+                    });
+                    console.log('📡 Response status:', response.status);
 
-             {/* Update Properties Button */}
-             <motion.button
-               onClick={async () => {
-                 if (confirm('This will update all existing properties to use the agent\'s current profile pictures. Continue?')) {
-                   try {
-                     const response = await fetch('/api/admin/update-agent-images', {
-                       method: 'POST',
-                       credentials: 'include',
-                     });
-                     const result = await response.json();
-                     
-                     if (response.ok) {
-                       alert(`✅ Successfully updated ${result.data.updatedCount} properties with agent profile pictures!`);
-                       window.location.reload();
-                     } else {
-                       alert(`❌ Error: ${result.error}`);
-                     }
-                   } catch (error) {
-                     alert('❌ Error updating agent images');
-                   }
-                 }
-               }}
-               className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl"
-             >
-               🔄 Update All Properties with Agent Profile Pictures
-             </motion.button>
-           </div>
+                    const result = await response.json();
+                    console.log('📡 Response result:', result);
+
+                    if (response.ok) {
+                      alert(`✅ Successfully restored ${result.data.restoredCount} agent images to Cloudflare R2!\n\nUpdated ${result.data.propertyUpdateCount} properties.\n\nErrors: ${result.data.errorCount}`);
+                      window.location.reload();
+                    } else {
+                      alert(`❌ Error: ${result.error}\n\nStatus: ${response.status}`);
+                    }
+                  } catch (error) {
+                    console.error('❌ Restore error:', error);
+                    alert(`❌ Error restoring agent images: ${error instanceof Error ? error.message : 'Unknown error'}`);
+                  }
+                }
+              }}
+              className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl"
+            >
+              🔄 Restore All Agent Images to Cloudflare R2
+            </motion.button>
+
+            {/* Update Properties Button */}
+            <motion.button
+              onClick={async () => {
+                if (confirm('This will update all existing properties to use the agent\'s current profile pictures. Continue?')) {
+                  try {
+                    const response = await fetch('/api/admin/update-agent-images', {
+                      method: 'POST',
+                      credentials: 'include',
+                    });
+                    const result = await response.json();
+
+                    if (response.ok) {
+                      alert(`✅ Successfully updated ${result.data.updatedCount} properties with agent profile pictures!`);
+                      window.location.reload();
+                    } else {
+                      alert(`❌ Error: ${result.error}`);
+                    }
+                  } catch (error) {
+                    alert('❌ Error updating agent images');
+                  }
+                }
+              }}
+              className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl"
+            >
+              🔄 Update All Properties with Agent Profile Pictures
+            </motion.button>
+          </div>
         </motion.div>
 
         {/* Error Display */}
@@ -524,16 +524,16 @@ export default function SuperAdminAgentsPage() {
             >
               {/* Agent Avatar */}
               <div className="relative mb-4">
-                                 <img
-                   src={agent.profile.avatar || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80'}
-                   alt={agent.fullName}
-                   className="w-24 h-24 rounded-full object-cover mx-auto border-4 border-purple-500/30"
-                   onError={(e) => {
-                     const target = e.target as HTMLImageElement;
-                     target.src = 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80';
-                   }}
-                 />
-                
+                <img
+                  src={agent.profile.avatar || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80'}
+                  alt={agent.fullName}
+                  className="w-24 h-24 rounded-full object-cover mx-auto border-4 border-purple-500/30"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80';
+                  }}
+                />
+
                 {/* Avatar Update Button */}
                 <button
                   onClick={() => setEditingAvatar(agent._id)}
@@ -572,24 +572,22 @@ export default function SuperAdminAgentsPage() {
                   )}
                 </div>
                 <div className="flex items-center justify-center space-x-2 mb-3">
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                    agent.role === 'agent' 
+                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${agent.role === 'agent'
                       ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
                       : 'bg-green-500/20 text-green-300 border border-green-500/30'
-                  }`}>
+                    }`}>
                     {agent.role === 'agent' ? 'Agent' : 'Agency'}
                   </span>
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                    agent.status === 'active'
+                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${agent.status === 'active'
                       ? 'bg-green-500/20 text-green-300 border border-green-500/30'
                       : 'bg-red-500/20 text-red-300 border border-red-500/30'
-                  }`}>
+                    }`}>
                     {agent.status}
                   </span>
                 </div>
-                
+
                 <div className="space-y-2 text-sm text-purple-200">
-                  <p 
+                  <p
                     className="cursor-pointer hover:text-blue-600 transition-colors"
                     onClick={() => {
                       if (agent.phone) {
@@ -619,7 +617,7 @@ export default function SuperAdminAgentsPage() {
                   <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20 max-w-md w-full mx-4">
                     <h3 className="text-xl font-bold text-white mb-4">Update Agent Avatar</h3>
                     <p className="text-purple-200 mb-4">Select a new profile image for {agent.fullName}</p>
-                    
+
                     <div className="flex space-x-3">
                       <label
                         htmlFor={`avatar-${agent._id}`}

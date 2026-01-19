@@ -34,6 +34,7 @@ import { PropertyRecommendations } from './PropertyRecommendations'
 import { formatPrice, formatPhoneNumber, formatListingDate, capitalizeName, DEFAULT_AVATAR_URL } from '@/lib/utils'
 import { getPrimaryImageUrl, getAllImageUrls } from '@/lib/imageUrlResolver'
 import { navigateToAgentProfile } from '@/lib/agentNavigation'
+import { useRoleAccess } from '@/hooks/useRoleAccess'
 
 // Safe agent ID resolver function
 function resolveAgentId(property: any): string | number | undefined {
@@ -152,6 +153,12 @@ interface PropertyDetailProps {
 export const PropertyDetail: React.FC<PropertyDetailProps> = ({ property, onClose, onPropertyClick }) => {
   const router = useRouter()
   const [selectedImage, setSelectedImage] = useState(0)
+
+  const { isAdmin } = useRoleAccess()
+  // Determine which phone number to use
+  const agentPhone = property.agent?.phone || '';
+  const displayPhone = isAdmin() ? agentPhone : '0610251014';
+  const displayLabel = isAdmin() ? (agentPhone ? formatPhoneNumber(agentPhone) : 'Contact Agent') : '061 025 1014';
 
   // Get all image URLs
   const allImageUrls = React.useMemo(() => {
@@ -326,39 +333,57 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ property, onClos
               {/* Right Side - Property Details */}
               <div className="space-y-4 sm:space-y-6 lg:col-span-3 w-full overflow-hidden relative z-10">
                 {/* Title & Price */}
-                <div className="space-y-3 sm:space-y-4">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
-                    <h1 className="text-xl sm:text-2xl lg:text-3xl font-serif font-bold text-slate-900">
+                <div className="space-y-6 pt-2">
+                  {/* Title & Price Section */}
+                  <div className="space-y-3">
+                    <h1 className="text-2xl sm:text-3xl lg:text-4xl font-serif font-extrabold bg-gradient-to-r from-blue-700 via-indigo-700 to-purple-700 bg-clip-text text-transparent leading-tight drop-shadow-sm">
                       {property.title}
                     </h1>
-                    <div className="bg-blue-500 text-white px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-semibold whitespace-nowrap w-fit">
-                      ID: {property.propertyId || property.id || property._id || 'N/A'}
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-2 text-slate-600">
-                    <img
-                      src="/icons/adress.png"
-                      alt="Location"
-                      className="w-4 h-4 sm:w-5 sm:h-5 object-contain flex-shrink-0"
+                    <div
+                      className="text-3xl sm:text-4xl lg:text-5xl font-extrabold bg-gradient-to-r from-green-600 to-teal-500 bg-clip-text text-transparent tracking-tight drop-shadow-sm"
+                      dangerouslySetInnerHTML={{ __html: formatPrice(property.price) }}
                     />
-                    <span className="text-sm sm:text-base truncate">{property.location}</span>
                   </div>
-                  {property.district && (
-                    <div className="flex items-center space-x-2 text-slate-500">
-                      <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
-                      <span className="text-sm sm:text-base font-medium truncate">{property.district}</span>
+
+                  {/* Location Details */}
+                  <div className="flex flex-col gap-4 py-5 border-t border-b border-gray-100 bg-gradient-to-r from-gray-50/50 to-transparent rounded-r-2xl pr-4 -ml-2 pl-2">
+                    {property.district && (
+                      <div className="flex items-center gap-4 group cursor-default">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-100 to-green-100 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm flex-shrink-0 border border-green-200/50">
+                          <MapPin className="w-5 h-5 text-emerald-600" />
+                        </div>
+                        <span className="text-base sm:text-lg text-slate-900 font-extrabold group-hover:text-emerald-700 transition-colors">{property.district}</span>
+                      </div>
+                    )}
+                    <div className="flex items-center gap-4 group cursor-default">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm flex-shrink-0 border border-blue-200/50">
+                        <video
+                          src="/icons/Adress3.webm"
+                          autoPlay
+                          loop
+                          muted
+                          playsInline
+                          className="w-7 h-7 object-contain mix-blend-multiply"
+                        />
+                      </div>
+                      <span className="text-base sm:text-lg text-slate-900 font-bold group-hover:text-blue-700 transition-colors">{property.location}</span>
                     </div>
-                  )}
-                  <div
-                    className="text-2xl sm:text-3xl lg:text-4xl font-bold text-green-600"
-                    dangerouslySetInnerHTML={{ __html: formatPrice(property.price) }}
-                  />
-                  {property.createdAt && (
-                    <div className="flex items-center space-x-2 text-slate-600">
-                      <Calendar className="w-5 h-5 md:w-4 md:h-4" />
-                      <span>Lasoo dhigay {formatListingDate(property.createdAt)}</span>
+                  </div>
+
+                  {/* Meta Information (ID & Date) */}
+                  <div className="flex flex-wrap items-center gap-3">
+                    <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-br from-indigo-50 to-blue-50 text-indigo-700 font-medium border border-indigo-100/50 hover:shadow-md transition-all duration-300">
+                      <span className="text-xs uppercase tracking-wider font-bold text-indigo-400">ID</span>
+                      <span className="font-bold">{property.propertyId || property.id || property._id || 'N/A'}</span>
                     </div>
-                  )}
+
+                    {property.createdAt && (
+                      <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-br from-orange-50 to-amber-50 text-orange-800 font-medium border border-orange-100/50 hover:shadow-md transition-all duration-300">
+                        <Calendar className="w-4 h-4 text-orange-500" />
+                        <span className="text-sm">Lasoo dhigay {formatListingDate(property.createdAt)}</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {/* Key Stats */}
@@ -679,12 +704,35 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ property, onClos
                     <div className="space-y-3">
                       <button
                         onClick={() => {
-                          if (property.agent?.phone) {
+                          if (displayPhone) {
                             // Clean the phone number for tel: link and format with 061
-                            const cleanPhone = property.agent.phone.replace(/\D/g, '');
-                            const formattedPhone = cleanPhone.startsWith('2526') ? `061${cleanPhone.substring(5)}` : `061${cleanPhone}`;
-                            const phoneLink = `tel:${formattedPhone}`;
-                            window.location.href = phoneLink;
+                            const cleanPhone = displayPhone.replace(/\D/g, '');
+                            // Handle 252 prefix if present, otherwise assume it needs standard 061 check/format
+                            // If it's our hardcoded number, it's just 061...
+
+                            let finalPhoneForLink = cleanPhone;
+                            if (cleanPhone.startsWith('252')) {
+                              finalPhoneForLink = cleanPhone;
+                            } else if (!cleanPhone.startsWith('0')) {
+                              finalPhoneForLink = `0${cleanPhone}`;
+                            }
+
+                            // Specific fix for the hardcoded number or generic handling
+                            if (cleanPhone === '0610251014' || cleanPhone === '610251014') {
+                              finalPhoneForLink = '0610251014';
+                            } else if (cleanPhone.startsWith('2526')) {
+                              finalPhoneForLink = `061${cleanPhone.substring(5)}`;
+                            } else if (!cleanPhone.startsWith('061') && cleanPhone.length >= 9) {
+                              // Fallback formatting closer to original logic
+                              finalPhoneForLink = `061${cleanPhone.replace(/^0+/, '')}`;
+                            }
+
+                            // Revert to the exact original logic for the agent phone to be safe, but applied to displayPhone
+                            // Original: props.agent.phone.replace(/\D/g, '') -> check 2526 -> etc
+                            const cleanInput = displayPhone.replace(/\D/g, '');
+                            const formattedEx = cleanInput.startsWith('2526') ? `061${cleanInput.substring(5)}` : (cleanInput.length === 9 && !cleanInput.startsWith('0') ? `0${cleanInput}` : cleanInput);
+
+                            window.location.href = `tel:${formattedEx}`;
                           }
                         }}
                         className="w-full bg-white border-2 border-gray-200 hover:bg-gray-50 text-gray-700 py-3 px-4 rounded-xl font-semibold transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center space-x-2 group"
@@ -714,30 +762,41 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ property, onClos
                             className="w-8 h-8 md:w-6 md:h-6 object-contain group-hover:scale-110 transition-transform"
                           />
                         </motion.div>
-                        <span>{property.agent?.phone ? formatPhoneNumber(property.agent.phone) : 'Contact Agent'}</span>
+                        <span>{displayLabel}</span>
                       </button>
 
                       <button
-                        className="w-full border-2 py-3 px-4 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center space-x-2 group bg-white border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300 cursor-pointer"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          const agentId = property.agentId || property.agent?.id;
-                          console.log('🔍 PropertyDetail: Agent button clicked, ID:', agentId);
-                          if (agentId && typeof window !== 'undefined') {
-                            console.log('🌐 Navigating to:', `/agent/${agentId}`);
-                            window.location.href = `/agent/${agentId}`;
-                          }
+                        onClick={() => {
+                          window.open('https://wa.me/252610251014', '_blank');
                         }}
-                        title="View agent profile"
+                        className="w-full bg-white border-2 border-green-200 hover:bg-green-50 text-green-700 py-3 px-4 rounded-xl font-semibold transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center space-x-2 group"
                       >
-                        <img
-                          src="/icons/profile.gif"
-                          alt="Profile"
-                          className="w-9 h-9 md:w-7 md:h-7 object-contain group-hover:scale-110 transition-transform"
-                        />
-                        <span>{`Ciwaanka - ${capitalizeName(property.agent?.name || 'Agent').split(' ')[0]}`}</span>
+                        <motion.div
+                          animate={{
+                            rotate: [0, -5, 5, -5, 0],
+                            scale: [1, 1.1, 1, 1.1, 1],
+                          }}
+                          transition={{
+                            duration: 2,
+                            repeat: Infinity,
+                            ease: "easeInOut",
+                            repeatDelay: 3
+                          }}
+                          className="flex items-center justify-center"
+                        >
+                          <video
+                            src="/icons/whatsapp.webm"
+                            autoPlay
+                            loop
+                            muted
+                            playsInline
+                            className="w-8 h-8 md:w-6 md:h-6 object-contain"
+                          />
+                        </motion.div>
+                        <span>WhatsApp Now</span>
                       </button>
+
+
                     </div>
 
                     {/* Additional Info */}
@@ -826,7 +885,7 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ property, onClos
           </div>
         )}
 
-        {/* Property Recommendations */}
+        {/* Property Recommendations - Temporarily Disabled
         {property.district && (
           <>
             {console.log('🔍 PropertyDetail: Rendering recommendations for district:', property.district)}
@@ -859,6 +918,7 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ property, onClos
             />
           </>
         )}
+        */}
       </div>
     </div>
   )

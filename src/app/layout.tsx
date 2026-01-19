@@ -39,10 +39,10 @@ const cormorant = Cormorant_Garamond({
 })
 
 export const metadata: Metadata = {
-  title: 'Kobac Real Estate: Homepage',
-  description: "Somalia's #1 Real Estate Platform. Browse premium properties for sale and rent in Mogadishu. Find villas, apartments, and houses with trusted agents.",
-  keywords: 'luxury real estate, premium properties, luxury homes, real estate, kobac real estate',
-  authors: [{ name: 'Kobac Real Estate' }],
+  title: 'Kobac Property: Homepage',
+  description: "Somalia's #1 Property Platform. Browse premium properties for sale and rent in Mogadishu. Find villas, apartments, and houses with trusted agents.",
+  keywords: 'luxury property, premium properties, luxury homes, Somalia property, Mogadishu property, kobac property',
+  authors: [{ name: 'Kobac Property' }],
   manifest: '/manifest.json',
   icons: {
     icon: [
@@ -62,10 +62,10 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'Kobac Real Estate',
+    title: 'Kobac Property',
   },
   openGraph: {
-    title: 'Kobac Real Estate - Premium Real Estate',
+    title: 'Kobac Property - Premium Property',
     description: 'Discover luxury properties in the most prestigious locations worldwide.',
     type: 'website',
     locale: 'en_US',
@@ -74,13 +74,13 @@ export const metadata: Metadata = {
         url: '/icons/header.png',
         width: 512,
         height: 512,
-        alt: 'Kobac Real Estate Logo',
+        alt: 'Kobac Property Logo',
       },
     ],
   },
   twitter: {
     card: 'summary',
-    title: 'Kobac Real Estate - Premium Real Estate',
+    title: 'Kobac Property - Premium Property',
     description: 'Discover luxury properties in the most prestigious locations worldwide.',
     images: ['/icons/header.png'],
   },
@@ -111,10 +111,10 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
 
         {/* PWA Meta Tags */}
-        <meta name="application-name" content="Kobac Real Estate" />
+        <meta name="application-name" content="Kobac Property" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="Kobac Real Estate" />
+        <meta name="apple-mobile-web-app-title" content="Kobac Property" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="msapplication-TileColor" content="#2563eb" />
         <meta name="msapplication-config" content="/browserconfig.xml" />

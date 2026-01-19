@@ -9,7 +9,7 @@ import { useViewCounter } from '@/hooks/useViewCounter';
 import { incrementPropertyView } from '@/lib/viewIncrement';
 import { ArrowLeft, Heart } from 'lucide-react';
 import { getPropertyUrl } from '@/lib/utils';
-import { IProperty } from '@/models/Property';
+
 
 // Interface matching the one used in the page (can be imported if centralized)
 interface Property {
@@ -168,8 +168,8 @@ export default function SinglePropertyClient({ initialProperty }: SingleProperty
                                         setTimeout(() => savePropertyState(), 100);
                                     }}
                                     className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${isFavorite
-                                            ? 'text-red-600 bg-red-50 border border-red-200'
-                                            : 'text-gray-600 hover:text-gray-900 border border-gray-300 hover:bg-gray-50'
+                                        ? 'text-red-600 bg-red-50 border border-red-200'
+                                        : 'text-gray-600 hover:text-gray-900 border border-gray-300 hover:bg-gray-50'
                                         }`}
                                 >
                                     <Heart className={`w-4 h-4 ${isFavorite ? 'fill-current' : ''}`} />

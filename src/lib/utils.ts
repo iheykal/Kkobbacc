@@ -1,6 +1,6 @@
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
-import { NextRequest } from "next/server"
+
 import { generateSEOUrl } from './seoUrlUtils'
 
 export function cn(...inputs: ClassValue[]) {
@@ -18,29 +18,29 @@ export function formatCurrency(amount: number): string {
 
 export function formatPrice(price: number, listingType?: string): string {
   const formattedPrice = `$${price.toLocaleString()}`
-  
+
   // Add "/Bishii" (monthly in Somali) for rent properties
   if (listingType === 'rent') {
     return `${formattedPrice}<span class="text-xs font-light text-gray-500 italic">/Bishii</span>`
   }
-  
+
   return formattedPrice
 }
 
 // Format price for input field display (with dollar sign and commas)
 export function formatPriceForInput(price: string | number): string {
   if (!price) return ''
-  
+
   // Convert to string and remove any non-numeric characters except decimal point
   const numericValue = price.toString().replace(/[^\d.]/g, '')
-  
+
   // If empty, return empty string
   if (!numericValue) return ''
-  
+
   // Convert to number and format with commas
   const number = parseFloat(numericValue)
   if (isNaN(number)) return ''
-  
+
   // Format with commas and add dollar sign
   return `$${number.toLocaleString()}`
 }
@@ -48,13 +48,13 @@ export function formatPriceForInput(price: string | number): string {
 // Parse price from formatted input (remove dollar sign and commas, return number)
 export function parsePriceFromInput(formattedPrice: string): number {
   if (!formattedPrice) return 0
-  
+
   // Remove dollar sign, commas, and any other non-numeric characters except decimal point
   const numericString = formattedPrice.replace(/[^\d.]/g, '')
-  
+
   // Convert to number
   const number = parseFloat(numericString)
-  
+
   // Return 0 if invalid
   return isNaN(number) ? 0 : number
 }
@@ -63,19 +63,19 @@ export function parsePriceFromInput(formattedPrice: string): number {
 export function handlePriceInputChange(value: string, setValue: (value: string) => void): void {
   // Remove any non-numeric characters except decimal point
   const numericValue = value.replace(/[^\d.]/g, '')
-  
+
   // If empty, set empty string
   if (!numericValue) {
     setValue('')
     return
   }
-  
+
   // Convert to number
   const number = parseFloat(numericValue)
-  
+
   // If invalid number, don't update
   if (isNaN(number)) return
-  
+
   // Format with dollar sign and commas
   const formatted = `$${number.toLocaleString()}`
   setValue(formatted)
@@ -103,25 +103,25 @@ export function debounce<T extends (...args: any[]) => any>(
 
 export function formatPhoneNumber(phone: string): string {
   if (!phone) return ''
-  
+
   // Remove any non-digit characters
   const digits = phone.replace(/\D/g, '')
-  
+
   // If it starts with 252 (country code), remove it and add 0
   if (digits.startsWith('252') && digits.length >= 12) {
     return '0' + digits.substring(3)
   }
-  
+
   // If it already starts with 0, return as is
   if (digits.startsWith('0')) {
     return digits
   }
-  
+
   // If it's a 9-digit number, add 0 prefix
   if (digits.length === 9) {
     return '0' + digits
   }
-  
+
   // For any other format, return the original
   return phone
 }
@@ -168,44 +168,23 @@ export function getCompanyLogoUrl(): string | null {
   if (process.env.ENABLE_COMPANY_LOGO === 'false') {
     return null;
   }
-  
+
   // Use custom logo URL if provided, otherwise use the existing Kobac logo
   return process.env.COMPANY_LOGO_URL || '/icons/kobac.webp';
 }
 
 export function capitalizeName(name: string): string {
   if (!name) return '';
-  
-  // Special case: if the name is "Kobac Real", display it as "Kobac Real Estate"
+
+  // Special case: if the name is "Kobac Real", display it as "Kobac Property"
   if (name.toLowerCase() === 'kobac real') {
-    return 'Kobac Real Estate';
+    return 'Kobac Property';
   }
-  
+
   return name.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
 }
 
-export const getAuthenticatedUser = async (request: NextRequest) => {
-  try {
-    const cookie = request.cookies.get('kobac_session')?.value;
-    if (!cookie) {
-      return null;
-    }
-    
-    const session = JSON.parse(decodeURIComponent(cookie));
-    if (!session?.userId) {
-      return null;
-    }
-    
-    // Import User model here to avoid circular dependencies
-    const { default: User } = await import('@/models/User');
-    const user = await User.findById(session.userId).select('_id fullName phone role status');
-    
-    return user;
-  } catch (error) {
-    console.error('Error getting authenticated user:', error);
-    return null;
-  }
-};
+
 
 export const generateSessionId = () => {
   return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
@@ -219,13 +198,13 @@ export const AGENT_AVATAR_URL = '/icons/line.png'
 
 // Function to get avatar for users - Kobac gets DiceBear, others get line.png
 export const generateUniqueAvatar = (fullName: string, phone: string, style?: string) => {
-  // Check if this is Kobac Real Estate (superadmin)
-  const isKobac = fullName.toLowerCase().includes('kobac') || fullName.toLowerCase().includes('real estate');
-  
+  // Check if this is Kobac Property (superadmin)
+  const isKobac = fullName.toLowerCase().includes('kobac') || fullName.toLowerCase().includes('property');
+
   if (isKobac) {
     // Kobac gets the special DiceBear avatar
     const seed = `${fullName}-${phone}`.replace(/\s+/g, '').toLowerCase();
-    
+
     const params = new URLSearchParams({
       seed: seed,
       backgroundColor: 'b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf',
@@ -241,23 +220,23 @@ export const generateUniqueAvatar = (fullName: string, phone: string, style?: st
       skinColor: 'light,tan,dark',
       top: 'shortHairShortFlat'
     });
-    
+
     return `https://api.dicebear.com/7.x/avataaars/svg?${params.toString()}`;
   }
-  
+
   // All other agents get line.png
   return AGENT_AVATAR_URL;
 }
 
 // Function to get avatar for superadmin - Kobac gets DiceBear, others get line.png
 export const generateSuperAdminAvatar = (phone: string, fullName?: string) => {
-  // Check if this is Kobac Real Estate
-  const isKobac = fullName && (fullName.toLowerCase().includes('kobac') || fullName.toLowerCase().includes('real estate'));
-  
+  // Check if this is Kobac Property
+  const isKobac = fullName && (fullName.toLowerCase().includes('kobac') || fullName.toLowerCase().includes('property'));
+
   if (isKobac) {
     // Kobac gets the special DiceBear avatar
     const seed = `superadmin-${phone}`.replace(/\s+/g, '').toLowerCase();
-    
+
     const params = new URLSearchParams({
       seed: seed,
       backgroundColor: 'ffd700,ffed4e,fff59d', // Gold colors for superadmin
@@ -273,10 +252,10 @@ export const generateSuperAdminAvatar = (phone: string, fullName?: string) => {
       skinColor: 'light,tan',
       top: 'shortHairShortFlat'
     });
-    
+
     return `https://api.dicebear.com/7.x/avataaars/svg?${params.toString()}`;
   }
-  
+
   // All other superadmins get line.png
   return AGENT_AVATAR_URL;
 }
@@ -293,7 +272,7 @@ export function getPropertyUrl(property: any): string {
     propertyId: property.propertyId || property._id,
     _id: property._id
   })
-  
+
   return seoUrl.seoUrl
 }
 
@@ -428,7 +407,7 @@ export function getStableAvatarUrl(agentId: string, currentAvatar?: string, isSa
   if (!isSampleData && currentAvatar && currentAvatar !== DEFAULT_AVATAR_URL) {
     return currentAvatar;
   }
-  
+
   // For sample data or missing avatars, use stable local images
   if (isSampleData) {
     // Use a deterministic avatar based on agent ID
@@ -436,13 +415,13 @@ export function getStableAvatarUrl(agentId: string, currentAvatar?: string, isSa
     const sampleKey = `agent-${agentNumber}`;
     return SAMPLE_AGENT_AVATARS[sampleKey as keyof typeof SAMPLE_AGENT_AVATARS] || DEFAULT_AVATAR_URL;
   }
-  
+
   // For real agents without avatars, use default avatar
   if (!isSampleData && (!currentAvatar || currentAvatar === DEFAULT_AVATAR_URL)) {
     // Return default avatar - no more DiceBear API
     return DEFAULT_AVATAR_URL;
   }
-  
+
   // For real agents without avatars, use default
   return DEFAULT_AVATAR_URL;
 }
@@ -454,10 +433,10 @@ export function getStableAvatarUrl(agentId: string, currentAvatar?: string, isSa
  */
 export function isStableAvatarUrl(avatarUrl: string): boolean {
   // Stable URLs are local files or our own hosted images
-  return avatarUrl.startsWith('/') || 
-         avatarUrl.includes('r2.dev') || 
-         avatarUrl.includes('kobac') ||
-         !avatarUrl.includes('unsplash.com');
+  return avatarUrl.startsWith('/') ||
+    avatarUrl.includes('r2.dev') ||
+    avatarUrl.includes('kobac') ||
+    !avatarUrl.includes('unsplash.com');
 }
 
 /**
@@ -470,19 +449,19 @@ export function sanitizeAvatarUrl(avatarUrl: string): string {
   if (isStableAvatarUrl(avatarUrl)) {
     return avatarUrl;
   }
-  
+
   // If it's an Unsplash URL or other unstable URL, replace with default
   return DEFAULT_AVATAR_URL;
 }
 
 export function generateAgentAvatar(agentId: string, email?: string, fullName?: string): string {
-  // Check if this is Kobac Real Estate
-  const isKobac = fullName && (fullName.toLowerCase().includes('kobac') || fullName.toLowerCase().includes('real estate'));
-  
+  // Check if this is Kobac Property
+  const isKobac = fullName && (fullName.toLowerCase().includes('kobac') || fullName.toLowerCase().includes('property'));
+
   if (isKobac) {
     // Kobac gets the special DiceBear avatar
     const seed = `agent-${agentId}`.replace(/\s+/g, '').toLowerCase();
-    
+
     const params = new URLSearchParams({
       seed: seed,
       backgroundColor: 'e3f2fd,bbdefb,90caf9',
@@ -498,10 +477,10 @@ export function generateAgentAvatar(agentId: string, email?: string, fullName?: 
       skinColor: 'light,tan,dark',
       top: 'shortHairShortFlat'
     });
-    
+
     return `https://api.dicebear.com/7.x/avataaars/svg?${params.toString()}`;
   }
-  
+
   // All other agents get line.png
   return AGENT_AVATAR_URL;
 }

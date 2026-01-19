@@ -50,8 +50,8 @@ export default function FixAvatarsPage() {
               Fix Avatar URLs
             </h1>
             <p className="text-gray-600 max-w-2xl mx-auto">
-              This tool will fix all avatar URLs in the database that are still using the old Unsplash URL 
-              and replace them with the Kobac Real Estate logo.
+              This tool will fix all avatar URLs in the database that are still using the old Unsplash URL
+              and replace them with the Kobac Property logo.
             </p>
           </div>
 
@@ -63,7 +63,7 @@ export default function FixAvatarsPage() {
             <ul className="space-y-2 text-gray-700">
               <li>• Find all users with old Unsplash avatar URLs</li>
               <li>• Find all properties with old Unsplash agent image URLs</li>
-              <li>• Replace them with the Kobac Real Estate logo (/icons/uze.png)</li>
+              <li>• Replace them with the Kobac Property logo (/icons/uze.png)</li>
               <li>• Show you a summary of what was fixed</li>
             </ul>
           </div>
@@ -111,7 +111,7 @@ export default function FixAvatarsPage() {
                   Avatar URLs Fixed Successfully!
                 </h3>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="bg-white rounded-lg p-4">
                   <h4 className="font-semibold text-gray-900 mb-3">Users Fixed</h4>

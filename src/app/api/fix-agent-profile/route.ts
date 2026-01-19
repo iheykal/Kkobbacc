@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 export async function POST(request: NextRequest) {
   try {
     console.log('🔧 Fixing agent profile...');
-    
+
     // Get current session
     const session = getSessionFromRequest(request);
     if (!session) {
@@ -17,10 +17,10 @@ export async function POST(request: NextRequest) {
         error: "No valid session found"
       });
     }
-    
+
     // Connect to database
     await connectDB();
-    
+
     // Find the user
     const user = await User.findById(session.userId);
     if (!user) {
@@ -29,14 +29,14 @@ export async function POST(request: NextRequest) {
         error: "User not found in database"
       });
     }
-    
+
     console.log('👤 Found user:', {
       id: user._id.toString(),
       name: user.fullName,
       role: user.role,
       hasAgentProfile: !!user.agentProfile
     });
-    
+
     // Check if user already has agent profile
     if (user.agentProfile && Object.keys(user.agentProfile).length > 0) {
       return NextResponse.json({
@@ -50,18 +50,18 @@ export async function POST(request: NextRequest) {
         }
       });
     }
-    
+
     // Create agent profile for the user
     const agentProfile = {
       licenseNumber: `LIC-${user._id.toString().slice(-8).toUpperCase()}`,
       verified: true,
-      experience: "Experienced Real Estate Professional",
+      experience: "Experienced Property Professional",
       specializations: ["Residential", "Commercial", "Land"],
       languages: ["Somali", "English", "Arabic"],
       areas: ["Mogadishu", "Hargeisa", "Kismayo"],
-      bio: `Professional real estate agent with extensive experience in the Somali market. Specializing in residential and commercial properties.`,
+      bio: `Professional property agent with extensive experience in the Somali market. Specializing in residential and commercial properties.`,
       achievements: ["Top Performer 2024", "Client Satisfaction Award"],
-      certifications: ["Real Estate License", "Property Management"],
+      certifications: ["Property License", "Property Management"],
       socialMedia: {
         facebook: "",
         instagram: "",
@@ -86,18 +86,18 @@ export async function POST(request: NextRequest) {
         workingHours: "9:00 AM - 6:00 PM"
       }
     };
-    
+
     // Update user with agent profile
     user.agentProfile = agentProfile;
     await user.save();
-    
+
     console.log('✅ Agent profile created:', {
       id: user._id.toString(),
       name: user.fullName,
       licenseNumber: agentProfile.licenseNumber,
       verified: agentProfile.verified
     });
-    
+
     return NextResponse.json({
       success: true,
       message: "Agent profile created successfully",
@@ -118,7 +118,7 @@ export async function POST(request: NextRequest) {
         stats: agentProfile.stats
       }
     });
-    
+
   } catch (error) {
     console.error('❌ Fix agent profile error:', error);
     return NextResponse.json({
@@ -131,7 +131,7 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     console.log('🔍 Checking agent profile status...');
-    
+
     // Get current session
     const session = getSessionFromRequest(request);
     if (!session) {
@@ -140,10 +140,10 @@ export async function GET(request: NextRequest) {
         error: "No valid session found"
       });
     }
-    
+
     // Connect to database
     await connectDB();
-    
+
     // Find the user
     const user = await User.findById(session.userId).select('_id fullName phone role status profile agentProfile');
     if (!user) {
@@ -152,9 +152,9 @@ export async function GET(request: NextRequest) {
         error: "User not found in database"
       });
     }
-    
+
     const hasAgentProfile = user.agentProfile && Object.keys(user.agentProfile).length > 0;
-    
+
     return NextResponse.json({
       success: true,
       user: {
@@ -173,12 +173,12 @@ export async function GET(request: NextRequest) {
       },
       action: {
         needed: !hasAgentProfile,
-        description: !hasAgentProfile ? 
+        description: !hasAgentProfile ?
           'User needs an agent profile to be recognized as an agent' :
           'Agent profile is available'
       }
     });
-    
+
   } catch (error) {
     console.error('❌ Check agent profile status error:', error);
     return NextResponse.json({

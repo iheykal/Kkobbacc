@@ -10,8 +10,9 @@ export async function getMongoose() {
   if (importCache.has('mongoose')) {
     return importCache.get('mongoose');
   }
-  
-  const mongoose = await import('mongoose');
+
+  const mongooseModule = await import('mongoose');
+  const mongoose = mongooseModule.default || mongooseModule;
   importCache.set('mongoose', mongoose);
   return mongoose;
 }
@@ -23,8 +24,9 @@ export async function getBcryptjs() {
   if (importCache.has('bcryptjs')) {
     return importCache.get('bcryptjs');
   }
-  
-  const bcryptjs = await import('bcryptjs');
+
+  const bcryptjsModule = await import('bcryptjs');
+  const bcryptjs = bcryptjsModule.default || bcryptjsModule;
   importCache.set('bcryptjs', bcryptjs);
   return bcryptjs;
 }
@@ -36,7 +38,7 @@ export async function getS3Client() {
   if (importCache.has('s3-client')) {
     return importCache.get('s3-client');
   }
-  
+
   const { S3Client } = await import('@aws-sdk/client-s3');
   importCache.set('s3-client', { S3Client });
   return { S3Client };
@@ -49,7 +51,7 @@ export async function getS3RequestPresigner() {
   if (importCache.has('s3-presigner')) {
     return importCache.get('s3-presigner');
   }
-  
+
   const { getSignedUrl } = await import('@aws-sdk/s3-request-presigner');
   importCache.set('s3-presigner', { getSignedUrl });
   return { getSignedUrl };
@@ -62,8 +64,9 @@ export async function getFormidable() {
   if (importCache.has('formidable')) {
     return importCache.get('formidable');
   }
-  
-  const formidable = await import('formidable');
+
+  const formidableModule = await import('formidable');
+  const formidable = formidableModule.default || formidableModule;
   importCache.set('formidable', formidable);
   return formidable;
 }
@@ -75,8 +78,9 @@ export async function getSharp() {
   if (importCache.has('sharp')) {
     return importCache.get('sharp');
   }
-  
-  const sharp = await import('sharp');
+
+  const sharpModule = await import('sharp');
+  const sharp = sharpModule.default || sharpModule;
   importCache.set('sharp', sharp);
   return sharp;
 }

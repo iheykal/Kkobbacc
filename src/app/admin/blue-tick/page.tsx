@@ -27,13 +27,13 @@ interface Agent {
 
 // Ultimate superadmin protection constants
 const ULTIMATE_SUPERADMIN_PHONE = '0610251014'
-const ULTIMATE_SUPERADMIN_NAME = 'Kobac Real Estate'
+const ULTIMATE_SUPERADMIN_NAME = 'Kobac Property'
 
 // Helper function to check if user is ultimate superadmin
 const isUltimateSuperadmin = (agent: Agent) => {
-  return agent.phone === ULTIMATE_SUPERADMIN_PHONE || 
-         agent.fullName === ULTIMATE_SUPERADMIN_NAME ||
-         agent.fullName.toLowerCase().includes('kobac')
+  return agent.phone === ULTIMATE_SUPERADMIN_PHONE ||
+    agent.fullName === ULTIMATE_SUPERADMIN_NAME ||
+    agent.fullName.toLowerCase().includes('kobac')
 }
 
 export default function BlueTickManagementPage() {
@@ -52,22 +52,22 @@ export default function BlueTickManagementPage() {
     try {
       setLoading(true)
       setError(null)
-      
+
       console.log('🔍 Fetching agents from admin API...')
       const response = await fetch('/api/admin/users', {
         credentials: 'include'
       })
-      
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
-      
+
       const data = await response.json()
       console.log('🔍 Admin API response:', data)
-      
+
       if (data.success) {
         // Filter only agents and agencies
-        const agentUsers = data.data.filter((user: any) => 
+        const agentUsers = data.data.filter((user: any) =>
           ['agent', 'agency'].includes(user.role)
         )
         console.log('🔍 Filtered agents:', agentUsers.length)
@@ -100,7 +100,7 @@ export default function BlueTickManagementPage() {
       })
 
       const data = await response.json()
-      
+
       if (data.success) {
         alert(`Blue tick ${action}ed successfully`)
         setSelectedAgent(null)
@@ -259,7 +259,7 @@ export default function BlueTickManagementPage() {
           <div className="p-6 border-b border-gray-200">
             <h2 className="text-xl font-semibold text-gray-900">Agent Verification Status</h2>
           </div>
-          
+
           <div className="divide-y divide-gray-200">
             {agents.map((agent, index) => (
               <motion.div
@@ -291,13 +291,13 @@ export default function BlueTickManagementPage() {
                       <p className="text-xs text-gray-500 capitalize">{agent.role}</p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center space-x-4">
                     <div className={`flex items-center space-x-2 px-3 py-1 rounded-full border text-sm font-medium ${getStatusColor(agent.agentProfile?.blueTickStatus || 'none')}`}>
                       {getStatusIcon(agent.agentProfile?.blueTickStatus || 'none')}
                       <span className="capitalize">{agent.agentProfile?.blueTickStatus || 'none'}</span>
                     </div>
-                    
+
                     <Button
                       variant="outline"
                       size="sm"
@@ -329,7 +329,7 @@ export default function BlueTickManagementPage() {
               >
                 <h3 className="text-xl font-semibold mb-4">Manage Blue Tick</h3>
                 <p className="text-gray-600 mb-4">Agent: <span className="font-semibold">{selectedAgent.fullName}</span></p>
-                
+
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Action</label>
@@ -343,7 +343,7 @@ export default function BlueTickManagementPage() {
                       <option value="reinstate">Reinstate Blue Tick</option>
                     </select>
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Reason</label>
                     <textarea
@@ -355,7 +355,7 @@ export default function BlueTickManagementPage() {
                     />
                   </div>
                 </div>
-                
+
                 <div className="flex space-x-3 mt-6">
                   <Button
                     variant="outline"

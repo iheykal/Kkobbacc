@@ -14,10 +14,10 @@ export function StructuredData() {
   const organizationSchema = {
     "@context": "https://schema.org",
     "@type": "Organization",
-    "name": "Kobac Real Estate",
+    "name": "Kobac Property",
     "url": baseUrl,
     "logo": `${baseUrl}/icons/header.png`,
-    "description": "Somalia's #1 Real Estate Platform - Premium properties in Mogadishu. Buy, rent, or list properties with trusted agents.",
+    "description": "Somalia's #1 Property Platform - Premium properties in Mogadishu. Buy, rent, or list properties with trusted agents.",
     "contactPoint": {
       "@type": "ContactPoint",
       "telephone": "+252-61-0251014",
@@ -31,9 +31,9 @@ export function StructuredData() {
   const websiteSchema = {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    "name": "Kobac Real Estate",
+
     "url": baseUrl,
-    "description": "Somalia's #1 Real Estate Platform - Premium properties in Mogadishu",
+    "description": "Somalia's #1 Property Platform - Premium properties in Mogadishu",
     "potentialAction": {
       "@type": "SearchAction",
       "target": {
@@ -60,13 +60,13 @@ export function StructuredData() {
         "@type": "SiteNavigationElement",
         "name": "Agents",
         "url": `${baseUrl}/agents`,
-        "description": "Find trusted real estate agents in Mogadishu"
+        "description": "Find trusted property agents in Mogadishu"
       },
       {
         "@type": "SiteNavigationElement",
         "name": "About",
         "url": `${baseUrl}/about`,
-        "description": "Learn about Kobac Real Estate and our mission"
+        "description": "Learn about Kobac Property and our mission"
       }
     ]
   }

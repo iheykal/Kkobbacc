@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import EnhancedPropertyImage from './EnhancedPropertyImage';
 import EnhancedThumbnailNavigation from './EnhancedThumbnailNavigation';
+import { getAllImageUrls } from '@/lib/imageUrlResolver';
 
 interface EnhancedImageGalleryProps {
   property: {
@@ -50,7 +51,7 @@ export default function EnhancedImageGallery({
   const [selectedImage, setSelectedImage] = useState(0);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
-  const [imageAspectRatio, setImageAspectRatio] = useState<number>(4/5);
+  const [imageAspectRatio, setImageAspectRatio] = useState<number>(4 / 5);
   const [isAutoPlaying, setIsAutoPlaying] = useState(false);
   const preloadedImagesRef = useRef<Set<string>>(new Set());
 
@@ -126,7 +127,7 @@ export default function EnhancedImageGallery({
 
   const handleTouchEnd = () => {
     if (!enableTouchGestures || touchStart === null || touchEnd === null) return;
-    
+
     const distance = touchStart - touchEnd;
     const isLeftSwipe = distance > 50;
     const isRightSwipe = distance < -50;
@@ -188,11 +189,11 @@ export default function EnhancedImageGallery({
     const updateAspectRatio = () => {
       const width = window.innerWidth;
       if (width < 640) {
-        setImageAspectRatio(4/5); // Mobile: portrait
+        setImageAspectRatio(4 / 5); // Mobile: portrait
       } else if (width < 1024) {
-        setImageAspectRatio(16/10); // Tablet: landscape
+        setImageAspectRatio(16 / 10); // Tablet: landscape
       } else {
-        setImageAspectRatio(16/9); // Desktop: wide landscape
+        setImageAspectRatio(16 / 9); // Desktop: wide landscape
       }
     };
 
@@ -220,7 +221,7 @@ export default function EnhancedImageGallery({
   return (
     <div className={`${className} space-y-4`}>
       {/* Main Image Display */}
-      <div 
+      <div
         className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-100 shadow-lg"
         style={{ aspectRatio: maintainAspectRatio ? imageAspectRatio : 'auto' }}
         onTouchStart={handleTouchStart}
@@ -319,11 +320,11 @@ export default function EnhancedImageGallery({
           >
             {isAutoPlaying ? (
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
+                <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
               </svg>
             ) : (
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M8 5v14l11-7z"/>
+                <path d="M8 5v14l11-7z" />
               </svg>
             )}
           </motion.button>
@@ -354,9 +355,8 @@ function useEnhancedPropertyImages(property: {
   images?: string[];
   image?: string;
 }) {
-  const { getAllImageUrls } = require('@/lib/imageUrlResolver');
   const allImageUrls = getAllImageUrls(property);
-  
+
   return {
     allImageUrls,
     hasImages: allImageUrls.length > 0,

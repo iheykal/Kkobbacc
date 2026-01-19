@@ -16,9 +16,9 @@ export async function sendOTPEmail(email: string, otp: string) {
 
     // --- CUSTOMIZE EMAIL TEXT HERE ---
     const emailText = {
-      subject: 'Your Login Code - Kobac Real Estate', // Subject Line
+      subject: 'Your Login Code - Kobac Property', // Subject Line
       headerTitle: '🔐 Your Login Code',
-      welcome: 'Welcome to Kobac Real Estate!',
+      welcome: 'Welcome to Kobac Property!',
       intro: 'Your one-time password (OTP) to sign in is:',
       warning: '⏱️ This code will expire in 10 minutes.', // Expiration warning
       instruction: 'Enter this code on the login page to complete your sign in.',
@@ -29,9 +29,9 @@ export async function sendOTPEmail(email: string, otp: string) {
     // Somali Translation (Uncomment to use)
     /*
     const emailText = {
-      subject: 'Koodka Gelitaanka - Kobac Real Estate',
+      subject: 'Koodka Gelitaanka - Kobac Property',
       headerTitle: '🔐 Koodkaaga Gelitaanka',
-      welcome: 'Kusoo dhawow Kobac Real Estate!',
+      welcome: 'Kusoo dhawow Kobac Property!',
       intro: 'Koodkaaga (OTP) aad ku galeyso waa:',
       warning: '⏱️ Koodkan wuxuu dhacayaa 10 daqiiqo gudahood.',
       instruction: 'Geli koodkan bogga gelitaanka si aad u dhameystirto.',
@@ -149,9 +149,9 @@ export async function sendOTPEmail(email: string, otp: string) {
                 <p>${emailText.security}</p>
               </div>
               <div class="footer">
-                <p><strong>Kobac Real Estate</strong></p>
+                <p><strong>Kobac Property</strong></p>
                 <p>${emailText.footerTagline}</p>
-                <p style="margin-top: 15px;">© ${new Date().getFullYear()} Kobac Real Estate. All rights reserved.</p>
+                <p style="margin-top: 15px;">© ${new Date().getFullYear()} Kobac Property. All rights reserved.</p>
               </div>
             </div>
           </body>

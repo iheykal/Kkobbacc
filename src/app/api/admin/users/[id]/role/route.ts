@@ -5,7 +5,7 @@ import { UserStatus } from '@/models/User'
 
 // Ultimate superadmin protection - cannot be deleted or modified
 const ULTIMATE_SUPERADMIN_PHONE = '0610251014'
-const ULTIMATE_SUPERADMIN_NAME = 'Kobac Real Estate'
+const ULTIMATE_SUPERADMIN_NAME = 'Kobac Property'
 
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   try {
@@ -20,7 +20,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     let session: { userId: string; role: string } | null = null
     try {
       session = JSON.parse(decodeURIComponent(cookie))
-    } catch (_) {}
+    } catch (_) { }
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
@@ -46,16 +46,16 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 
     // 🛡️ ULTIMATE PROTECTION: Prevent modification of the ultimate superadmin
     if (targetUser.phone === ULTIMATE_SUPERADMIN_PHONE || targetUser.fullName === ULTIMATE_SUPERADMIN_NAME) {
-      return NextResponse.json({ 
+      return NextResponse.json({
         error: 'Forbidden: Cannot modify the ultimate superadmin. This account is protected and cannot be altered.',
         code: 'ULTIMATE_SUPERADMIN_PROTECTED'
       }, { status: 403 })
     }
 
     // Check if the admin user is the ultimate superadmin (Kobac superadmin)
-    const isKobacSuperadmin = adminUser.phone === ULTIMATE_SUPERADMIN_PHONE || 
-                              adminUser.fullName === ULTIMATE_SUPERADMIN_NAME ||
-                              adminUser.fullName.toLowerCase().includes('kobac')
+    const isKobacSuperadmin = adminUser.phone === ULTIMATE_SUPERADMIN_PHONE ||
+      adminUser.fullName === ULTIMATE_SUPERADMIN_NAME ||
+      adminUser.fullName.toLowerCase().includes('kobac')
 
     // Protect superadmin demotion - only allow if admin is Kobac superadmin
     if (targetUser.role === UserRole.SUPERADMIN && !isKobacSuperadmin) {
@@ -76,12 +76,12 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     if (isPromotingToAgent) {
       const currentAvatar = (targetUser as any).profile?.avatar
       if (!currentAvatar) {
-        return NextResponse.json({ 
+        return NextResponse.json({
           error: 'Profile picture is required to promote user to agent role. Please set a profile picture first.',
           code: 'AVATAR_REQUIRED_FOR_AGENT'
         }, { status: 400 })
       }
-      
+
       // Since avatar is required and present, automatically set status to ACTIVE
       targetUser.status = UserStatus.ACTIVE
     }

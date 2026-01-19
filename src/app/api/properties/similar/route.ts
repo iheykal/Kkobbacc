@@ -49,75 +49,89 @@ export async function GET(request: NextRequest) {
     const neighbors = DISTRICT_NEIGHBORS[district] || [];
     const allRelevantDistricts = [district, ...neighbors];
 
-    // Build query to find similar properties in current district AND neighbors
-    let query: any = {
-      district: { $in: allRelevantDistricts },
+    // Base query conditions
+    const baseQuery: any = {
       deletionStatus: { $ne: 'deleted' },
-      isExpired: { $ne: true } // Exclude expired properties
+      isExpired: { $ne: true }
     };
 
-    // Exclude the current property if excludeId is provided
+    // Exclude the current property
     if (excludeId) {
-      // Try to parse as number first, if it fails, treat as string
       const excludeIdNum = parseInt(excludeId);
       if (!isNaN(excludeIdNum)) {
-        query.$and = [
+        baseQuery.$and = [
           { _id: { $ne: excludeId } },
           { propertyId: { $ne: excludeIdNum } }
         ];
       } else {
-        query._id = { $ne: excludeId };
+        baseQuery._id = { $ne: excludeId };
       }
     }
 
-    // Find similar properties in current district and neighbors
-    // Optimized query with field selection for better performance
-    const similarProperties = await Property.find(query)
+    // Tier 1 & 2 Query: Current District + Neighbors
+    // We fetch a bit more than limit to ensure we have enough "Same District" candidates if they exist
+    const primaryQuery = {
+      ...baseQuery,
+      district: { $in: allRelevantDistricts }
+    };
+
+    const primaryResults = await Property.find(primaryQuery)
       .select('propertyId title location district price beds baths sqft propertyType listingType status thumbnailImage images agentId createdAt viewCount uniqueViewCount featured district measurement')
       .populate('agentId', 'fullName phone profile.avatar agentProfile.rating')
       .lean()
-      .limit(limit * 2); // Fetch more than needed for sorting, but limit DB query
-    
-    // Single-pass optimization: separate properties by district
-    const sameDistrictProps: any[] = [];
-    const neighborProps: any[] = [];
-    
-    for (const p of similarProperties) {
-      if (p.district === district) {
-        sameDistrictProps.push(p);
-      } else {
-        neighborProps.push(p);
-      }
-    }
-    
-    // Optimized sorting: pre-compute sort scores
-    const sortProps = (props: any[]) => {
-      // Pre-compute timestamps and sort scores once
-      for (const p of props) {
-        p._sortScore = (p.featured ? 1000000 : 0) + (p.viewCount || 0) * 100 + (new Date(p.createdAt).getTime() || 0) / 1000000;
-      }
-      return props.sort((a, b) => (b._sortScore || 0) - (a._sortScore || 0));
-    };
-    
-    const sortedSameDistrict = sortProps(sameDistrictProps);
-    const sortedNeighbors = sortProps(neighborProps);
-    
-    // Mix results: prioritize same district but ensure neighbors are included
-    // Take up to 4 from same district, then fill with neighbors
-    const sameDistrictCount = Math.min(sortedSameDistrict.length, Math.floor(limit * 0.7)); // 70% from same district
-    const neighborCount = limit - sameDistrictCount;
-    
-    const finalProperties = [
-      ...sortedSameDistrict.slice(0, sameDistrictCount),
-      ...sortedNeighbors.slice(0, neighborCount)
-    ];
-    
-    // Reduced logging for better performance
+      .limit(limit * 3); // Fetch extra to allow for in-memory sorting/splitting
 
-    // Process properties to ensure consistent agent data
+    // Split and Sort Primary Results
+    // strictly sort by createdAt (newest first)
+    const sortByDate = (a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+
+    const sameDistrictProps = primaryResults
+      .filter((p: any) => p.district === district)
+      .sort(sortByDate);
+
+    const neighborProps = primaryResults
+      .filter((p: any) => p.district !== district)
+      .sort(sortByDate);
+
+    // Build the list
+    let finalProperties = [...sameDistrictProps];
+
+    // If we haven't hit the limit, add neighbors
+    if (finalProperties.length < limit) {
+      const needed = limit - finalProperties.length;
+      finalProperties = [...finalProperties, ...neighborProps.slice(0, needed)];
+    } else {
+      // We have enough same-district properties, just slice to limit
+      finalProperties = finalProperties.slice(0, limit);
+    }
+
+    // Tier 3 Query: If we STILL don't have enough, fetch "Everything Else"
+    if (finalProperties.length < limit) {
+      const needed = limit - finalProperties.length;
+
+      // We need to exclude all the IDs we've already found to avoid duplicates
+      const existingIds = finalProperties.map(p => p._id);
+
+      const fallbackQuery = {
+        ...baseQuery,
+        _id: { $nin: [...existingIds, ...(excludeId ? [excludeId] : [])] }, // Exclude found + original
+        district: { $nin: allRelevantDistricts } // Optimization: Don't re-search districts we just searched
+      };
+
+      const fallbackResults = await Property.find(fallbackQuery)
+        .select('propertyId title location district price beds baths sqft propertyType listingType status thumbnailImage images agentId createdAt viewCount uniqueViewCount featured district measurement')
+        .populate('agentId', 'fullName phone profile.avatar agentProfile.rating')
+        .sort({ createdAt: -1 }) // Database sort by date
+        .limit(needed)
+        .lean();
+
+      finalProperties = [...finalProperties, ...fallbackResults];
+    }
+
+    // Process properties to ensure consistent agent data (keeping original helper logic)
     const processedProperties = finalProperties.map(property => {
       const propertyObj = property;
-      
+
       // Store the original agentId as a string for navigation
       let originalAgentId = null;
       if (propertyObj.agentId) {
@@ -127,13 +141,13 @@ export async function GET(request: NextRequest) {
           originalAgentId = (propertyObj.agentId as any)._id.toString();
         }
       }
-      
+
       // Use populated agentId data for fresh agent information
       if (propertyObj.agentId && typeof propertyObj.agentId === 'object') {
         const agentData = propertyObj.agentId as any;
         const agentAvatar = agentData.profile?.avatar;
         const agentRating = agentData.agentProfile?.rating || 0;
-        
+
         return {
           ...propertyObj,
           agentId: originalAgentId,
@@ -145,7 +159,7 @@ export async function GET(request: NextRequest) {
           }
         };
       }
-      
+
       return {
         ...propertyObj,
         agentId: originalAgentId,
@@ -164,17 +178,16 @@ export async function GET(request: NextRequest) {
       properties: processedProperties,
       count: processedProperties.length
     });
-    
-    // Set aggressive cache headers - recommendations can be cached longer
+
+    // Set aggressive cache headers
     response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=1200, max-age=60');
-    
+
     return response;
 
   } catch (error) {
-    // Reduced error logging for better performance
     console.error('❌ GET /api/properties/similar - Error:', error instanceof Error ? error.message : 'Unknown error');
     return NextResponse.json(
-      { 
+      {
         error: 'Failed to fetch similar properties',
         details: error instanceof Error ? error.message : 'Unknown error'
       },

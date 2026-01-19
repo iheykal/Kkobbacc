@@ -6,11 +6,11 @@ import React, { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigation } from '@/contexts/NavigationContext'
-import { 
-  Bed, 
-  Bath, 
-  Phone, 
-  Mail, 
+import {
+  Bed,
+  Bath,
+  Phone,
+  Mail,
   ArrowLeft,
   Star,
   Calendar,
@@ -84,19 +84,19 @@ export default function AgentProfilePage() {
   const params = useParams()
   const router = useRouter()
   const { setPreviousPage } = useNavigation()
-  
+
   // Get slug from params (can be either slug or ID for backward compatibility)
   const slugOrId = params.id;
-  
+
   // The slug/id can be:
   // 1. A URL-friendly slug (e.g., "kobac-real-estate")
   // 2. A MongoDB ObjectId (for backward compatibility)
   // 3. Invalid value (will be handled by API)
-  
+
   // We'll let the API resolve it to an actual agentId
   // For now, just use the slug/id as-is for API calls
   const agentSlugOrId = typeof slugOrId === 'string' ? slugOrId : String(slugOrId || '');
-  
+
   // Validate it's not [object Object]
   if (agentSlugOrId === '[object Object]' || agentSlugOrId.includes('object Object')) {
     console.error('❌ Invalid slug/ID in params:', slugOrId);
@@ -106,10 +106,10 @@ export default function AgentProfilePage() {
       }, 100);
     }
   }
-  
+
   const [agent, setAgent] = useState<Agent | null>(null)
   const [properties, setProperties] = useState<Property[]>([])
-  
+
   // Check if slug/ID is invalid - including URL-encoded [object Object]
   let decodedCheckSlug = agentSlugOrId;
   try {
@@ -117,22 +117,22 @@ export default function AgentProfilePage() {
   } catch (e) {
     decodedCheckSlug = agentSlugOrId;
   }
-  
-  const isInvalidSlug = !agentSlugOrId || 
-    agentSlugOrId === '[object Object]' || 
-    agentSlugOrId.includes('object Object') || 
-    decodedCheckSlug === '[object Object]' || 
+
+  const isInvalidSlug = !agentSlugOrId ||
+    agentSlugOrId === '[object Object]' ||
+    agentSlugOrId.includes('object Object') ||
+    decodedCheckSlug === '[object Object]' ||
     decodedCheckSlug.includes('object Object') ||
     agentSlugOrId.length === 0 ||
     agentSlugOrId === '%5Bobject%20Object%5D' || // URL-encoded [object Object]
     agentSlugOrId.includes('%5Bobject%20Object%5D');
   const [loading, setLoading] = useState(!isInvalidSlug)
   const [error, setError] = useState<string | null>(
-    isInvalidSlug 
-      ? 'Invalid agent slug detected in URL. Redirecting to home page...' 
+    isInvalidSlug
+      ? 'Invalid agent slug detected in URL. Redirecting to home page...'
       : null
   )
-  
+
   // Redirect immediately if slug is invalid
   useEffect(() => {
     if (isInvalidSlug && typeof window !== 'undefined') {
@@ -155,7 +155,7 @@ export default function AgentProfilePage() {
       setLoading(false);
       return;
     }
-    
+
     // Validate slug is a valid string before proceeding
     if (!agentSlugOrId || agentSlugOrId === '[object Object]' || agentSlugOrId.includes('object Object') || agentSlugOrId.length === 0) {
       console.error('❌ Invalid agent slug in useEffect:', agentSlugOrId);
@@ -163,7 +163,7 @@ export default function AgentProfilePage() {
       setLoading(false);
       return;
     }
-    
+
     if (agentSlugOrId && typeof agentSlugOrId === 'string' && agentSlugOrId.length > 0) {
       // Warm cache first, then fetch data
       // Use slug for API call - API will resolve it to agentId
@@ -181,7 +181,7 @@ export default function AgentProfilePage() {
           console.log('Cache warming failed, proceeding with normal fetch');
         }
       };
-      
+
       warmCache().then(() => {
         fetchAgentData();
       });
@@ -202,7 +202,7 @@ export default function AgentProfilePage() {
       }
       return;
     }
-    
+
     try {
       setLoading(true)
       setError(null)
@@ -219,7 +219,7 @@ export default function AgentProfilePage() {
         }
         return;
       }
-      
+
       // Additional validation - decode URL-encoded strings to check for [object Object]
       const decodedSlug = decodeURIComponent(agentSlugOrId);
       if (decodedSlug === '[object Object]' || decodedSlug.includes('object Object')) {
@@ -252,7 +252,7 @@ export default function AgentProfilePage() {
           }
         })
         clearTimeout(instantTimeoutId)
-        
+
         // Check if instant API returned "no cache" error
         if (response.status === 404) {
           const instantResult = await response.json()
@@ -264,11 +264,11 @@ export default function AgentProfilePage() {
       } catch (instantError) {
         clearTimeout(instantTimeoutId)
         console.log('Instant API failed, trying minimal API:', instantError)
-        
+
         // Try minimal API (1.5s timeout)
         const minimalController = new AbortController()
         const minimalTimeoutId = setTimeout(() => minimalController.abort(), 1500) // 1.5s timeout
-        
+
         try {
           response = await fetch(`/api/agents/${encodedSlug}/minimal`, {
             cache: 'no-store',
@@ -282,11 +282,11 @@ export default function AgentProfilePage() {
         } catch (minimalError) {
           clearTimeout(minimalTimeoutId)
           console.log('Minimal API failed, trying main API:', minimalError)
-          
+
           // Fallback to main API (3s timeout)
           const mainController = new AbortController()
           const mainTimeoutId = setTimeout(() => mainController.abort(), 3000) // 3s timeout
-          
+
           response = await fetch(`/api/agents/${encodedSlug}`, {
             cache: 'no-store',
             signal: mainController.signal,
@@ -298,7 +298,7 @@ export default function AgentProfilePage() {
           clearTimeout(mainTimeoutId)
         }
       }
-      
+
       const result = await response.json()
 
       console.log('⚡ Single API response:', result)
@@ -314,7 +314,7 @@ export default function AgentProfilePage() {
           rating: 5.0
         })
         setProperties(agentData.properties || [])
-        
+
         if (result.cached) {
           console.log('⚡ Data loaded from cache - instant response!')
         }
@@ -323,7 +323,7 @@ export default function AgentProfilePage() {
       }
     } catch (error) {
       console.error('Error in fetchAgentData:', error)
-      
+
       // Retry logic for network errors
       const errorObj = error as Error
       if (retryCount < 2 && (errorObj.name === 'AbortError' || errorObj.message?.includes('fetch'))) {
@@ -334,7 +334,7 @@ export default function AgentProfilePage() {
         }, 1000)
         return
       }
-      
+
       if (errorObj.name === 'AbortError') {
         setError('Request timed out. Please check your connection and try again.')
       } else if (errorObj.message?.includes('fetch')) {
@@ -352,7 +352,7 @@ export default function AgentProfilePage() {
     if (typeof window !== 'undefined') {
       setPreviousPage(window.location.pathname)
     }
-    
+
     // Navigate to property detail page using client-side routing for faster loading
     const propertyId = property.propertyId || property._id
     // Determine type based on status: "Kiro" for rent, "Iib" for sale
@@ -390,7 +390,7 @@ export default function AgentProfilePage() {
           {retryCount > 0 && (
             <div className="mt-2">
               <div className="w-32 bg-gray-200 rounded-full h-2 mx-auto">
-                <div 
+                <div
                   className="bg-blue-600 h-2 rounded-full transition-all duration-300"
                   style={{ width: `${(retryCount / 3) * 100}%` }}
                 ></div>
@@ -410,7 +410,7 @@ export default function AgentProfilePage() {
             <h2 className="text-lg font-semibold mb-2">Error</h2>
             <p>{error || 'Agent not found'}</p>
             <div className="flex gap-3 mt-4 justify-center">
-              <Button 
+              <Button
                 onClick={() => {
                   // Validate slug before retrying
                   if (isInvalidSlug || !agentSlugOrId || agentSlugOrId === '[object Object]' || agentSlugOrId.includes('object Object') || agentSlugOrId.length === 0) {
@@ -432,7 +432,7 @@ export default function AgentProfilePage() {
               >
                 🔄 Retry
               </Button>
-              <Button 
+              <Button
                 onClick={handleBack}
                 variant="ghost"
               >
@@ -511,11 +511,11 @@ export default function AgentProfilePage() {
                 </div>
                 <div className="text-center md:text-left">
                   <h2 className="text-3xl font-bold mb-2">{capitalizeName(agent.name)}</h2>
-                  <p className="text-blue-100 mb-4">Wakiilka Kobac Real Estate</p>
+                  <p className="text-blue-100 mb-4">Wakiilka Kobac Property</p>
                   <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-6">
                     <div className="flex items-center space-x-2">
                       <Phone className="w-4 h-4" />
-                      <span 
+                      <span
                         className="cursor-pointer hover:text-blue-600 transition-colors"
                         onClick={() => {
                           if (agent.phone) {
@@ -570,7 +570,7 @@ export default function AgentProfilePage() {
                       transition={{ duration: 0.8, delay: index * 0.1 }}
                       className="group"
                     >
-                      <div 
+                      <div
                         className="relative bg-white rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500 cursor-pointer transform hover:-translate-y-2"
                         onClick={() => handlePropertyClick(property)}
                       >
@@ -584,10 +584,10 @@ export default function AgentProfilePage() {
                             watermarkPosition="center"
                             watermarkSize="medium"
                           />
-                          
+
                           {/* Overlay Elements */}
                           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-                          
+
                           {/* Top Badges */}
                           <div className="absolute top-6 left-6 flex flex-col gap-2">
                             <div className="bg-white/90 backdrop-blur-sm text-slate-800 px-4 py-2 rounded-full text-sm font-semibold shadow-lg">
@@ -600,7 +600,7 @@ export default function AgentProfilePage() {
 
                           {/* Action Buttons */}
                           <div className="absolute top-6 right-6">
-                            <button 
+                            <button
                               className="w-12 h-12 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white transition-all duration-300 shadow-lg group/btn"
                               onClick={(e) => {
                                 e.stopPropagation()
@@ -622,9 +622,12 @@ export default function AgentProfilePage() {
                               </h3>
                             </div>
                             <div className="flex items-center text-slate-600 mb-3 md:mb-4">
-                              <img 
-                                src="/icons/adress.png" 
-                                alt="Location" 
+                              <video
+                                src="/icons/Adress3.webm"
+                                autoPlay
+                                loop
+                                muted
+                                playsInline
                                 className="w-4 h-4 md:w-5 md:h-5 mr-2 object-contain"
                               />
                               <span className="text-base md:text-lg">{property.location}</span>
@@ -635,10 +638,10 @@ export default function AgentProfilePage() {
                                 <span className="text-base md:text-lg font-medium">{property.district}</span>
                               </div>
                             )}
-                            
+
                             {/* Price Display */}
                             <div className="mb-4 md:mb-6">
-                              <div 
+                              <div
                                 className="text-2xl md:text-3xl font-bold text-green-600"
                                 dangerouslySetInnerHTML={{ __html: formatPrice(property.price, property.listingType) }}
                               />
@@ -646,33 +649,32 @@ export default function AgentProfilePage() {
                           </div>
 
                           {/* Stats Grid */}
-                          <div className={`grid gap-4 md:gap-6 mb-6 md:mb-8 ${
-                            property.status === 'For Sale' 
-                              ? (property.beds > 0 && property.baths > 0 ? 'grid-cols-3' : 'grid-cols-2')
-                              : 'grid-cols-2'
-                          }`}>
+                          <div className={`grid gap-4 md:gap-6 mb-6 md:mb-8 ${property.status === 'For Sale'
+                            ? (property.beds > 0 && property.baths > 0 ? 'grid-cols-3' : 'grid-cols-2')
+                            : 'grid-cols-2'
+                            }`}>
                             {/* Bedrooms and Bathrooms - Only show if values are greater than 0 */}
                             {property.beds > 0 && property.baths > 0 && (
                               <>
                                 <div className="text-center group/stat">
                                   <div className="w-12 h-12 md:w-16 md:h-16 flex items-center justify-center mx-auto mb-2 md:mb-3 group-hover/stat:scale-110 transition-transform duration-300">
-                                    <img 
-                                      src="/icons/bed.png" 
-                                      alt="Bed" 
+                                    <img
+                                      src="/icons/bed.png"
+                                      alt="Bed"
                                       className="w-7 h-7 md:w-9 md:h-9 object-contain"
                                     />
                                   </div>
                                   <div className="text-lg md:text-2xl font-bold text-slate-900 mb-1">{property.beds}</div>
                                   <div className="text-slate-600 text-xs md:text-sm font-medium">Qol</div>
                                 </div>
-                                
+
                                 <div className="text-center group/stat">
                                   <div className="w-16 h-16 md:w-20 md:h-20 flex items-center justify-center mx-auto mb-2 md:mb-3 group-hover/stat:scale-110 transition-transform duration-300">
-                                    <video 
-                                      src="/icons/shower1.mp4" 
-                                      autoPlay 
-                                      loop 
-                                      muted 
+                                    <video
+                                      src="/icons/shower1.mp4"
+                                      autoPlay
+                                      loop
+                                      muted
                                       playsInline
                                       className="w-9 h-9 md:w-11 md:h-11 object-contain"
                                     />
@@ -687,9 +689,9 @@ export default function AgentProfilePage() {
                             {property.status === 'For Sale' && property.measurement && (
                               <div className="text-center group/stat">
                                 <div className="w-12 h-12 md:w-16 md:h-16 flex items-center justify-center mx-auto mb-2 md:mb-3 group-hover/stat:scale-110 transition-transform duration-300">
-                                  <img 
-                                    src="/icons/ruler.webp" 
-                                    alt="Measurement" 
+                                  <img
+                                    src="/icons/ruler.webp"
+                                    alt="Measurement"
                                     className="w-7 h-7 md:w-9 md:h-9 object-contain"
                                   />
                                 </div>
@@ -716,7 +718,7 @@ export default function AgentProfilePage() {
                                   {capitalizeName(property.agent?.name || 'Agent')}
                                 </div>
                                 <div className="text-xs text-slate-500">
-                                  <span 
+                                  <span
                                     className="cursor-pointer hover:text-blue-600 transition-colors"
                                     onClick={() => {
                                       if (property.agent?.phone) {

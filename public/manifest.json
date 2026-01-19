@@ -1,7 +1,7 @@
 {
-  "name": "Kobac Real Estate",
+  "name": "Kobac Property",
   "short_name": "Kobac",
-  "description": "Premium luxury real estate properties",
+  "description": "Premium luxury properties in Somalia",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
@@ -57,7 +57,10 @@
       "purpose": "any maskable"
     }
   ],
-  "categories": ["business", "real estate"],
+  "categories": [
+    "business",
+    "property"
+  ],
   "screenshots": [],
   "shortcuts": [
     {
@@ -74,4 +77,3 @@
     }
   ]
 }
-

@@ -2,12 +2,12 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Shield, 
-  CheckCircle, 
-  XCircle, 
-  Clock, 
-  Crown, 
+import {
+  Shield,
+  CheckCircle,
+  XCircle,
+  Clock,
+  Crown,
   AlertTriangle,
   Search,
   Filter,
@@ -57,9 +57,9 @@ export default function BlueTickManagementPage() {
 
   // Helper function to check if user is ultimate superadmin
   const isUltimateSuperadmin = (user: any) => {
-    return user?.phone === '0610251014' || 
-           user?.fullName === 'Kobac Real Estate' ||
-           user?.fullName?.toLowerCase().includes('kobac')
+    return user?.phone === '0610251014' ||
+      user?.fullName === 'Kobac Property' ||
+      user?.fullName?.toLowerCase().includes('kobac')
   }
 
   useEffect(() => {
@@ -79,7 +79,7 @@ export default function BlueTickManagementPage() {
         setLoading(false);
       }
     };
-    
+
     checkAccess();
   }, []);
 
@@ -88,7 +88,7 @@ export default function BlueTickManagementPage() {
       setLoading(true);
       const response = await fetch('/api/admin/agents/blue-tick');
       const result = await response.json();
-      
+
       if (response.ok) {
         setAgents(result.data);
       } else {
@@ -104,10 +104,10 @@ export default function BlueTickManagementPage() {
 
   const filteredAgents = agents.filter(agent => {
     const matchesSearch = agent.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         agent.phone.includes(searchTerm);
-    const matchesStatus = statusFilter === 'all' || 
-                         agent.agentProfile?.blueTickStatus === statusFilter;
-    
+      agent.phone.includes(searchTerm);
+    const matchesStatus = statusFilter === 'all' ||
+      agent.agentProfile?.blueTickStatus === statusFilter;
+
     return matchesSearch && matchesStatus;
   });
 
@@ -130,7 +130,7 @@ export default function BlueTickManagementPage() {
       });
 
       const result = await response.json();
-      
+
       if (response.ok) {
         alert(`Blue tick ${actionType}ed successfully for ${selectedAgent.fullName}`);
         setShowActionModal(false);
@@ -211,7 +211,7 @@ export default function BlueTickManagementPage() {
               <h3 className="text-xl font-semibold text-white mb-3">Ultimate Superadmin Requirements:</h3>
               <ul className="text-gray-300 space-y-2">
                 <li>• Phone number: 0610251014</li>
-                <li>• Full name: Kobac Real Estate</li>
+                <li>• Full name: Kobac Property</li>
                 <li>• Role: super_admin</li>
               </ul>
             </div>
@@ -328,7 +328,7 @@ export default function BlueTickManagementPage() {
                 />
               </div>
             </div>
-            
+
             <div className="flex gap-4">
               <select
                 value={statusFilter}
@@ -341,7 +341,7 @@ export default function BlueTickManagementPage() {
                 <option value="verified">Verified</option>
                 <option value="suspended">Suspended</option>
               </select>
-              
+
               <button
                 onClick={fetchAgents}
                 disabled={loading}
@@ -410,13 +410,12 @@ export default function BlueTickManagementPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                          agent.status === 'active' ? 'bg-green-100 text-green-800' :
-                          agent.status === 'pending_verification' ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-red-100 text-red-800'
-                        }`}>
-                          {agent.status === 'active' ? 'Active' : 
-                           agent.status === 'pending_verification' ? 'Pending' : 'Inactive'}
+                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${agent.status === 'active' ? 'bg-green-100 text-green-800' :
+                            agent.status === 'pending_verification' ? 'bg-yellow-100 text-yellow-800' :
+                              'bg-red-100 text-red-800'
+                          }`}>
+                          {agent.status === 'active' ? 'Active' :
+                            agent.status === 'pending_verification' ? 'Pending' : 'Inactive'}
                         </span>
                       </td>
                       <td className="px-6 py-4">
@@ -436,7 +435,7 @@ export default function BlueTickManagementPage() {
                             <Award className="w-3 h-3 mr-1" />
                             Grant
                           </button>
-                          
+
                           <button
                             onClick={() => {
                               setSelectedAgent(agent);
@@ -449,7 +448,7 @@ export default function BlueTickManagementPage() {
                             <Ban className="w-3 h-3 mr-1" />
                             Suspend
                           </button>
-                          
+
                           <button
                             onClick={() => {
                               setSelectedAgent(agent);
@@ -492,7 +491,7 @@ export default function BlueTickManagementPage() {
                   {actionType === 'suspend' && 'Suspend Blue Tick'}
                   {actionType === 'reinstate' && 'Reinstate Blue Tick'}
                 </h3>
-                
+
                 <div className="mb-4">
                   <p className="text-gray-600 mb-2">Agent: <span className="font-medium">{selectedAgent.fullName}</span></p>
                   <p className="text-gray-600">Current Status: <span className="font-medium">{selectedAgent.agentProfile?.blueTickStatus || 'none'}</span></p>

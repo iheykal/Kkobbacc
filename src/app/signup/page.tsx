@@ -26,31 +26,31 @@ export default function SignupPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     // Validate password using new rules (5+ chars, numbers or letters)
     if (formData.password.length < 5) {
       alert('Password must be at least 5 characters long')
       return
     }
-    
+
     const hasNumber = /\d/.test(formData.password)
     const hasAlphabet = /[a-zA-Z]/.test(formData.password)
-    
+
     if (!hasNumber && !hasAlphabet) {
       alert('Password must contain at least one number or one alphabet')
       return
     }
-    
+
     // Allow numbers only, text only, or mixed passwords
-    
+
     // Validate phone number format (should have 9 digits)
     if (!/^\d{9}$/.test(formData.phone)) {
       alert('Please enter a valid phone number (9 digits, e.g., 61xxxxxxx)')
       return
     }
-    
+
     setIsLoading(true)
-    
+
     try {
       const signupData = {
         firstName: formData.fullName.split(' ')[0] || formData.fullName,
@@ -61,9 +61,9 @@ export default function SignupPage() {
         location: '',
         avatar: ''
       }
-      
+
       const success = await signup(signupData)
-      
+
       if (success) {
         router.push('/')
       }
@@ -106,7 +106,7 @@ export default function SignupPage() {
             <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
               <User className="w-8 h-8 text-white" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Join Kobac Real Estate</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Join Kobac Property</h2>
             <p className="text-gray-600">Create your account to get started</p>
           </div>
 

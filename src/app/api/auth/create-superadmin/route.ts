@@ -8,23 +8,23 @@ export async function POST(request: NextRequest) {
   try {
     console.log('👑 Creating SuperAdmin request received');
     await connectDB();
-    
+
     const body = await request.json();
     const { fullName, phone, password, adminToken } = body;
-    
+
     // Secure admin token validation - only allow from specific IPs or with valid token
     const ADMIN_TOKEN = process.env.ADMIN_TOKEN || 'kobac2025-secure-admin-token';
     const ALLOWED_IPS = process.env.ALLOWED_IPS?.split(',') || ['127.0.0.1', '::1', 'localhost'];
-    
+
     // Get client IP
-    const clientIP = request.headers.get('x-forwarded-for') || 
-                    request.headers.get('x-real-ip') || 
-                    'unknown';
-    
+    const clientIP = request.headers.get('x-forwarded-for') ||
+      request.headers.get('x-real-ip') ||
+      'unknown';
+
     // Check if request is from allowed IP or has valid admin token
     const hasValidToken = adminToken === ADMIN_TOKEN;
     const isAllowedIP = ALLOWED_IPS.some(ip => clientIP.includes(ip.trim()));
-    
+
     if (!hasValidToken && !isAllowedIP) {
       console.log('❌ Unauthorized SuperAdmin creation attempt from IP:', clientIP);
       return NextResponse.json(
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
         { status: 403 }
       );
     }
-    
+
     // Validate required fields
     if (!fullName || !phone || !password) {
       console.log('❌ Missing required fields');
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    
+
     // Validate password using new rules (5+ chars, numbers or letters)
     const passwordError = validatePassword(password, phone);
     if (passwordError) {
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    
+
     // Validate phone number format (should start with +252 and have 9 digits after)
     if (!/^\+252\d{9}$/.test(phone)) {
       return NextResponse.json(
@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    
+
     // Check if user already exists
     const existingUser = await User.findOne({ phone });
     if (existingUser) {
@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
         { status: 409 }
       );
     }
-    
+
     // Check if SuperAdmin already exists (consider both legacy and new role values)
     const existingSuperAdmin = await User.findOne({ role: { $in: [UserRole.SUPER_ADMIN, UserRole.SUPERADMIN] } });
     if (existingSuperAdmin) {
@@ -78,12 +78,12 @@ export async function POST(request: NextRequest) {
         { status: 409 }
       );
     }
-    
+
     console.log('✅ Creating SuperAdmin...');
-    
+
     // Store password as plain text (no hashing)
     console.log('🔐 Storing SuperAdmin password as plain text');
-    
+
     // Create SuperAdmin user
     const superAdmin = new User({
       fullName,
@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
         avatar: generateSuperAdminAvatar(phone, fullName),
         location: 'Somalia',
         occupation: 'System Administrator',
-        company: 'Kobac Real Estate'
+        company: 'Kobac Property'
       },
       preferences: {
         favoriteProperties: [],
@@ -117,10 +117,10 @@ export async function POST(request: NextRequest) {
         twoFactorEnabled: false
       }
     });
-    
+
     await superAdmin.save();
     console.log('✅ SuperAdmin created successfully:', superAdmin._id);
-    
+
     // Return user data (without password)
     const userResponse = {
       id: superAdmin._id,
@@ -131,13 +131,13 @@ export async function POST(request: NextRequest) {
       permissions: superAdmin.permissions,
       createdAt: superAdmin.createdAt
     };
-    
-    return NextResponse.json({ 
-      success: true, 
+
+    return NextResponse.json({
+      success: true,
       message: 'SuperAdmin created successfully',
       data: userResponse
     }, { status: 201 });
-    
+
   } catch (error) {
     console.error('Error during SuperAdmin creation:', error);
     return NextResponse.json(

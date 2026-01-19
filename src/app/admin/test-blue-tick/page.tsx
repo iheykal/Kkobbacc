@@ -22,7 +22,7 @@ export default function TestBlueTickPage() {
         setAccessDenied(true);
       }
     };
-    
+
     checkAccess();
   }, []);
 
@@ -36,7 +36,7 @@ export default function TestBlueTickPage() {
         action: async () => {
           const response = await fetch('/api/admin/agents/blue-tick');
           const result = await response.json();
-          
+
           if (response.status === 403 && result.code === 'ULTIMATE_SUPERADMIN_REQUIRED') {
             return '✅ API correctly restricts access to ultimate superadmin only';
           } else if (response.ok) {
@@ -67,7 +67,7 @@ export default function TestBlueTickPage() {
           try {
             const response = await fetch('/api/test-db');
             const result = await response.json();
-            
+
             if (response.ok && result.data) {
               return '✅ User model schema includes blue tick fields';
             } else {
@@ -114,7 +114,7 @@ export default function TestBlueTickPage() {
               <h3 className="text-xl font-semibold text-white mb-3">Ultimate Superadmin Requirements:</h3>
               <ul className="text-gray-300 space-y-2">
                 <li>• Phone number: 0610251014</li>
-                <li>• Full name: Kobac Real Estate</li>
+                <li>• Full name: Kobac Property</li>
                 <li>• Role: super_admin</li>
               </ul>
             </div>
@@ -169,7 +169,7 @@ export default function TestBlueTickPage() {
         <div className="bg-white/10 backdrop-blur-lg rounded-xl border border-white/20 overflow-hidden">
           <div className="p-6">
             <h3 className="text-lg font-semibold text-white mb-4">Test Results</h3>
-            
+
             {testResults.length === 0 ? (
               <div className="text-center py-8">
                 <Award className="w-16 h-16 text-gray-400 mx-auto mb-4" />
@@ -183,21 +183,19 @@ export default function TestBlueTickPage() {
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.1 }}
-                    className={`p-3 rounded-lg ${
-                      result.includes('✅') 
-                        ? 'bg-green-100/10 border border-green-200/20' 
+                    className={`p-3 rounded-lg ${result.includes('✅')
+                        ? 'bg-green-100/10 border border-green-200/20'
                         : result.includes('❌')
-                        ? 'bg-red-100/10 border border-red-200/20'
-                        : 'bg-blue-100/10 border border-blue-200/20'
-                    }`}
+                          ? 'bg-red-100/10 border border-red-200/20'
+                          : 'bg-blue-100/10 border border-blue-200/20'
+                      }`}
                   >
-                    <p className={`text-sm ${
-                      result.includes('✅') 
-                        ? 'text-green-300' 
+                    <p className={`text-sm ${result.includes('✅')
+                        ? 'text-green-300'
                         : result.includes('❌')
-                        ? 'text-red-300'
-                        : 'text-blue-300'
-                    }`}>
+                          ? 'text-red-300'
+                          : 'text-blue-300'
+                      }`}>
                       {result}
                     </p>
                   </motion.div>
@@ -220,7 +218,7 @@ export default function TestBlueTickPage() {
             </div>
             <p className="text-gray-300 text-sm">
               Phone: +252610251014<br />
-              Name: Kobac Real Estate<br />
+              Name: Kobac Property<br />
               Status: Protected
             </p>
           </motion.div>

@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     let session: { userId: string; role: string } | null = null
-    try { session = JSON.parse(decodeURIComponent(cookie)) } catch {}
+    try { session = JSON.parse(decodeURIComponent(cookie)) } catch { }
     if (!session?.userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
@@ -21,12 +21,12 @@ export async function POST(req: NextRequest) {
     // Allow superadmin, agency, and users with admin permissions
     const allowedRoles = ['superadmin', 'super_admin', 'agency'];
     const hasAdminPermissions = adminUser?.permissions?.canManageUsers;
-    
+
     if (!adminUser || (!allowedRoles.includes(adminUser.role) && !hasAdminPermissions)) {
       return NextResponse.json({ error: 'Admin access required' }, { status: 403 })
     }
 
-    // Find Kobac Real Estate agent
+    // Find Kobac Property agent
     const kobacAgent = await User.findOne({
       $or: [
         { fullName: { $regex: /kobac/i } },
@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
     })
 
     if (!kobacAgent) {
-      return NextResponse.json({ error: 'Kobac Real Estate agent not found' }, { status: 404 })
+      return NextResponse.json({ error: 'Kobac Property agent not found' }, { status: 404 })
     }
 
     // Initialize agentProfile if it doesn't exist
@@ -77,9 +77,9 @@ export async function POST(req: NextRequest) {
 
     await kobacAgent.save()
 
-    return NextResponse.json({ 
-      success: true, 
-      message: 'Blue tick granted to Kobac Real Estate successfully',
+    return NextResponse.json({
+      success: true,
+      message: 'Blue tick granted to Kobac Property successfully',
       agentName: kobacAgent.fullName,
       blueTickStatus: kobacAgent.agentProfile.blueTickStatus,
       verified: kobacAgent.agentProfile.verified

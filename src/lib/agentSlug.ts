@@ -13,11 +13,11 @@ import connectDB from '@/lib/mongodb';
 
 /**
  * Generate a URL-friendly slug from agent name
- * Example: "Kobac Real Estate" -> "kobac-real-estate"
+ * Example: "Kobac Property" -> "kobac-property"
  */
 export function generateSlug(name: string): string {
   if (!name) return '';
-  
+
   return name
     .toLowerCase()
     .trim()
@@ -33,7 +33,7 @@ export function generateSlug(name: string): string {
  */
 export async function getUniqueSlug(agentId: string, name: string): Promise<string> {
   await connectDB();
-  
+
   const baseSlug = generateSlug(name);
   if (!baseSlug) {
     // Fallback to ID-based slug if name is empty
@@ -43,29 +43,29 @@ export async function getUniqueSlug(agentId: string, name: string): Promise<stri
   // Check if base slug exists for another agent
   let slug = baseSlug;
   let counter = 1;
-  
+
   while (true) {
     const existingAgent = await User.findOne({
       'profile.slug': slug,
       _id: { $ne: agentId }
     }).select('_id').lean();
-    
+
     if (!existingAgent) {
       // Slug is available
       break;
     }
-    
+
     // Slug exists, try with number suffix
     counter++;
     slug = `${baseSlug}-${counter}`;
-    
+
     // Prevent infinite loop (max 100 attempts)
     if (counter > 100) {
       slug = `${baseSlug}-${Date.now()}`;
       break;
     }
   }
-  
+
   return slug;
 }
 
@@ -74,17 +74,17 @@ export async function getUniqueSlug(agentId: string, name: string): Promise<stri
  */
 export async function resolveAgentIdFromSlug(slugOrId: string): Promise<string | null> {
   await connectDB();
-  
+
   // First try to find by slug
   const agentBySlug = await User.findOne({
     'profile.slug': slugOrId,
     role: { $in: ['agent', 'agency'] }
   }).select('_id').lean();
-  
+
   if (agentBySlug && !Array.isArray(agentBySlug) && agentBySlug._id) {
     return agentBySlug._id.toString();
   }
-  
+
   // If not found by slug, try as ObjectId (for backward compatibility)
   if (/^[0-9a-fA-F]{24}$/.test(slugOrId)) {
     const agentById = await User.findById(slugOrId).select('_id').lean();
@@ -92,7 +92,7 @@ export async function resolveAgentIdFromSlug(slugOrId: string): Promise<string |
       return agentById._id.toString();
     }
   }
-  
+
   return null;
 }
 
@@ -101,14 +101,14 @@ export async function resolveAgentIdFromSlug(slugOrId: string): Promise<string |
  */
 export async function getAgentSlug(agentId: string, agentName?: string): Promise<string> {
   await connectDB();
-  
+
   // Try to get existing slug from user profile
   const user = await User.findById(agentId).select('profile.slug fullName firstName lastName').lean();
-  
+
   if (user && !Array.isArray(user) && user.profile?.slug) {
     return user.profile.slug;
   }
-  
+
   // Generate slug from name
   const userObj = user && !Array.isArray(user) ? user : null;
   const name = agentName || userObj?.fullName || `${userObj?.firstName || ''} ${userObj?.lastName || ''}`.trim();

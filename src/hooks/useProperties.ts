@@ -99,33 +99,38 @@ export const useProperties = (featured?: boolean, filters?: FilterOptions) => {
         cacheValid = cacheAge < cacheValidTime;
       }
 
-      const cacheFreshForMobile = cacheAge < 60000;
-      const canUseCacheImmediately = !!cachedData && cacheValid && (!isMobile || cacheFreshForMobile);
+      const hasCachedData = !!cachedData;
 
-      if (!canUseCacheImmediately) {
+      // STRATEGY: Stale-While-Revalidate
+      // 1. If we have ANY cached data (fresh or stale), show it immediately.
+      // This prevents the page from "collapsing" to a loading spinner, which destroys scroll position.
+      if (hasCachedData) {
+        try {
+          const parsed = JSON.parse(cachedData!);
+          if (Array.isArray(parsed)) {
+            setProperties(parsed);
+            setLoading(false); // Show content immediately
+            setHasHydratedFromCache(true);
+          }
+        } catch (parseError) {
+          console.warn('⚠️ Failed to parse cached data, will fetch fresh:', parseError);
+          // If parse fails, treat as no cache
+          setLoading(true);
+        }
+      } else {
+        // Only show loading spinner if we have absolutely NO data to show
         setLoading(true);
       }
 
-      // Check cache first (but skip on mobile for first load to ensure fresh data)
-      if (canUseCacheImmediately && cachedData) {
-        try {
-          const parsed = JSON.parse(cachedData);
-          if (Array.isArray(parsed)) {
-            setProperties(parsed);
-            setLoading(false);
-            setHasHydratedFromCache(true);
-          }
-          // Still fetch fresh data in background for mobile
-          if (isMobile) {
-            // Continue to fetch fresh data below
-          } else {
-            return;
-          }
-        } catch (parseError) {
-          console.warn('⚠️ Failed to parse cached data, fetching fresh:', parseError);
-          // Continue to fetch fresh data
-        }
+      // 2. Decide if we need to fetch fresh data (Background Revalidation)
+      const shouldFetch = !cacheValid || isMobile; // Always refresh on mobile or if cache is stale
+
+      if (!shouldFetch && hasCachedData) {
+        console.log('📱 Using fresh cache, no revalidation needed');
+        return;
       }
+
+      console.log('🔄 Revalidating property list in background...');
 
       const params = new URLSearchParams();
       if (featured) {

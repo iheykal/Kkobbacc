@@ -9,11 +9,11 @@ import { Button } from '@/components/ui/Button'
 import { AuthModal } from '@/components/auth/AuthModal'
 import { useUser } from '@/contexts/UserContext'
 import HybridImage from '@/components/ui/HybridImage'
-import { 
-  Menu, 
-  X, 
-  User, 
-  Heart, 
+import {
+  Menu,
+  X,
+  User,
+  Heart,
   Phone,
   MapPin,
   LogOut,
@@ -52,9 +52,9 @@ export const Header: React.FC = () => {
               title="Click to go to homepage"
             >
               <div className="w-24 h-24 flex items-center justify-center">
-                <HybridImage 
-                  src="/icons/header.png" 
-                  alt="Kobac Logo" 
+                <HybridImage
+                  src="/icons/header.png"
+                  alt="Kobac Logo"
                   width={96}
                   height={96}
                   className="w-full h-full object-contain"
@@ -62,7 +62,7 @@ export const Header: React.FC = () => {
                 />
               </div>
               <div className="hidden sm:block">
-                <motion.h1 
+                <motion.h1
                   className="text-2xl font-serif font-bold text-blue-600"
                   animate={{
                     backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
@@ -76,9 +76,9 @@ export const Header: React.FC = () => {
                     backgroundSize: '200% 200%'
                   }}
                 >
-                  Kobac Real Estate
+                  Kobac Property
                 </motion.h1>
-                <motion.p 
+                <motion.p
                   className="text-xs text-primary-600 -mt-1"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -104,175 +104,175 @@ export const Header: React.FC = () => {
             ))}
           </nav>
 
-                     {/* Right Side Actions */}
-           <div className="flex items-center space-x-4">
+          {/* Right Side Actions */}
+          <div className="flex items-center space-x-4">
 
             {/* Phone Number */}
             <div className="hidden md:flex items-center space-x-2 text-primary-700">
               <Phone className="w-4 h-4 text-white" />
-                              <span className="font-medium text-lg">0610251014</span>
+              <span className="font-medium text-lg">0610251014</span>
             </div>
 
-                         {/* User Menu */}
-             <div className="relative">
-               <Button
-                 variant="ghost"
-                 size="sm"
-                 onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                 className="flex items-center space-x-2 hover:bg-primary-50 transition-colors duration-200"
-               >
-                 {isAuthenticated && user?.avatar ? (
-                   <HybridImage 
-                     src={user.avatar} 
-                     alt={`${user.firstName} ${user.lastName}`}
-                     width={40}
-                     height={40}
-                     className="w-10 h-10 rounded-full object-cover border-2 border-primary-100"
-                   />
-                 ) : null}
-                 {isAuthenticated && (!user?.avatar || user.avatar === DEFAULT_AVATAR_URL) ? (
-                   <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-gray-700 font-semibold text-sm border-2 border-gray-200">
-                     {user?.firstName?.charAt(0)?.toUpperCase() || user?.lastName?.charAt(0)?.toUpperCase() || 'U'}
-                   </div>
-                 ) : null}
-                 {!isAuthenticated && (
-                   <User className="w-5 h-5" />
-                 )}
-                 <span className="hidden sm:block">
-                   {isAuthenticated ? `${user?.firstName}` : 'Account'}
-                 </span>
-               </Button>
+            {/* User Menu */}
+            <div className="relative">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                className="flex items-center space-x-2 hover:bg-primary-50 transition-colors duration-200"
+              >
+                {isAuthenticated && user?.avatar ? (
+                  <HybridImage
+                    src={user.avatar}
+                    alt={`${user.firstName} ${user.lastName}`}
+                    width={40}
+                    height={40}
+                    className="w-10 h-10 rounded-full object-cover border-2 border-primary-100"
+                  />
+                ) : null}
+                {isAuthenticated && (!user?.avatar || user.avatar === DEFAULT_AVATAR_URL) ? (
+                  <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-gray-700 font-semibold text-sm border-2 border-gray-200">
+                    {user?.firstName?.charAt(0)?.toUpperCase() || user?.lastName?.charAt(0)?.toUpperCase() || 'U'}
+                  </div>
+                ) : null}
+                {!isAuthenticated && (
+                  <User className="w-5 h-5" />
+                )}
+                <span className="hidden sm:block">
+                  {isAuthenticated ? `${user?.firstName}` : 'Account'}
+                </span>
+              </Button>
 
-               <AnimatePresence>
-                 {isUserMenuOpen && (
-                   <motion.div
-                     initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                     animate={{ opacity: 1, y: 0, scale: 1 }}
-                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                     className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-luxury border border-primary-100 py-2"
-                   >
-                     {isAuthenticated ? (
-                       <>
-                         <div className="px-4 py-3 border-b border-primary-100">
-                           <div className="flex items-center space-x-3">
-                             {user?.avatar && user.avatar !== DEFAULT_AVATAR_URL ? (
-                               <HybridImage 
-                                 src={user.avatar} 
-                                 alt={`${user.firstName} ${user.lastName}`}
-                                 width={48}
-                                 height={48}
-                                 className="w-12 h-12 rounded-full object-cover border-2 border-primary-100"
-                               />
-                             ) : null}
-                             {(!user?.avatar || user.avatar === DEFAULT_AVATAR_URL) ? (
-                               <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-gray-700 font-semibold text-sm border-2 border-gray-200">
-                                 {user?.firstName?.charAt(0)?.toUpperCase() || user?.lastName?.charAt(0)?.toUpperCase() || 'U'}
-                               </div>
-                             ) : null}
-                             <div>
-                               <div className="flex items-center space-x-2">
-                                 <p className="text-sm font-medium text-primary-900">
-                                   {user?.firstName} {user?.lastName}
-                                 </p>
-                                 {user?.role === 'super_admin' && (
-                                   <div className="flex items-center space-x-1">
-                                     <div className="relative">
-                                       <Shield className="w-5 h-5 text-gray-600 drop-shadow-sm" />
-                                       <Crown className="w-3 h-3 text-gray-500 absolute -top-1 -right-1" />
-                                     </div>
-                                     <span className="text-xs font-bold text-gray-700 bg-white px-3 py-1 rounded-full shadow-lg border border-gray-200">
-                                       ULTIMATE SUPERADMIN
-                                     </span>
-                                   </div>
-                                 )}
-                               </div>
-                               <p className="text-xs text-primary-600">{user?.phone ? formatPhoneNumber(user.phone) : ''}</p>
-                               {user?.role && (
-                                 <p className="text-xs text-primary-500 capitalize">{user.role}</p>
-                               )}
-                             </div>
-                           </div>
-                         </div>
-                         {(user?.role === 'agent' || user?.role === 'agency') && (
-                           <Link 
-                             href="/agent"
-                             className="block px-4 py-2 text-sm text-primary-700 hover:bg-primary-50 flex items-center space-x-2"
-                             onClick={() => setIsUserMenuOpen(false)}
-                           >
-                             <Home className="w-4 h-4" />
-                             <span>Agent Dashboard</span>
-                           </Link>
-                         )}
-                         <a
-                           href="/profile"
-                           className="block px-4 py-2 text-sm text-primary-700 hover:bg-primary-50"
-                         >
-                           Profile Settings
-                         </a>
-                         <a
-                           href="/saved"
-                           className="block px-4 py-2 text-sm text-primary-700 hover:bg-primary-50 flex items-center space-x-2"
-                         >
-                           <Heart className="w-4 h-4" />
-                           <span>Saved Properties</span>
-                         </a>
-                         <hr className="my-2 border-primary-100" />
-                         <button
-                           onClick={() => {
-                             logout()
-                             setIsUserMenuOpen(false)
-                           }}
-                           className="block w-full text-left px-4 py-2 text-sm text-primary-700 hover:bg-primary-50 flex items-center space-x-2"
-                         >
-                           <LogOut className="w-4 h-4" />
-                           <span>Sign Out</span>
-                         </button>
-                       </>
-                     ) : (
-                       <>
-                         <button
-                           onClick={() => {
-                             setAuthMode('login')
-                             setIsAuthModalOpen(true)
-                             setIsUserMenuOpen(false)
-                           }}
-                           className="block w-full text-left px-4 py-2 text-sm text-primary-700 hover:bg-primary-50 hover:text-white transition-colors duration-200 flex items-center space-x-2"
-                         >
-                           <User className="w-4 h-4" />
-                           <span>Sign In</span>
-                         </button>
-                         <button
-                           onClick={() => {
-                             setAuthMode('signup')
-                             setIsAuthModalOpen(true)
-                             setIsUserMenuOpen(false)
-                           }}
-                           className="block w-full text-left px-4 py-2 text-sm text-primary-700 hover:bg-primary-50 hover:text-white transition-colors duration-200 flex items-center space-x-2"
-                         >
-                           <User className="w-4 h-4" />
-                           <span>Create Account</span>
-                         </button>
-                         <hr className="my-2 border-primary-100" />
-                         <a
-                           href="/saved"
-                           className="block px-4 py-2 text-sm text-primary-700 hover:bg-primary-50 flex items-center space-x-2"
-                         >
-                           <Heart className="w-4 h-4" />
-                           <span>Saved Properties</span>
-                         </a>
-                       </>
-                     )}
-                   </motion.div>
-                 )}
-               </AnimatePresence>
+              <AnimatePresence>
+                {isUserMenuOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-luxury border border-primary-100 py-2"
+                  >
+                    {isAuthenticated ? (
+                      <>
+                        <div className="px-4 py-3 border-b border-primary-100">
+                          <div className="flex items-center space-x-3">
+                            {user?.avatar && user.avatar !== DEFAULT_AVATAR_URL ? (
+                              <HybridImage
+                                src={user.avatar}
+                                alt={`${user.firstName} ${user.lastName}`}
+                                width={48}
+                                height={48}
+                                className="w-12 h-12 rounded-full object-cover border-2 border-primary-100"
+                              />
+                            ) : null}
+                            {(!user?.avatar || user.avatar === DEFAULT_AVATAR_URL) ? (
+                              <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-gray-700 font-semibold text-sm border-2 border-gray-200">
+                                {user?.firstName?.charAt(0)?.toUpperCase() || user?.lastName?.charAt(0)?.toUpperCase() || 'U'}
+                              </div>
+                            ) : null}
+                            <div>
+                              <div className="flex items-center space-x-2">
+                                <p className="text-sm font-medium text-primary-900">
+                                  {user?.firstName} {user?.lastName}
+                                </p>
+                                {user?.role === 'super_admin' && (
+                                  <div className="flex items-center space-x-1">
+                                    <div className="relative">
+                                      <Shield className="w-5 h-5 text-gray-600 drop-shadow-sm" />
+                                      <Crown className="w-3 h-3 text-gray-500 absolute -top-1 -right-1" />
+                                    </div>
+                                    <span className="text-xs font-bold text-gray-700 bg-white px-3 py-1 rounded-full shadow-lg border border-gray-200">
+                                      ULTIMATE SUPERADMIN
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                              <p className="text-xs text-primary-600">{user?.phone ? formatPhoneNumber(user.phone) : ''}</p>
+                              {user?.role && (
+                                <p className="text-xs text-primary-500 capitalize">{user.role}</p>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        {(user?.role === 'agent' || user?.role === 'agency') && (
+                          <Link
+                            href="/agent"
+                            className="block px-4 py-2 text-sm text-primary-700 hover:bg-primary-50 flex items-center space-x-2"
+                            onClick={() => setIsUserMenuOpen(false)}
+                          >
+                            <Home className="w-4 h-4" />
+                            <span>Agent Dashboard</span>
+                          </Link>
+                        )}
+                        <a
+                          href="/profile"
+                          className="block px-4 py-2 text-sm text-primary-700 hover:bg-primary-50"
+                        >
+                          Profile Settings
+                        </a>
+                        <a
+                          href="/saved"
+                          className="block px-4 py-2 text-sm text-primary-700 hover:bg-primary-50 flex items-center space-x-2"
+                        >
+                          <Heart className="w-4 h-4" />
+                          <span>Saved Properties</span>
+                        </a>
+                        <hr className="my-2 border-primary-100" />
+                        <button
+                          onClick={() => {
+                            logout()
+                            setIsUserMenuOpen(false)
+                          }}
+                          className="block w-full text-left px-4 py-2 text-sm text-primary-700 hover:bg-primary-50 flex items-center space-x-2"
+                        >
+                          <LogOut className="w-4 h-4" />
+                          <span>Sign Out</span>
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          onClick={() => {
+                            setAuthMode('login')
+                            setIsAuthModalOpen(true)
+                            setIsUserMenuOpen(false)
+                          }}
+                          className="block w-full text-left px-4 py-2 text-sm text-primary-700 hover:bg-primary-50 hover:text-white transition-colors duration-200 flex items-center space-x-2"
+                        >
+                          <User className="w-4 h-4" />
+                          <span>Sign In</span>
+                        </button>
+                        <button
+                          onClick={() => {
+                            setAuthMode('signup')
+                            setIsAuthModalOpen(true)
+                            setIsUserMenuOpen(false)
+                          }}
+                          className="block w-full text-left px-4 py-2 text-sm text-primary-700 hover:bg-primary-50 hover:text-white transition-colors duration-200 flex items-center space-x-2"
+                        >
+                          <User className="w-4 h-4" />
+                          <span>Create Account</span>
+                        </button>
+                        <hr className="my-2 border-primary-100" />
+                        <a
+                          href="/saved"
+                          className="block px-4 py-2 text-sm text-primary-700 hover:bg-primary-50 flex items-center space-x-2"
+                        >
+                          <Heart className="w-4 h-4" />
+                          <span>Saved Properties</span>
+                        </a>
+                      </>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
-               {/* Authentication Modal - Positioned relative to user menu */}
-               <AuthModal
-                 isOpen={isAuthModalOpen}
-                 onClose={() => setIsAuthModalOpen(false)}
-                 initialMode={authMode}
-               />
-             </div>
+              {/* Authentication Modal - Positioned relative to user menu */}
+              <AuthModal
+                isOpen={isAuthModalOpen}
+                onClose={() => setIsAuthModalOpen(false)}
+                initialMode={authMode}
+              />
+            </div>
 
             {/* CTA Button */}
             {isAuthenticated && (user?.role === 'superadmin') && (
@@ -366,8 +366,8 @@ export const Header: React.FC = () => {
                     <Button variant="outline" fullWidth>
                       Saved Properties
                     </Button>
-                    <Button 
-                      variant="ghost" 
+                    <Button
+                      variant="ghost"
                       fullWidth
                       onClick={() => {
                         logout()
@@ -376,11 +376,11 @@ export const Header: React.FC = () => {
                     >
                       Sign Out
                     </Button>
-                    
+
                     {/* Mobile List Your Property Button */}
                     {(user?.role === 'agent' || user?.role === 'agency') && (
-                      <Button 
-                        variant="gold" 
+                      <Button
+                        variant="gold"
                         fullWidth
                         onClick={() => {
                           router.push('/agent')
@@ -393,8 +393,8 @@ export const Header: React.FC = () => {
                   </>
                 ) : (
                   <>
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       fullWidth
                       onClick={() => {
                         setAuthMode('login')
@@ -406,8 +406,8 @@ export const Header: React.FC = () => {
                       <User className="w-4 h-4" />
                       <span>Sign In</span>
                     </Button>
-                    <Button 
-                      variant="gold" 
+                    <Button
+                      variant="gold"
                       fullWidth
                       onClick={() => {
                         setAuthMode('signup')
@@ -418,10 +418,10 @@ export const Header: React.FC = () => {
                     >
                       Create Account
                     </Button>
-                    
+
                     {/* Mobile List Your Property Button for non-authenticated users */}
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       fullWidth
                       onClick={() => {
                         setAuthMode('signup')
@@ -440,6 +440,6 @@ export const Header: React.FC = () => {
         )}
       </AnimatePresence>
 
-           </header>
+    </header>
   )
 }

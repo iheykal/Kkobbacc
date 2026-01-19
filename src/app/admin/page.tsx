@@ -6,11 +6,11 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { LazyMotionDiv } from '@/components/lazy/LazyMotion'
 import { useUser } from '@/contexts/UserContext'
-import { 
-  Users, 
-  Home, 
-  Trash2, 
-  Settings, 
+import {
+  Users,
+  Home,
+  Trash2,
+  Settings,
   LogOut,
   User,
   AlertTriangle,
@@ -39,13 +39,13 @@ export default function AdminDashboard() {
   useEffect(() => {
     console.log('🔍 Admin useEffect - contextUser:', contextUser, 'isAuthenticated:', isAuthenticated, 'contextLoading:', contextLoading)
     console.log('🔍 Admin useEffect - user role:', contextUser?.role, 'user id:', contextUser?.id)
-    
+
     // Wait for UserContext to finish loading
     if (contextLoading) {
       console.log('⏳ Admin - UserContext still loading, waiting...')
       return
     }
-    
+
     // Only redirect if we're sure the user is not authenticated after loading is complete
     if (!isAuthenticated && !contextLoading) {
       console.log('❌ Admin - Not authenticated after loading, redirecting to home')
@@ -82,7 +82,7 @@ export default function AdminDashboard() {
       const response = await fetch('/api/properties/pending-deletion', {
         credentials: 'include'
       })
-      
+
       if (response.ok) {
         const result = await response.json()
         setPendingDeletionsCount(result.data?.length || 0)
@@ -108,9 +108,9 @@ export default function AdminDashboard() {
 
   // Helper function to check if user is ultimate superadmin
   const isUltimateSuperadmin = (user: any) => {
-    return user?.phone === '0610251014' || 
-           user?.fullName === 'Kobac Real Estate' ||
-           user?.fullName?.toLowerCase().includes('kobac')
+    return user?.phone === '0610251014' ||
+      user?.fullName === 'Kobac Property' ||
+      user?.fullName?.toLowerCase().includes('kobac')
   }
 
   // Don't render anything until authentication check is complete
@@ -294,10 +294,10 @@ export default function AdminDashboard() {
               </div>
               <div>
                 <h1 className="text-xl font-bold text-gray-900">Admin Dashboard</h1>
-                <p className="text-sm text-gray-600">Kobac Real Estate</p>
+                <p className="text-sm text-gray-600">Kobac Property</p>
               </div>
             </div>
-            
+
             <div className="flex items-center space-x-4">
               <div className="text-sm text-gray-600">
                 Welcome, {contextUser?.firstName || 'Admin'}
@@ -340,7 +340,7 @@ export default function AdminDashboard() {
               <div className="flex items-center">
                 <Crown className="w-5 h-5 text-blue-600 mr-2" />
                 <p className="text-sm text-blue-800">
-                  <strong>Note:</strong> Blue tick management features are only available to the ultimate superadmin. 
+                  <strong>Note:</strong> Blue tick management features are only available to the ultimate superadmin.
                   Contact the system administrator for blue tick verification requests.
                 </p>
               </div>
@@ -366,7 +366,7 @@ export default function AdminDashboard() {
               </div>
             </div>
           </div>
-          
+
           <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-xl">
             <div className="flex items-center justify-between">
               <div>
@@ -378,7 +378,7 @@ export default function AdminDashboard() {
               </div>
             </div>
           </div>
-          
+
           <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-xl">
             <div className="flex items-center justify-between">
               <div>
@@ -390,7 +390,7 @@ export default function AdminDashboard() {
               </div>
             </div>
           </div>
-          
+
           <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-xl">
             <div className="flex items-center justify-between">
               <div>
@@ -411,7 +411,7 @@ export default function AdminDashboard() {
           transition={{ delay: 0.2 }}
         >
           <h3 className="text-xl font-semibold text-gray-900 mb-6">Administrative Functions</h3>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6">
             {adminModules.map((module, index) => (
               <LazyMotionDiv
@@ -429,12 +429,12 @@ export default function AdminDashboard() {
                       {module.badge}
                     </div>
                   )}
-                  
+
                   <div className="flex items-center justify-between mb-4">
                     <module.icon className="w-8 h-8" />
                     <ArrowRight className="w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
-                  
+
                   <h4 className="text-lg font-semibold mb-2">{module.title}</h4>
                   <p className="text-sm opacity-90">{module.description}</p>
                 </div>
@@ -473,7 +473,7 @@ export default function AdminDashboard() {
           className="mt-12"
         >
           <h3 className="text-xl font-semibold text-gray-900 mb-6">Quick Actions</h3>
-          
+
           <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-xl">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <button
@@ -484,7 +484,7 @@ export default function AdminDashboard() {
                 <Trash2 className="w-5 h-5" />
                 <span>Review Deletions ({pendingDeletionsCount})</span>
               </button>
-              
+
               <button
                 onClick={() => router.push('/admin/users')}
                 className="flex items-center justify-center space-x-3 px-6 py-4 bg-blue-100 text-blue-700 rounded-xl hover:bg-blue-200 transition-colors"
@@ -492,7 +492,7 @@ export default function AdminDashboard() {
                 <Users className="w-5 h-5" />
                 <span>Manage Users</span>
               </button>
-              
+
               <button
                 onClick={() => router.push('/admin/agents')}
                 className="flex items-center justify-center space-x-3 px-6 py-4 bg-green-100 text-green-700 rounded-xl hover:bg-green-200 transition-colors"

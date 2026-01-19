@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { safeConnectDB } from '@/lib/db-utils';
 import User from '@/models/User';
-import { getAuthenticatedUser } from '@/lib/utils';
+import { getAuthenticatedUser } from '@/lib/serverUtils';
 
 // Get all pending avatar change requests
 export async function GET(request: NextRequest) {
@@ -22,8 +22,8 @@ export async function GET(request: NextRequest) {
 
     // Check if user is superadmin
     if (currentUser.role !== 'superadmin' && currentUser.role !== 'super_admin') {
-      return NextResponse.json({ 
-        error: 'Only superadmins can manage avatar change requests' 
+      return NextResponse.json({
+        error: 'Only superadmins can manage avatar change requests'
       }, { status: 403 });
     }
 
@@ -75,8 +75,8 @@ export async function PATCH(request: NextRequest) {
 
     // Check if user is superadmin
     if (currentUser.role !== 'superadmin' && currentUser.role !== 'super_admin') {
-      return NextResponse.json({ 
-        error: 'Only superadmins can manage avatar change requests' 
+      return NextResponse.json({
+        error: 'Only superadmins can manage avatar change requests'
       }, { status: 403 });
     }
 
@@ -105,7 +105,7 @@ export async function PATCH(request: NextRequest) {
       // Approve the request
       user.profile = user.profile || {};
       user.profile.avatar = user.avatarChangeRequest.requestedAvatar;
-      
+
       user.avatarChangeRequest.status = 'approved';
       user.avatarChangeRequest.reviewedBy = currentUser._id;
       user.avatarChangeRequest.reviewedAt = new Date();

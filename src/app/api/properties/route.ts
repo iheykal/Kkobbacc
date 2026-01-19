@@ -189,9 +189,12 @@ export async function GET(request: NextRequest) {
 
     // Mobile-optimized field selection
     // Include description for search functionality, images for gallery, and other essential fields
+    // Optimized field selection for property lists
+    // EXCLUDE heavy text fields (description) and arrays (features, amenities) that aren't shown on cards
+    // This significantly reduces payload size for large lists (500+ items)
     const selectFields = isMobileOptimized
-      ? 'propertyId title location district price beds baths sqft propertyType listingType measurement status description features amenities thumbnailImage images agentId createdAt viewCount uniqueViewCount deletionStatus expiresAt isExpired'
-      : 'propertyId title location district price beds baths sqft yearBuilt lotSize propertyType listingType measurement status description features amenities thumbnailImage images agentId createdAt viewCount uniqueViewCount agent deletionStatus expiresAt isExpired';
+      ? 'propertyId title location district price beds baths sqft propertyType listingType measurement status thumbnailImage images agentId createdAt viewCount uniqueViewCount deletionStatus expiresAt isExpired'
+      : 'propertyId title location district price beds baths sqft yearBuilt lotSize propertyType listingType measurement status thumbnailImage images agentId createdAt viewCount uniqueViewCount agent deletionStatus expiresAt isExpired';
 
     let propertiesQuery;
     try {

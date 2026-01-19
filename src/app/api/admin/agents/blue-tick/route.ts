@@ -4,7 +4,7 @@ import User from '@/models/User';
 
 // Ultimate superadmin protection constants
 const ULTIMATE_SUPERADMIN_PHONE = '0610251014';
-const ULTIMATE_SUPERADMIN_NAME = 'Kobac Real Estate';
+const ULTIMATE_SUPERADMIN_NAME = 'Kobac Property';
 
 export async function POST(req: NextRequest) {
   try {
@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
     let session: { userId: string; role: string } | null = null;
     try {
       session = JSON.parse(decodeURIComponent(cookie));
-    } catch (_) {}
+    } catch (_) { }
 
     if (!session?.userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -27,10 +27,10 @@ export async function POST(req: NextRequest) {
 
     // Verify ultimate superadmin
     const adminUser = await User.findById(session.userId);
-    if (!adminUser || 
-        adminUser.phone !== ULTIMATE_SUPERADMIN_PHONE || 
-        adminUser.fullName !== ULTIMATE_SUPERADMIN_NAME) {
-      return NextResponse.json({ 
+    if (!adminUser ||
+      adminUser.phone !== ULTIMATE_SUPERADMIN_PHONE ||
+      adminUser.fullName !== ULTIMATE_SUPERADMIN_NAME) {
+      return NextResponse.json({
         error: 'Only the ultimate superadmin can manage blue tick verification',
         code: 'ULTIMATE_SUPERADMIN_REQUIRED'
       }, { status: 403 });
@@ -179,9 +179,9 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'User not found' }, { status: 401 });
     }
 
-    if (adminUser.phone !== ULTIMATE_SUPERADMIN_PHONE || 
-        adminUser.fullName !== ULTIMATE_SUPERADMIN_NAME) {
-      return NextResponse.json({ 
+    if (adminUser.phone !== ULTIMATE_SUPERADMIN_PHONE ||
+      adminUser.fullName !== ULTIMATE_SUPERADMIN_NAME) {
+      return NextResponse.json({
         error: 'Only the ultimate superadmin can view blue tick status',
         code: 'ULTIMATE_SUPERADMIN_REQUIRED'
       }, { status: 403 });

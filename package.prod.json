@@ -1,7 +1,7 @@
 {
   "name": "luxury-real-estate-app",
   "version": "1.0.0",
-  "description": "Premium luxury real estate web application",
+  "description": "Premium luxury property web application",
   "private": true,
   "scripts": {
     "dev": "next dev",

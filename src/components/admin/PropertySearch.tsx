@@ -2,13 +2,13 @@
 
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
-  Bed, 
-  Bath, 
-  Heart, 
-  Share2, 
-  Phone, 
-  Mail, 
+import {
+  Bed,
+  Bath,
+  Heart,
+  Share2,
+  Phone,
+  Mail,
   ArrowLeft,
   ArrowRight,
   Home,
@@ -80,7 +80,7 @@ export default function PropertySearch() {
   const [isFavorite, setIsFavorite] = useState(false)
   const [touchStart, setTouchStart] = useState<number | null>(null)
   const [touchEnd, setTouchEnd] = useState<number | null>(null)
-  const [imageAspectRatio, setImageAspectRatio] = useState<number>(4/5)
+  const [imageAspectRatio, setImageAspectRatio] = useState<number>(4 / 5)
 
   // Function to get agent's first name
   const getAgentFirstName = () => {
@@ -95,12 +95,12 @@ export default function PropertySearch() {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(price)
-    
+
     // Add "/Bishii" (monthly in Somali) for rent properties
     if (listingType === 'rent') {
       return `${formattedPrice}<span class="text-xs font-light text-gray-500 italic">/Bishii</span>`
     }
-    
+
     return formattedPrice
   }
 
@@ -128,7 +128,7 @@ export default function PropertySearch() {
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!propertyId.trim()) {
       setError('Please enter a property ID')
       return
@@ -188,7 +188,7 @@ export default function PropertySearch() {
 
   const onTouchEnd = () => {
     if (!touchStart || !touchEnd || !property) return
-    
+
     const distance = touchStart - touchEnd
     const isLeftSwipe = distance > minSwipeDistance
     const isRightSwipe = distance < -minSwipeDistance
@@ -264,7 +264,7 @@ export default function PropertySearch() {
             className="bg-white rounded-2xl shadow-xl overflow-hidden"
           >
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-8">
-              
+
               {/* Left Side - Enhanced Property Images */}
               <div className="space-y-6">
                 <EnhancedImageGallery
@@ -296,14 +296,17 @@ export default function PropertySearch() {
                     </div>
                   </div>
                   <div className="flex items-center space-x-2 text-slate-600">
-                    <img 
-                      src="/icons/adress.png" 
-                      alt="Location" 
+                    <video
+                      src="/icons/Adress3.webm"
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
                       className="w-5 h-5 object-contain"
                     />
                     <span>{property.location}</span>
                   </div>
-                  <div 
+                  <div
                     className="text-4xl font-bold text-green-600"
                     dangerouslySetInnerHTML={{ __html: formatPrice(property.price, property.listingType) }}
                   />
@@ -328,21 +331,21 @@ export default function PropertySearch() {
                     <>
                       <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl">
                         <div className="w-16 h-16 flex items-center justify-center mx-auto mb-2">
-                          <img 
-                            src="/icons/sharci.gif" 
-                            alt="Document" 
+                          <img
+                            src="/icons/sharci.gif"
+                            alt="Document"
                             className="w-10 h-10 object-contain"
                           />
                         </div>
                         <div className="text-sm text-blue-800 mb-1 font-bold">Sharciga</div>
                         <div className="text-lg font-bold text-slate-900">{property.documentType || 'Siyaad Barre'}</div>
                       </div>
-                      
+
                       <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl">
                         <div className="w-20 h-20 flex items-center justify-center mx-auto mb-2">
-                          <img 
-                            src="/icons/ruler2.gif" 
-                            alt="Measurement" 
+                          <img
+                            src="/icons/ruler2.gif"
+                            alt="Measurement"
                             className="w-14 h-14 object-contain"
                           />
                         </div>
@@ -358,9 +361,9 @@ export default function PropertySearch() {
                       {property.beds > 0 && (
                         <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl">
                           <div className="w-16 h-16 flex items-center justify-center mx-auto mb-2">
-                            <img 
-                              src="/icons/bed.png" 
-                              alt="Bed" 
+                            <img
+                              src="/icons/bed.png"
+                              alt="Bed"
                               className="w-8 h-8 object-contain"
                             />
                           </div>
@@ -368,15 +371,15 @@ export default function PropertySearch() {
                           <div className="text-sm text-blue-800">Qol</div>
                         </div>
                       )}
-                      
+
                       {property.baths > 0 && (
                         <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl">
                           <div className="w-20 h-20 flex items-center justify-center mx-auto mb-2">
-                            <video 
-                              src="/icons/shower1.mp4" 
-                              autoPlay 
-                              loop 
-                              muted 
+                            <video
+                              src="/icons/shower1.mp4"
+                              autoPlay
+                              loop
+                              muted
                               playsInline
                               className="w-10 h-10 object-contain mix-blend-multiply"
                               style={{ filter: 'contrast(1.2) brightness(1.1)' }}
@@ -419,7 +422,7 @@ export default function PropertySearch() {
                       </div>
                     </div>
                   </div>
-                  
+
                   {/* Agent Content */}
                   <div className="p-6">
                     <div className="flex items-center space-x-4 mb-6">
@@ -439,20 +442,20 @@ export default function PropertySearch() {
                           <ExternalLink className="w-3 h-3" />
                         </div>
                       </div>
-                      
+
                       <div className="flex-1">
                         <h3 className="text-xl font-bold text-slate-800 mb-2 cursor-pointer hover:text-blue-600 transition-colors">
-                                                      {capitalizeName(property.agent?.name || 'Agent')}
+                          {capitalizeName(property.agent?.name || 'Agent')}
                         </h3>
                         <div className="mb-3">
                           <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-white text-gray-700 border border-gray-200">
                             <span className="w-2 h-2 bg-gray-500 rounded-full mr-2"></span>
-                            Wakiilka Kobac Real Estate
+                            Wakiilka Kobac Property
                           </span>
                         </div>
                         <div className="flex items-center space-x-2 text-sm text-slate-600">
                           <div className="w-1.5 h-1.5 bg-gray-400 rounded-full"></div>
-                          <span>Professional Real Estate Services</span>
+                          <span>Professional Property Services</span>
                         </div>
                         {property.agentId?.email && (
                           <div className="flex items-center space-x-2 text-sm text-slate-600 mt-2">
@@ -467,10 +470,10 @@ export default function PropertySearch() {
                         )}
                       </div>
                     </div>
-                    
+
                     {/* Contact Buttons */}
                     <div className="space-y-3">
-                      <button 
+                      <button
                         onClick={() => {
                           if (property.agent?.phone) {
                             // Clean the phone number for tel: link and format with 061
@@ -485,13 +488,13 @@ export default function PropertySearch() {
                         <Phone className="w-4 h-4 group-hover:scale-110 transition-transform" />
                         <span>{property.agent?.phone ? formatPhoneNumber(property.agent.phone) : 'Contact Agent'}</span>
                       </button>
-                      
+
                       <button className="w-full bg-white border-2 border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300 py-3 px-4 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center space-x-2 group">
                         <ExternalLink className="w-4 h-4 group-hover:scale-110 transition-transform" />
                         <span>Profile-ka {getAgentFirstName()}</span>
                       </button>
                     </div>
-                    
+
                     {/* Additional Info */}
                     <div className="mt-4 pt-4 border-t border-blue-100">
                       <div className="flex items-center justify-center space-x-4 text-xs text-slate-500">

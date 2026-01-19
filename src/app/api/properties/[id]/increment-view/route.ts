@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import connectDB from '@/lib/mongodb'
 import Property from '@/models/Property'
 import User from '@/models/User'
-import { getAuthenticatedUser, generateSessionId } from '@/lib/utils'
+import { generateSessionId } from '@/lib/utils'
+import { getAuthenticatedUser } from '@/lib/serverUtils'
 
 export async function POST(
   request: NextRequest,
@@ -19,16 +20,16 @@ export async function POST(
 
     // Get authenticated user if available
     const user = await getAuthenticatedUser(request);
-    
+
     // Generate session ID for anonymous users
     const sessionId = user ? null : generateSessionId();
 
     // Try to find by propertyId first, then by _id if that fails - exclude deleted properties
-    let property = await Property.findOne({ 
+    let property = await Property.findOne({
       propertyId: parseInt(propertyId),
       deletionStatus: { $ne: 'deleted' }
     });
-    
+
     // If not found by propertyId, try by _id - exclude deleted properties
     if (!property) {
       property = await Property.findById(propertyId);
@@ -39,9 +40,9 @@ export async function POST(
     }
 
     if (!property) {
-      return NextResponse.json({ 
-        success: false, 
-        error: `Property with ID ${propertyId} not found` 
+      return NextResponse.json({
+        success: false,
+        error: `Property with ID ${propertyId} not found`
       }, { status: 404 })
     }
 
@@ -54,11 +55,11 @@ export async function POST(
     // Check if the viewer is the property owner
     if (user && property.agentId && user._id.toString() === property.agentId.toString()) {
       isOwnerView = true;
-      
+
       // Get current timestamp for rate limiting
       const now = new Date();
       const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000); // 1 hour ago
-      
+
       // Check if owner has viewed this property recently (within 1 hour)
       // But allow the view to proceed - just don't count it as a unique view
       if (property.lastViewedAt && property.lastViewedAt > oneHourAgo) {
@@ -70,12 +71,12 @@ export async function POST(
     // Check for suspicious activity patterns
     if (user) {
       const userId = user._id.toString();
-      
+
       // Check if user has viewed this property multiple times in a short period
-      const recentViews = property.uniqueViewers?.filter((viewerId: any) => 
+      const recentViews = property.uniqueViewers?.filter((viewerId: any) =>
         viewerId.toString() === userId
       ).length || 0;
-      
+
       if (recentViews > 5) {
         viewBlocked = true;
         blockReason = 'Excessive viewing detected';
@@ -107,12 +108,12 @@ export async function POST(
     if (user) {
       // Authenticated user
       const userId = user._id.toString();
-      
+
       // Check if user already viewed this property
-      const hasViewed = property.uniqueViewers?.some((viewerId: any) => 
+      const hasViewed = property.uniqueViewers?.some((viewerId: any) =>
         viewerId.toString() === userId
       );
-      
+
       // Only count as unique view if not an owner view or if owner hasn't viewed recently
       if (!hasViewed && !isOwnerView) {
         isUniqueView = true;

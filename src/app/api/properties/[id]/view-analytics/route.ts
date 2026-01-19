@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import connectDB from '@/lib/mongodb'
 import Property from '@/models/Property'
-import { getAuthenticatedUser } from '@/lib/utils'
+import { getAuthenticatedUser } from '@/lib/serverUtils'
 
 export async function GET(
   request: NextRequest,
@@ -18,31 +18,31 @@ export async function GET(
 
     // Get authenticated user
     const user = await getAuthenticatedUser(request);
-    
+
     if (!user) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
     }
 
     // Try to find by propertyId first, then by _id if that fails
     let property = await Property.findOne({ propertyId: parseInt(propertyId) });
-    
+
     // If not found by propertyId, try by _id
     if (!property) {
       property = await Property.findById(propertyId);
     }
 
     if (!property) {
-      return NextResponse.json({ 
-        success: false, 
-        error: `Property with ID ${propertyId} not found` 
+      return NextResponse.json({
+        success: false,
+        error: `Property with ID ${propertyId} not found`
       }, { status: 404 })
     }
 
     // Only allow property owner or superadmin to view analytics
     if (property.agentId && property.agentId.toString() !== user._id.toString() && user.role !== 'superadmin') {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Forbidden: You can only view analytics for your own properties' 
+      return NextResponse.json({
+        success: false,
+        error: 'Forbidden: You can only view analytics for your own properties'
       }, { status: 403 })
     }
 
@@ -51,18 +51,18 @@ export async function GET(
     const uniqueViews = property.uniqueViewCount || 0;
     const uniqueViewers = property.uniqueViewers?.length || 0;
     const anonymousViewers = property.anonymousViewers?.length || 0;
-    
+
     // Calculate view quality score (unique views / total views)
     const viewQualityScore = totalViews > 0 ? (uniqueViews / totalViews) * 100 : 0;
 
     // Check for owner views
-    const ownerViews = property.uniqueViewers?.some((viewerId: any) => 
+    const ownerViews = property.uniqueViewers?.some((viewerId: any) =>
       viewerId.toString() === user._id.toString()
     ) ? 1 : 0;
 
     // Calculate engagement metrics
     const engagementRate = uniqueViewers > 0 ? (uniqueViews / uniqueViewers) : 0;
-    
+
     // Determine view quality status
     let viewQualityStatus = 'Excellent';
     if (viewQualityScore < 30) viewQualityStatus = 'Poor';
@@ -110,7 +110,7 @@ export async function GET(
     // Add performance insights
     const daysSinceCreation = Math.ceil((new Date().getTime() - new Date(property.createdAt).getTime()) / (1000 * 60 * 60 * 24));
     const viewsPerDay = daysSinceCreation > 0 ? (uniqueViews / daysSinceCreation) : 0;
-    
+
     analytics.viewsPerDay = Math.round(viewsPerDay * 100) / 100;
     analytics.daysSinceCreation = daysSinceCreation;
 

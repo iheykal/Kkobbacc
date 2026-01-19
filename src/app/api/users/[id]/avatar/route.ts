@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import User from '@/models/User';
-import { getAuthenticatedUser } from '@/lib/utils';
+import { getAuthenticatedUser } from '@/lib/serverUtils';
 
 export async function PUT(
   request: NextRequest,
@@ -20,15 +20,15 @@ export async function PUT(
 
     // Only superadmins can update avatars
     if (currentUser.role !== 'superadmin' && currentUser.role !== 'super_admin') {
-      return NextResponse.json({ 
-        error: 'Only superadmins can update profile pictures. Please contact the superadmin to change your profile picture.' 
+      return NextResponse.json({
+        error: 'Only superadmins can update profile pictures. Please contact the superadmin to change your profile picture.'
       }, { status: 403 });
     }
 
     // Superadmins can only update avatars for agents (not for themselves or other superadmins)
     if (currentUser.id === userId) {
-      return NextResponse.json({ 
-        error: 'Superadmins cannot update their own profile picture through this interface' 
+      return NextResponse.json({
+        error: 'Superadmins cannot update their own profile picture through this interface'
       }, { status: 403 });
     }
 
@@ -49,7 +49,7 @@ export async function PUT(
       user.profile = {};
     }
     user.profile.avatar = avatar;
-    
+
     // Clear any pending avatar change request
     if (user.avatarChangeRequest) {
       user.avatarChangeRequest = undefined;

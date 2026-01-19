@@ -224,26 +224,26 @@ function PropertiesContent(): JSX.Element {
     // Search filter - safely handle null/undefined values
     const searchLower = searchTerm.toLowerCase();
     const matchesSearch = searchTerm === '' ||
-                         (property.title?.toLowerCase() || '').includes(searchLower) ||
-                         (property.location?.toLowerCase() || '').includes(searchLower) ||
-                         (property.description?.toLowerCase() || '').includes(searchLower)
+      (property.title?.toLowerCase() || '').includes(searchLower) ||
+      (property.location?.toLowerCase() || '').includes(searchLower) ||
+      (property.description?.toLowerCase() || '').includes(searchLower)
 
     // Price filter - safely handle null/undefined values
     const propertyPrice = property.price || 0;
     const matchesPrice = (!priceRange.min || propertyPrice >= parseInt(priceRange.min)) &&
-                        (!priceRange.max || propertyPrice <= parseInt(priceRange.max))
+      (!priceRange.max || propertyPrice <= parseInt(priceRange.max))
 
     // Type filter - safely handle null/undefined values
     const matchesType = propertyType === 'all' ||
-                       (property.propertyType?.toLowerCase() || '') === propertyType.toLowerCase()
+      (property.propertyType?.toLowerCase() || '') === propertyType.toLowerCase()
 
     // Status filter - safely handle null/undefined values
     const matchesStatus = status === 'all' ||
-                         (property.status?.toLowerCase() || '') === status.toLowerCase()
+      (property.status?.toLowerCase() || '') === status.toLowerCase()
 
     // District filter - safely handle null/undefined values
     const matchesDistrict = districtFilter === 'all' ||
-                           (property.district || '') === districtFilter
+      (property.district || '') === districtFilter
 
     return matchesSearch && matchesPrice && matchesType && matchesStatus && matchesDistrict
   })
@@ -526,9 +526,12 @@ function PropertiesContent(): JSX.Element {
                           </div>
                         )}
                         <div className="flex items-center text-slate-600 mb-3 md:mb-4">
-                          <img
-                            src="/icons/adress.png"
-                            alt="Location"
+                          <video
+                            src="/icons/Adress3.webm"
+                            autoPlay
+                            loop
+                            muted
+                            playsInline
                             className="w-4 h-4 md:w-5 md:h-5 mr-2 object-contain"
                           />
                           <span className="text-base md:text-lg">{property.location}</span>
@@ -544,11 +547,10 @@ function PropertiesContent(): JSX.Element {
                       </div>
 
                       {/* Stats Grid - Show different fields based on property type */}
-                      <div className={`grid gap-4 md:gap-6 mb-6 md:mb-8 ${
-                        property.status === 'For Sale'
-                          ? (property.beds > 0 && property.baths > 0 ? 'grid-cols-4' : 'grid-cols-2')
-                          : 'grid-cols-2'
-                      }`}>
+                      <div className={`grid gap-4 md:gap-6 mb-6 md:mb-8 ${property.status === 'For Sale'
+                        ? (property.beds > 0 && property.baths > 0 ? 'grid-cols-4' : 'grid-cols-2')
+                        : 'grid-cols-2'
+                        }`}>
                         {/* For Sale properties: Show Sharciga and Cabbirka, plus optional QOL/Suuli */}
                         {property.status === 'For Sale' ? (
                           <>

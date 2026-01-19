@@ -341,14 +341,14 @@ export const SampleHomes: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [clickedPropertyId, setClickedPropertyId] = useState<string | null>(null)
   const [scrollPosition, setScrollPosition] = useState(0)
-  
+
   // Use scroll restoration hook for saving scroll position
   const { saveScrollPosition } = useScrollRestoration({
     key: 'home_page_state',
     enabled: true,
     delay: 100
   })
-  
+
   const { isAnimating, startRedirect, animationProps } = useRedirectAnimation({
     destination: "Agent Dashboard",
     message: "Taking you to your dashboard..."
@@ -358,9 +358,9 @@ export const SampleHomes: React.FC = () => {
     e.preventDefault()
     startRedirect('/agent')
   }
-  
+
   const { properties, loading, error } = useProperties(false, filters)
-  
+
   // Get all properties (without filters) for calculating available districts
   const { properties: allProperties } = useProperties(false, undefined)
 
@@ -406,7 +406,7 @@ export const SampleHomes: React.FC = () => {
     }
 
     window.addEventListener('propertyClick', handleRecommendationClick as EventListener)
-    
+
     return () => {
       window.removeEventListener('propertyClick', handleRecommendationClick as EventListener)
     }
@@ -429,7 +429,7 @@ export const SampleHomes: React.FC = () => {
       // Cache property data BEFORE navigation for instant display
       if (typeof window !== 'undefined') {
         setPreviousPage(window.location.pathname)
-        
+
         // Save current scroll position with more detailed state
         const currentScrollPosition = window.scrollY
         preserveState('home_page_state', {
@@ -440,16 +440,16 @@ export const SampleHomes: React.FC = () => {
           search: window.location.search,
           hash: window.location.hash
         })
-        
+
         // Also use the hook's save function for redundancy
         saveScrollPosition()
-        
+
         // Cache property data for instant loading on detail page
         const cachePayload = JSON.stringify({
           data: property,
           timestamp: Date.now()
         })
-        
+
         try {
           // Cache with multiple keys for fast lookup
           sessionStorage.setItem(`prefetched_property_${propertyId}`, cachePayload)
@@ -462,11 +462,11 @@ export const SampleHomes: React.FC = () => {
           console.warn('⚠️ Failed to cache property:', cacheError)
         }
       }
-      
+
       // Use SEO-friendly URL format - navigate directly (no redirect chain)
       const targetUrl = getPropertyUrl(property)
       router.push(targetUrl)
-      
+
     } catch (error) {
       console.error('❌ Error navigating to property:', error)
       alert('Error navigating to property. Please try again.')
@@ -476,21 +476,21 @@ export const SampleHomes: React.FC = () => {
 
   // Separate properties by agent if user is logged in as an agent
   const isAgent = isAuthenticated && user?.role === 'agent'
-  
+
   // Use database properties - don't fall back to sample data
   const displayProperties = properties
-  
+
   // Separate properties into agent's own listings and others
   const { agentProperties, otherProperties } = useMemo(() => {
     if (!isAgent || !user?.id) {
       return { agentProperties: [], otherProperties: properties }
     }
-    
+
     // More robust agentId matching - handle different formats
     const agentProps = properties.filter(property => {
       const propertyAgentId = property.agentId?.toString()
       const userId = user.id?.toString()
-      
+
       // Debug logging for agentId matching
       if (property.title && (propertyAgentId || userId)) {
         console.log('🔍 AgentId matching debug:', {
@@ -502,30 +502,30 @@ export const SampleHomes: React.FC = () => {
           userIdType: typeof user.id
         })
       }
-      
+
       return propertyAgentId === userId
     })
-    
+
     const otherProps = properties.filter(property => {
       const propertyAgentId = property.agentId?.toString()
       const userId = user.id?.toString()
       return propertyAgentId !== userId
     })
-    
+
     // Fallback: If no agent properties found by agentId, try to find by agent name/phone
     if (agentProps.length === 0 && properties.length > 0) {
       console.log('⚠️ No properties found by agentId, trying fallback matching...')
-      
+
       const fallbackAgentProps = properties.filter(property => {
         // Try to match by agent name or phone if agentId doesn't match
         const agentName = property.agent?.name?.toLowerCase()
         const agentPhone = property.agent?.phone?.replace(/\D/g, '') // Remove non-digits
         const userName = `${user.firstName || ''} ${user.lastName || ''}`.toLowerCase()
         const userPhone = user.phone?.replace(/\D/g, '') // Remove non-digits
-        
+
         const nameMatch = agentName && userName && agentName.includes(userName) || userName.includes(agentName)
         const phoneMatch = agentPhone && userPhone && agentPhone === userPhone
-        
+
         if (nameMatch || phoneMatch) {
           console.log('🔍 Fallback match found:', {
             propertyTitle: property.title,
@@ -537,29 +537,29 @@ export const SampleHomes: React.FC = () => {
             phoneMatch
           })
         }
-        
+
         return nameMatch || phoneMatch
       })
-      
-          if (fallbackAgentProps.length > 0) {
-      console.log('✅ Fallback matching successful, found properties:', fallbackAgentProps.length)
-      return { 
-        agentProperties: fallbackAgentProps, 
-        otherProperties: properties.filter(p => !fallbackAgentProps.includes(p))
+
+      if (fallbackAgentProps.length > 0) {
+        console.log('✅ Fallback matching successful, found properties:', fallbackAgentProps.length)
+        return {
+          agentProperties: fallbackAgentProps,
+          otherProperties: properties.filter(p => !fallbackAgentProps.includes(p))
+        }
+      }
+
+      // Final fallback: If still no properties found, show all properties as agent properties
+      // This ensures agents can see their properties while we debug the matching issue
+      if (agentProps.length === 0 && fallbackAgentProps.length === 0) {
+        console.log('⚠️ No properties found by any matching method, showing all properties as agent properties')
+        return {
+          agentProperties: properties,
+          otherProperties: []
+        }
       }
     }
-    
-    // Final fallback: If still no properties found, show all properties as agent properties
-    // This ensures agents can see their properties while we debug the matching issue
-    if (agentProps.length === 0 && fallbackAgentProps.length === 0) {
-      console.log('⚠️ No properties found by any matching method, showing all properties as agent properties')
-      return { 
-        agentProperties: properties, 
-        otherProperties: []
-      }
-    }
-    }
-    
+
     console.log('🔍 Property separation results:', {
       totalProperties: properties.length,
       agentProperties: agentProps.length,
@@ -574,10 +574,10 @@ export const SampleHomes: React.FC = () => {
         agentId: otherProps[0].agentId
       } : null
     })
-    
+
     return { agentProperties: agentProps, otherProperties: otherProps }
   }, [properties, isAgent, user?.id])
-  
+
   // Extract available districts from all properties (not filtered)
   const availableDistricts = useMemo(() => {
     const districts = new Set<string>()
@@ -588,10 +588,10 @@ export const SampleHomes: React.FC = () => {
     })
     return Array.from(districts).sort()
   }, [allProperties])
-  
+
   // Check if any filters are active
   const hasActiveFilters = filters.listingType !== 'all' || filters.district !== ''
-  
+
   // Debug: Log what properties are being displayed
   console.log('🔍 SampleHomes Debug:', {
     databasePropertiesCount: properties.length,
@@ -612,11 +612,11 @@ export const SampleHomes: React.FC = () => {
       agentId: displayProperties[0].agentId,
       createdAt: displayProperties[0].createdAt
     } : null,
-    sampleProperties: properties.slice(0, 3).map(p => ({ 
-      title: p.title, 
+    sampleProperties: properties.slice(0, 3).map(p => ({
+      title: p.title,
       district: p.district,
       agentId: p.agentId,
-      deletionStatus: p.deletionStatus 
+      deletionStatus: p.deletionStatus
     }))
   })
 
@@ -660,17 +660,17 @@ export const SampleHomes: React.FC = () => {
   // Grid View Card Component
   const GridCard = ({ property, index }: { property: any; index: number }) => {
     const isClicked = clickedPropertyId === (property.id || property._id || property.propertyId)
-    
+
     return (
       <motion.div
         key={getPropertyKey(property, index)}
         initial={{ opacity: 0, y: 30 }}
-        whileInView={{ 
-          opacity: 1, 
+        whileInView={{
+          opacity: 1,
           y: 0
         }}
-        transition={{ 
-          duration: 0.4, 
+        transition={{
+          duration: 0.4,
           delay: index * 0.02, // Reduced delay
           ease: [0.25, 0.46, 0.45, 0.94]
         }}
@@ -686,11 +686,11 @@ export const SampleHomes: React.FC = () => {
           >
             <div className="text-center">
               <motion.div
-                animate={{ 
+                animate={{
                   rotate: 360,
                   scale: [1, 1.1, 1]
                 }}
-                transition={{ 
+                transition={{
                   rotate: { duration: 1, repeat: Infinity, ease: "linear" },
                   scale: { duration: 0.8, repeat: Infinity, ease: "easeInOut" }
                 }}
@@ -707,7 +707,7 @@ export const SampleHomes: React.FC = () => {
             </div>
           </motion.div>
         )}
-        
+
         {/* Click Effect Ripple */}
         {isClicked && (
           <motion.div
@@ -722,8 +722,8 @@ export const SampleHomes: React.FC = () => {
             }}
           />
         )}
-        
-        <div 
+
+        <div
           className="relative bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1"
           onClick={(e) => {
             console.log('🖱️ Property card clicked!', { propertyId: property.propertyId, title: property.title })
@@ -732,195 +732,198 @@ export const SampleHomes: React.FC = () => {
             handlePropertyClick(property)
           }}
         >
-        {/* Image Section */}
-        <div className="relative h-40 sm:h-48 md:h-60 lg:h-80 overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-          <PropertyImageWithWatermarkFixed
-            src={getPropertyImage(property) || '/icons/placeholder.jpg'}
-            alt={property.title}
-            className="w-full h-full object-cover object-center"
-            showWatermark={true}
-            watermarkPosition="center"
-            property={property}
-            watermarkSize="small"
-          />
-          
-          {/* Overlay Elements */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-          
-          {/* Top Badges */}
-          <div className="absolute top-2 left-2 flex flex-col gap-1">
-            <div className="bg-blue-500/90 backdrop-blur-sm text-white px-2 py-1 rounded-full text-xs font-semibold shadow-lg">
-              ID: {property.propertyId || property.id || 'N/A'}
+          {/* Image Section */}
+          <div className="relative h-40 sm:h-48 md:h-60 lg:h-80 overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+            <PropertyImageWithWatermarkFixed
+              src={getPropertyImage(property) || '/icons/placeholder.jpg'}
+              alt={property.title}
+              className="w-full h-full object-cover object-center"
+              showWatermark={true}
+              watermarkPosition="center"
+              property={property}
+              watermarkSize="small"
+            />
+
+            {/* Overlay Elements */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+
+            {/* Top Badges */}
+            <div className="absolute top-2 left-2 flex flex-col gap-1">
+              <div className="bg-blue-500/90 backdrop-blur-sm text-white px-2 py-1 rounded-full text-xs font-semibold shadow-lg">
+                ID: {property.propertyId || property.id || 'N/A'}
+              </div>
             </div>
+
+            {/* Top Right Badges */}
+            <div className="absolute top-2 right-2 flex flex-col gap-1">
+              {/* My Property Badge */}
+              {isAgent && property.agentId === user?.id && (
+                <div className="bg-green-500/90 backdrop-blur-sm text-white px-2 py-1 rounded-full text-xs font-semibold shadow-lg">
+                  My Property
+                </div>
+              )}
+            </div>
+
+
           </div>
 
-          {/* Top Right Badges */}
-          <div className="absolute top-2 right-2 flex flex-col gap-1">
-            {/* My Property Badge */}
-            {isAgent && property.agentId === user?.id && (
-              <div className="bg-green-500/90 backdrop-blur-sm text-white px-2 py-1 rounded-full text-xs font-semibold shadow-lg">
-                My Property
-              </div>
-            )}
-          </div>
-
-
-        </div>
-
-        {/* Content Section */}
-        <div className="p-3 sm:p-4 md:p-6 lg:p-8">
-          {/* Header */}
-          <div className="mb-3 sm:mb-4 md:mb-6">
-            <div className="mb-1 sm:mb-2 md:mb-3">
-              <h3 className="text-sm sm:text-base md:text-xl lg:text-2xl font-bold text-slate-900 group-hover:text-blue-600 transition-colors duration-300 line-clamp-2">
-                {property.title}
-              </h3>
-            </div>
-            {property.district && (
-              <div className="flex items-center text-slate-500 mb-2 sm:mb-3 md:mb-4">
-                <MapPin className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 mr-1 sm:mr-2 text-green-500 flex-shrink-0" />
-                <span className="text-xs sm:text-sm md:text-base lg:text-lg line-clamp-1 font-medium text-green-700">
-                  {property.district}
-                </span>
-              </div>
-            )}
-            <div className="flex items-center text-slate-600 mb-2 sm:mb-3 md:mb-4">
-              <img 
-                src="/icons/adress.png" 
-                alt="Location" 
-                className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 mr-1 sm:mr-2 flex-shrink-0 object-contain"
-              />
-              <span className="text-xs sm:text-sm md:text-base lg:text-lg line-clamp-1">{property.location}</span>
-            </div>
-            
-            {/* Price Display */}
+          {/* Content Section */}
+          <div className="p-3 sm:p-4 md:p-6 lg:p-8">
+            {/* Header */}
             <div className="mb-3 sm:mb-4 md:mb-6">
-              <div 
-                className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-green-600"
-                dangerouslySetInnerHTML={{ __html: formatPrice(property.price, property.listingType) }}
-              />
-            </div>
-          </div>
-
-          {/* Stats Grid - Show different fields based on property type */}
-          <div className={`grid gap-2 sm:gap-3 md:gap-4 lg:gap-6 mb-4 sm:mb-5 md:mb-6 lg:mb-8 ${property.status === 'For Sale' ? 'grid-cols-2' : 'grid-cols-2'}`}>
-            {/* For Sale properties: Show Sharciga and Cabbirka instead of QOL/Suuli */}
-            {property.status === 'For Sale' ? (
-              <>
-                <div className="text-center group/stat">
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-16 lg:h-16 flex items-center justify-center mx-auto mb-1 sm:mb-2 md:mb-3 group-hover/stat:scale-110 transition-transform duration-300">
-                    <img 
-                      src="/icons/sharci.gif" 
-                      alt="Document" 
-                      className="w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 object-contain"
-                    />
-                  </div>
-                  <div className="text-xs sm:text-sm md:text-base lg:text-lg font-bold text-slate-900 mb-0.5 sm:mb-1">{property.documentType || 'Siyaad Barre'}</div>
-                  <div className="text-blue-800 text-xs sm:text-sm font-medium">Sharciga</div>
-                </div>
-                
-                <div className="text-center group/stat">
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-16 lg:h-16 flex items-center justify-center mx-auto mb-1 sm:mb-2 md:mb-3 group-hover/stat:scale-110 transition-transform duration-300">
-                    <img 
-                      src="/icons/ruler2.gif" 
-                      alt="Measurement" 
-                      className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 lg:w-12 lg:h-12 object-contain"
-                    />
-                  </div>
-                  <div className="text-sm sm:text-base md:text-lg lg:text-2xl font-bold text-slate-900 mb-0.5 sm:mb-1">
-                    {resolveMeasurementValue(property.measurement, property.sqft, property.lotSize)}
-                  </div>
-                  <div className="text-blue-800 text-xs sm:text-sm font-medium">Cabbirka</div>
-                </div>
-              </>
-            ) : (
-              /* For Rent properties: Show QOL and Suuli only if values > 0 */
-              <>
-                {property.beds > 0 && (
-            <div className="text-center group/stat">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-16 lg:h-16 flex items-center justify-center mx-auto mb-1 sm:mb-2 md:mb-3 group-hover/stat:scale-110 transition-transform duration-300">
-                <NextImage 
-                  src="/icons/bed.png" 
-                  alt="Bed" 
-                  width={32}
-                  height={32}
-                  className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 lg:w-10 lg:h-10 object-contain"
-                  loading="lazy"
-                />
+              <div className="mb-1 sm:mb-2 md:mb-3">
+                <h3 className="text-sm sm:text-base md:text-xl lg:text-2xl font-bold text-slate-900 group-hover:text-blue-600 transition-colors duration-300 line-clamp-2">
+                  {property.title}
+                </h3>
               </div>
-              <div className="text-sm sm:text-base md:text-lg lg:text-2xl font-bold text-slate-900 mb-0.5 sm:mb-1">{property.beds}</div>
-                    <div className="text-blue-800 text-xs sm:text-sm font-medium">Qol</div>
-            </div>
-                )}
-            
-                {property.baths > 0 && (
-            <div className="text-center group/stat">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-16 lg:h-16 flex items-center justify-center mx-auto mb-1 sm:mb-2 md:mb-3 group-hover/stat:scale-110 transition-transform duration-300">
-                <video 
-                  src="/icons/shower1.mp4" 
-                  autoPlay 
-                  loop 
-                  muted 
-                  playsInline
-                  className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 lg:w-10 lg:h-10 object-contain"
-                />
-              </div>
-              <div className="text-sm sm:text-base md:text-lg lg:text-2xl font-bold text-slate-900 mb-0.5 sm:mb-1">{property.baths}</div>
-                    <div className="text-blue-800 text-xs sm:text-sm font-medium">Suuli</div>
-              </div>
-                )}
-              </>
-            )}
-          </div>
-
-          {/* Agent Preview */}
-          <div className="flex items-center p-2 sm:p-3 md:p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl md:rounded-2xl">
-            <div className="flex items-center space-x-2 sm:space-x-3 md:space-x-4">
-              <HybridImage
-                src={getStableAvatarUrl(property.agentId || property.agent?.name || 'agent-1', property.agent?.image, false)}
-                alt={capitalizeName(property.agent?.name || 'Agent')}
-                width={48}
-                height={48}
-                className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full object-cover border-2 border-white shadow-lg"
-              />
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                  <div className="font-semibold text-slate-900 text-xs sm:text-sm md:text-base truncate">
-                    {getFirstName(property.agent?.name)}
-                  </div>
-                  {(property.agent?.name?.toLowerCase().includes('kobac real estate') || 
-                    property.agent?.name?.toLowerCase().includes('kobac real')) && (
-                    <div className="flex items-center justify-center w-4 h-4 rounded-full shadow-lg border-2 border-white" style={{backgroundColor: '#1877F2'}}>
-                      <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                  )}
-                </div>
-                <div className="text-xs text-slate-500 truncate">
-                  <span 
-                    className="cursor-pointer hover:text-blue-600 transition-colors"
-                    onClick={() => {
-                      if (property.agent?.phone) {
-                        // Clean the phone number for tel: link and format with 061
-                        const cleanPhone = property.agent.phone.replace(/\D/g, '');
-                        const formattedPhone = cleanPhone.startsWith('2526') ? `061${cleanPhone.substring(5)}` : `061${cleanPhone}`;
-                        const phoneLink = `tel:${formattedPhone}`;
-                        window.location.href = phoneLink;
-                      }
-                    }}
-                  >
-                  {property.agent?.phone ? formatPhoneNumber(property.agent.phone) : 'Contact Agent'}
+              {property.district && (
+                <div className="flex items-center text-slate-500 mb-2 sm:mb-3 md:mb-4">
+                  <MapPin className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 mr-1 sm:mr-2 text-green-500 flex-shrink-0" />
+                  <span className="text-xs sm:text-sm md:text-base lg:text-lg line-clamp-1 font-medium text-green-700">
+                    {property.district}
                   </span>
                 </div>
+              )}
+              <div className="flex items-center text-slate-600 mb-2 sm:mb-3 md:mb-4">
+                <video
+                  src="/icons/Adress3.webm"
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 mr-1 sm:mr-2 flex-shrink-0 object-contain"
+                />
+                <span className="text-xs sm:text-sm md:text-base lg:text-lg line-clamp-1">{property.location}</span>
+              </div>
+
+              {/* Price Display */}
+              <div className="mb-3 sm:mb-4 md:mb-6">
+                <div
+                  className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-green-600"
+                  dangerouslySetInnerHTML={{ __html: formatPrice(property.price, property.listingType) }}
+                />
+              </div>
+            </div>
+
+            {/* Stats Grid - Show different fields based on property type */}
+            <div className={`grid gap-2 sm:gap-3 md:gap-4 lg:gap-6 mb-4 sm:mb-5 md:mb-6 lg:mb-8 ${property.status === 'For Sale' ? 'grid-cols-2' : 'grid-cols-2'}`}>
+              {/* For Sale properties: Show Sharciga and Cabbirka instead of QOL/Suuli */}
+              {property.status === 'For Sale' ? (
+                <>
+                  <div className="text-center group/stat">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-16 lg:h-16 flex items-center justify-center mx-auto mb-1 sm:mb-2 md:mb-3 group-hover/stat:scale-110 transition-transform duration-300">
+                      <img
+                        src="/icons/sharci.gif"
+                        alt="Document"
+                        className="w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 object-contain"
+                      />
+                    </div>
+                    <div className="text-xs sm:text-sm md:text-base lg:text-lg font-bold text-slate-900 mb-0.5 sm:mb-1">{property.documentType || 'Siyaad Barre'}</div>
+                    <div className="text-blue-800 text-xs sm:text-sm font-medium">Sharciga</div>
+                  </div>
+
+                  <div className="text-center group/stat">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-16 lg:h-16 flex items-center justify-center mx-auto mb-1 sm:mb-2 md:mb-3 group-hover/stat:scale-110 transition-transform duration-300">
+                      <img
+                        src="/icons/ruler2.gif"
+                        alt="Measurement"
+                        className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 lg:w-12 lg:h-12 object-contain"
+                      />
+                    </div>
+                    <div className="text-sm sm:text-base md:text-lg lg:text-2xl font-bold text-slate-900 mb-0.5 sm:mb-1">
+                      {resolveMeasurementValue(property.measurement, property.sqft, property.lotSize)}
+                    </div>
+                    <div className="text-blue-800 text-xs sm:text-sm font-medium">Cabbirka</div>
+                  </div>
+                </>
+              ) : (
+                /* For Rent properties: Show QOL and Suuli only if values > 0 */
+                <>
+                  {property.beds > 0 && (
+                    <div className="text-center group/stat">
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-16 lg:h-16 flex items-center justify-center mx-auto mb-1 sm:mb-2 md:mb-3 group-hover/stat:scale-110 transition-transform duration-300">
+                        <NextImage
+                          src="/icons/bed.png"
+                          alt="Bed"
+                          width={32}
+                          height={32}
+                          className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 lg:w-10 lg:h-10 object-contain"
+                          loading="lazy"
+                        />
+                      </div>
+                      <div className="text-sm sm:text-base md:text-lg lg:text-2xl font-bold text-slate-900 mb-0.5 sm:mb-1">{property.beds}</div>
+                      <div className="text-blue-800 text-xs sm:text-sm font-medium">Qol</div>
+                    </div>
+                  )}
+
+                  {property.baths > 0 && (
+                    <div className="text-center group/stat">
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-16 lg:h-16 flex items-center justify-center mx-auto mb-1 sm:mb-2 md:mb-3 group-hover/stat:scale-110 transition-transform duration-300">
+                        <video
+                          src="/icons/shower1.mp4"
+                          autoPlay
+                          loop
+                          muted
+                          playsInline
+                          className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 lg:w-10 lg:h-10 object-contain"
+                        />
+                      </div>
+                      <div className="text-sm sm:text-base md:text-lg lg:text-2xl font-bold text-slate-900 mb-0.5 sm:mb-1">{property.baths}</div>
+                      <div className="text-blue-800 text-xs sm:text-sm font-medium">Suuli</div>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+
+            {/* Agent Preview */}
+            <div className="flex items-center p-2 sm:p-3 md:p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl md:rounded-2xl">
+              <div className="flex items-center space-x-2 sm:space-x-3 md:space-x-4">
+                <HybridImage
+                  src={getStableAvatarUrl(property.agentId || property.agent?.name || 'agent-1', property.agent?.image, false)}
+                  alt={capitalizeName(property.agent?.name || 'Agent')}
+                  width={48}
+                  height={48}
+                  className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full object-cover border-2 border-white shadow-lg"
+                />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <div className="font-semibold text-slate-900 text-xs sm:text-sm md:text-base truncate">
+                      {getFirstName(property.agent?.name)}
+                    </div>
+                    {(property.agent?.name?.toLowerCase().includes('kobac real estate') ||
+                      property.agent?.name?.toLowerCase().includes('kobac real')) && (
+                        <div className="flex items-center justify-center w-4 h-4 rounded-full shadow-lg border-2 border-white" style={{ backgroundColor: '#1877F2' }}>
+                          <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                      )}
+                  </div>
+                  <div className="text-xs text-slate-500 truncate">
+                    <span
+                      className="cursor-pointer hover:text-blue-600 transition-colors"
+                      onClick={() => {
+                        if (property.agent?.phone) {
+                          // Clean the phone number for tel: link and format with 061
+                          const cleanPhone = property.agent.phone.replace(/\D/g, '');
+                          const formattedPhone = cleanPhone.startsWith('2526') ? `061${cleanPhone.substring(5)}` : `061${cleanPhone}`;
+                          const phoneLink = `tel:${formattedPhone}`;
+                          window.location.href = phoneLink;
+                        }
+                      }}
+                    >
+                      {property.agent?.phone ? formatPhoneNumber(property.agent.phone) : 'Contact Agent'}
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </motion.div>
-      )
-    }
+      </motion.div>
+    )
+  }
 
   // List View Card Component
   const ListCard = ({ property, index }: { property: any; index: number }) => (
@@ -928,15 +931,15 @@ export const SampleHomes: React.FC = () => {
       key={getPropertyKey(property, index)}
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
-      transition={{ 
-        duration: 0.4, 
+      transition={{
+        duration: 0.4,
         delay: index * 0.02, // Reduced delay
         ease: [0.25, 0.46, 0.45, 0.94]
       }}
       viewport={{ once: true }}
       className="group"
     >
-      <div 
+      <div
         className="relative bg-white rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1"
         onClick={(e) => {
           console.log('🖱️ Property card clicked!', { propertyId: property.propertyId, title: property.title })
@@ -957,10 +960,10 @@ export const SampleHomes: React.FC = () => {
               property={property}
               watermarkSize="medium"
             />
-            
+
             {/* Overlay Elements */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-            
+
             {/* Top Badges */}
             <div className="absolute top-4 left-4 flex flex-col gap-2">
               <div className="bg-blue-500/90 backdrop-blur-sm text-white px-2 py-1 rounded-full text-xs font-semibold shadow-lg">
@@ -999,17 +1002,20 @@ export const SampleHomes: React.FC = () => {
                     </div>
                   )}
                   <div className="flex items-center text-slate-600 mb-3">
-                    <img 
-                      src="/icons/adress.png" 
-                      alt="Location" 
+                    <video
+                      src="/icons/Adress3.webm"
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
                       className="w-5 h-5 mr-2 object-contain"
                     />
                     <span className="text-lg">{property.location}</span>
                   </div>
-                  
+
                   {/* Price Display */}
                   <div className="mb-6">
-                    <div 
+                    <div
                       className="text-3xl md:text-4xl font-bold text-green-600"
                       dangerouslySetInnerHTML={{ __html: formatPrice(property.price, property.listingType) }}
                     />
@@ -1022,9 +1028,9 @@ export const SampleHomes: React.FC = () => {
                   {property.status === 'For Sale' ? (
                     <>
                       <div className="flex items-center space-x-2">
-                        <img 
-                          src="/icons/sharci.gif" 
-                          alt="Document" 
+                        <img
+                          src="/icons/sharci.gif"
+                          alt="Document"
                           className="w-9 h-9 object-contain"
                         />
                         <div>
@@ -1032,11 +1038,11 @@ export const SampleHomes: React.FC = () => {
                           <div className="text-lg font-bold text-slate-900">{property.documentType || 'Siyaad Barre'}</div>
                         </div>
                       </div>
-                      
+
                       <div className="flex items-center space-x-2">
-                        <NextImage 
-                          src="/icons/ruler2.gif" 
-                          alt="Measurement" 
+                        <NextImage
+                          src="/icons/ruler2.gif"
+                          alt="Measurement"
                           width={32}
                           height={32}
                           className="w-9 h-9 object-contain"
@@ -1044,9 +1050,9 @@ export const SampleHomes: React.FC = () => {
                         />
                         <div>
                           <div className="text-blue-800 text-sm font-bold mb-1">Cabbirka</div>
-                        <div className="text-xl font-bold text-slate-900">
-                          {resolveMeasurementValue(property.measurement, property.sqft, property.lotSize)}
-                        </div>
+                          <div className="text-xl font-bold text-slate-900">
+                            {resolveMeasurementValue(property.measurement, property.sqft, property.lotSize)}
+                          </div>
                         </div>
                       </div>
                     </>
@@ -1054,38 +1060,38 @@ export const SampleHomes: React.FC = () => {
                     /* For Rent properties: Show QOL and Suuli only if values > 0 */
                     <>
                       {property.beds > 0 && (
-                    <div className="flex items-center space-x-2">
-                      <NextImage 
-                        src="/icons/bed.png" 
-                        alt="Bed" 
-                        width={24}
-                        height={24}
-                        className="w-7 h-7 object-contain"
-                        loading="lazy"
-                      />
-                      <div>
-                        <div className="text-xl font-bold text-slate-900">{property.beds}</div>
+                        <div className="flex items-center space-x-2">
+                          <NextImage
+                            src="/icons/bed.png"
+                            alt="Bed"
+                            width={24}
+                            height={24}
+                            className="w-7 h-7 object-contain"
+                            loading="lazy"
+                          />
+                          <div>
+                            <div className="text-xl font-bold text-slate-900">{property.beds}</div>
                             <div className="text-blue-800 text-sm font-medium">Qol</div>
-                      </div>
-                    </div>
-                  )}
-                  
+                          </div>
+                        </div>
+                      )}
+
                       {property.baths > 0 && (
-                    <div className="flex items-center space-x-2">
-                      <video 
-                        src="/icons/shower1.mp4" 
-                        autoPlay 
-                        loop 
-                        muted 
-                        playsInline
-                        className="w-7 h-7 object-contain"
-                      />
-                      <div>
-                        <div className="text-xl font-bold text-slate-900">{property.baths}</div>
+                        <div className="flex items-center space-x-2">
+                          <video
+                            src="/icons/shower1.mp4"
+                            autoPlay
+                            loop
+                            muted
+                            playsInline
+                            className="w-7 h-7 object-contain"
+                          />
+                          <div>
+                            <div className="text-xl font-bold text-slate-900">{property.baths}</div>
                             <div className="text-blue-800 text-sm font-medium">Suuli</div>
-                      </div>
-                    </div>
-                  )}
+                          </div>
+                        </div>
+                      )}
                     </>
                   )}
 
@@ -1112,23 +1118,23 @@ export const SampleHomes: React.FC = () => {
                         <div className="font-semibold text-slate-900 text-base">
                           {capitalizeName(property.agent?.name || 'Agent')}
                         </div>
-                        {(property.agent?.name?.toLowerCase().includes('kobac real estate') || 
+                        {(property.agent?.name?.toLowerCase().includes('kobac real estate') ||
                           property.agent?.name?.toLowerCase().includes('kobac real')) && (
-                          <div className="flex-shrink-0 flex items-center justify-center w-4 h-4 rounded-full shadow-lg border border-white" style={{backgroundColor: '#1877F2'}}>
-                            <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                            </svg>
-                          </div>
-                        )}
+                            <div className="flex-shrink-0 flex items-center justify-center w-4 h-4 rounded-full shadow-lg border border-white" style={{ backgroundColor: '#1877F2' }}>
+                              <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                              </svg>
+                            </div>
+                          )}
                         {property.agent?.verified && (
-                          <div className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border" style={{backgroundColor: '#E3F2FD', color: '#1877F2', borderColor: '#1877F2'}}>
+                          <div className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border" style={{ backgroundColor: '#E3F2FD', color: '#1877F2', borderColor: '#1877F2' }}>
                             <Award className="w-3 h-3" />
                             <span>Verified</span>
                           </div>
                         )}
                       </div>
                       <div className="text-sm text-slate-500">
-                        <span 
+                        <span
                           className="cursor-pointer hover:text-blue-600 transition-colors"
                           onClick={() => {
                             if (property.agent?.phone) {
@@ -1140,7 +1146,7 @@ export const SampleHomes: React.FC = () => {
                             }
                           }}
                         >
-                        {property.agent?.phone ? formatPhoneNumber(property.agent.phone) : 'Contact Agent'}
+                          {property.agent?.phone ? formatPhoneNumber(property.agent.phone) : 'Contact Agent'}
                         </span>
                       </div>
                     </div>
@@ -1158,7 +1164,7 @@ export const SampleHomes: React.FC = () => {
     <>
       {/* Redirect Animation */}
       <RedirectAnimation {...animationProps} />
-      
+
       <section className="relative pt-8 sm:pt-12 md:pt-16 lg:pt-20 pb-16 sm:pb-20 md:pb-24 lg:pb-32 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 overflow-hidden">
         {/* Background Elements */}
         <div className="absolute inset-0">
@@ -1174,9 +1180,9 @@ export const SampleHomes: React.FC = () => {
             {/* Mobile Agent Dashboard Button */}
             {isAuthenticated && user?.role === 'agent' && (
               <div className="sm:hidden mb-6 text-center">
-                <Button 
+                <Button
                   onClick={handleAgentDashboardClick}
-                  variant="secondary" 
+                  variant="secondary"
                   size="lg"
                   className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-full shadow-2xl border-0 w-full max-w-xs transition-all duration-300 hover:scale-105"
                 >
@@ -1185,7 +1191,7 @@ export const SampleHomes: React.FC = () => {
                 </Button>
               </div>
             )}
-            
+
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-6">
               <div className="flex flex-col sm:flex-row sm:items-center sm:gap-6">
                 <div>
@@ -1193,17 +1199,17 @@ export const SampleHomes: React.FC = () => {
                     {isAgent ? 'My Listings' : 'Featured Properties'}
                   </h2>
                   <p className="text-slate-600 text-lg">
-                    {isAgent 
+                    {isAgent
                       ? `You have ${agentProperties.length} properties listed. Browse all available properties below.`
                       : 'Discover our curated selection of premium properties'
                     }
                   </p>
                 </div>
-                
+
                 {/* Agents Link */}
                 <div className="mt-4 sm:mt-0">
-                  <Link 
-                    href="/agents" 
+                  <Link
+                    href="/agents"
                     className="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg"
                   >
                     <Users className="w-4 h-4 mr-2" />
@@ -1211,7 +1217,7 @@ export const SampleHomes: React.FC = () => {
                   </Link>
                 </div>
               </div>
-              
+
               {/* View Toggle and Refresh */}
               <div className="flex items-center space-x-4">
                 {/* Refresh Button */}
@@ -1223,32 +1229,32 @@ export const SampleHomes: React.FC = () => {
                   <RefreshCw className="w-4 h-4" />
                   <span className="hidden sm:inline">Refresh</span>
                 </button>
-                
+
                 <div className="hidden sm:flex items-center bg-white rounded-2xl p-1 shadow-lg">
                   <motion.button
                     onClick={() => setViewMode('grid')}
-                    whileHover={{ 
+                    whileHover={{
                       scale: 1.05,
                       y: -1,
                       transition: { type: "spring", stiffness: 300, damping: 20 }
                     }}
-                    whileTap={{ 
+                    whileTap={{
                       scale: 0.95,
                       transition: { type: "spring", stiffness: 400, damping: 15 }
                     }}
                     className={cn(
                       "flex items-center space-x-2 px-4 py-2 rounded-xl transition-all duration-300",
-                      viewMode === 'grid' 
-                        ? "bg-blue-600 text-white shadow-md" 
+                      viewMode === 'grid'
+                        ? "bg-blue-600 text-white shadow-md"
                         : "text-slate-600 hover:text-slate-900"
                     )}
                   >
                     <motion.div
-                      animate={{ 
+                      animate={{
                         rotate: viewMode === 'grid' ? [0, 5, -5, 0] : 0,
                         scale: viewMode === 'grid' ? 1.1 : 1
                       }}
-                      transition={{ 
+                      transition={{
                         rotate: { duration: 2, repeat: viewMode === 'grid' ? Infinity : 0, ease: "easeInOut" },
                         scale: { duration: 0.3, ease: "easeOut" }
                       }}
@@ -1259,28 +1265,28 @@ export const SampleHomes: React.FC = () => {
                   </motion.button>
                   <motion.button
                     onClick={() => setViewMode('list')}
-                    whileHover={{ 
+                    whileHover={{
                       scale: 1.05,
                       y: -1,
                       transition: { type: "spring", stiffness: 300, damping: 20 }
                     }}
-                    whileTap={{ 
+                    whileTap={{
                       scale: 0.95,
                       transition: { type: "spring", stiffness: 400, damping: 15 }
                     }}
                     className={cn(
                       "flex items-center space-x-2 px-4 py-2 rounded-xl transition-all duration-300",
-                      viewMode === 'list' 
-                        ? "bg-blue-600 text-white shadow-md" 
+                      viewMode === 'list'
+                        ? "bg-blue-600 text-white shadow-md"
                         : "text-slate-600 hover:text-slate-900"
                     )}
                   >
                     <motion.div
-                      animate={{ 
+                      animate={{
                         rotate: viewMode === 'list' ? [0, 5, -5, 0] : 0,
                         scale: viewMode === 'list' ? 1.1 : 1
                       }}
-                      transition={{ 
+                      transition={{
                         rotate: { duration: 2, repeat: viewMode === 'list' ? Infinity : 0, ease: "easeInOut" },
                         scale: { duration: 0.3, ease: "easeOut" }
                       }}
@@ -1290,38 +1296,38 @@ export const SampleHomes: React.FC = () => {
                     <span className="text-sm font-medium">List</span>
                   </motion.button>
                 </div>
-                
+
                 {/* District Info */}
                 <div className="flex items-center space-x-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-semibold">
                   <MapPin className="w-4 h-4" />
                   <span>{availableDistricts.length} Degmo</span>
                 </div>
-                
+
                 {/* Mobile View Toggle */}
                 <div className="sm:hidden flex items-center bg-white rounded-2xl p-1 shadow-lg">
                   <motion.button
                     onClick={() => setViewMode('grid')}
-                    whileHover={{ 
+                    whileHover={{
                       scale: 1.1,
                       transition: { type: "spring", stiffness: 300, damping: 20 }
                     }}
-                    whileTap={{ 
+                    whileTap={{
                       scale: 0.9,
                       transition: { type: "spring", stiffness: 400, damping: 15 }
                     }}
                     className={cn(
                       "p-2 rounded-xl transition-all duration-300",
-                      viewMode === 'grid' 
-                        ? "bg-blue-600 text-white shadow-md" 
+                      viewMode === 'grid'
+                        ? "bg-blue-600 text-white shadow-md"
                         : "text-slate-600 hover:text-slate-900"
                     )}
                   >
                     <motion.div
-                      animate={{ 
+                      animate={{
                         rotate: viewMode === 'grid' ? [0, 5, -5, 0] : 0,
                         scale: viewMode === 'grid' ? 1.2 : 1
                       }}
-                      transition={{ 
+                      transition={{
                         rotate: { duration: 2, repeat: viewMode === 'grid' ? Infinity : 0, ease: "easeInOut" },
                         scale: { duration: 0.3, ease: "easeOut" }
                       }}
@@ -1331,27 +1337,27 @@ export const SampleHomes: React.FC = () => {
                   </motion.button>
                   <motion.button
                     onClick={() => setViewMode('list')}
-                    whileHover={{ 
+                    whileHover={{
                       scale: 1.1,
                       transition: { type: "spring", stiffness: 300, damping: 20 }
                     }}
-                    whileTap={{ 
+                    whileTap={{
                       scale: 0.9,
                       transition: { type: "spring", stiffness: 400, damping: 15 }
                     }}
                     className={cn(
                       "p-2 rounded-xl transition-all duration-300",
-                      viewMode === 'list' 
-                        ? "bg-blue-600 text-white shadow-md" 
+                      viewMode === 'list'
+                        ? "bg-blue-600 text-white shadow-md"
                         : "text-slate-600 hover:text-slate-900"
                     )}
                   >
                     <motion.div
-                      animate={{ 
+                      animate={{
                         rotate: viewMode === 'list' ? [0, 5, -5, 0] : 0,
                         scale: viewMode === 'list' ? 1.2 : 1
                       }}
-                      transition={{ 
+                      transition={{
                         rotate: { duration: 2, repeat: viewMode === 'list' ? Infinity : 0, ease: "easeInOut" },
                         scale: { duration: 0.3, ease: "easeOut" }
                       }}
@@ -1362,7 +1368,7 @@ export const SampleHomes: React.FC = () => {
                 </div>
               </div>
             </div>
-            
+
             {/* Filters Section */}
             <PropertyFilters
               filters={filters}
@@ -1370,26 +1376,26 @@ export const SampleHomes: React.FC = () => {
               availableDistricts={availableDistricts}
               className="mb-6"
             />
-            
+
             {/* Results Count */}
             {!loading && !error && (
               <div className="flex items-center justify-between mb-6">
                 <div className="text-slate-600">
                   {isAgent ? (
-                  <>
-                    {agentProperties.length > 0 && (
-                      <span className="font-semibold text-blue-600">{agentProperties.length} my properties</span>
-                    )}
-                    {agentProperties.length > 0 && otherProperties.length > 0 && (
-                      <span className="text-slate-500 mx-2">•</span>
-                    )}
-                    {otherProperties.length > 0 && (
-                      <span className="font-semibold text-slate-900">{otherProperties.length} other properties</span>
-                    )}
-                  </>
-                ) : (
-                  <span className="font-semibold text-slate-900">{displayProperties.length} properties</span>
-                )}
+                    <>
+                      {agentProperties.length > 0 && (
+                        <span className="font-semibold text-blue-600">{agentProperties.length} my properties</span>
+                      )}
+                      {agentProperties.length > 0 && otherProperties.length > 0 && (
+                        <span className="text-slate-500 mx-2">•</span>
+                      )}
+                      {otherProperties.length > 0 && (
+                        <span className="font-semibold text-slate-900">{otherProperties.length} other properties</span>
+                      )}
+                    </>
+                  ) : (
+                    <span className="font-semibold text-slate-900">{displayProperties.length} properties</span>
+                  )}
                   {hasActiveFilters && (
                     <span className="text-slate-500">
                       {' '}matching your filters
@@ -1415,8 +1421,8 @@ export const SampleHomes: React.FC = () => {
           {/* Properties Grid/List */}
           <div className={cn(
             "grid gap-2 sm:gap-4 md:gap-6 lg:gap-8",
-            viewMode === 'grid' 
-              ? "grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2" 
+            viewMode === 'grid'
+              ? "grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2"
               : "grid-cols-1"
           )}>
             {loading ? (
@@ -1428,7 +1434,7 @@ export const SampleHomes: React.FC = () => {
                     </h3>
                     <p className="text-slate-600 text-base sm:text-lg">Discovering amazing properties for you</p>
                   </div>
-                  
+
                   {/* Animated Loading Cards - Mobile Optimized */}
                   <div className="grid grid-cols-2 gap-2 sm:gap-4 md:gap-6 lg:gap-8 max-w-4xl mx-auto px-4 sm:px-0">
                     {[...Array(4)].map((_, index) => (
@@ -1436,8 +1442,8 @@ export const SampleHomes: React.FC = () => {
                         key={index}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ 
-                          duration: 0.3, 
+                        transition={{
+                          duration: 0.3,
                           delay: index * 0.1,
                           repeat: Infinity,
                           repeatType: "reverse",
@@ -1463,7 +1469,7 @@ export const SampleHomes: React.FC = () => {
                               ease: "linear"
                             }}
                           />
-                          
+
                           {/* Floating Elements - Mobile Optimized */}
                           <motion.div
                             className="absolute top-2 left-2 sm:top-4 sm:left-4 w-8 h-8 sm:w-12 sm:h-12 bg-white/20 rounded-full backdrop-blur-sm"
@@ -1506,7 +1512,7 @@ export const SampleHomes: React.FC = () => {
                             }}
                           />
                         </div>
-                        
+
                         {/* Content Placeholder - Mobile Optimized */}
                         <div className="p-2 sm:p-3 md:p-4 lg:p-6">
                           {/* Title Placeholder */}
@@ -1535,7 +1541,7 @@ export const SampleHomes: React.FC = () => {
                               delay: 0.2
                             }}
                           />
-                          
+
                           {/* Price Placeholder */}
                           <motion.div
                             className="h-4 sm:h-5 md:h-6 bg-green-200 rounded mb-2 sm:mb-3 w-1/2"
@@ -1549,7 +1555,7 @@ export const SampleHomes: React.FC = () => {
                               ease: "easeInOut"
                             }}
                           />
-                          
+
                           {/* Stats Placeholder - Mobile Optimized */}
                           <div className="grid grid-cols-2 gap-1 sm:gap-2">
                             {[...Array(4)].map((_, statIndex) => (
@@ -1573,7 +1579,7 @@ export const SampleHomes: React.FC = () => {
                       </motion.div>
                     ))}
                   </div>
-                  
+
                   {/* Fun Loading Message - Mobile Optimized */}
                   <motion.div
                     className="mt-6 sm:mt-8"
@@ -1628,7 +1634,7 @@ export const SampleHomes: React.FC = () => {
                       <span className="ml-2 text-xs sm:text-sm font-medium">Finding your perfect property...</span>
                     </div>
                   </motion.div>
-                  
+
 
                 </div>
               </div>
@@ -1642,9 +1648,9 @@ export const SampleHomes: React.FC = () => {
                   {hasActiveFilters ? 'No properties match your filters' : 'No properties found'}
                 </div>
                 <div className="text-sm text-slate-500 mb-6">
-                  {loading ? 'Loading properties...' : 
-                   hasActiveFilters ? 'Try adjusting your filters or browse all properties.' : 
-                   'No properties have been uploaded yet.'}
+                  {loading ? 'Loading properties...' :
+                    hasActiveFilters ? 'Try adjusting your filters or browse all properties.' :
+                      'No properties have been uploaded yet.'}
                 </div>
                 {hasActiveFilters && (
                   <Button
@@ -1673,7 +1679,7 @@ export const SampleHomes: React.FC = () => {
                         </div>
                       </div>
                     </div>
-                    {agentProperties.map((property, index) => 
+                    {agentProperties.map((property, index) =>
                       viewMode === 'grid' ? (
                         <GridCard key={`agent-${getPropertyKey(property, index)}`} property={property} index={index} />
                       ) : (
@@ -1700,7 +1706,7 @@ export const SampleHomes: React.FC = () => {
                         </div>
                       </div>
                     )}
-                    {otherProperties.map((property, index) => 
+                    {otherProperties.map((property, index) =>
                       viewMode === 'grid' ? (
                         <GridCard key={`other-${getPropertyKey(property, index)}`} property={property} index={index} />
                       ) : (

@@ -7,16 +7,16 @@ export async function POST(request: NextRequest) {
   try {
     console.log('👑 Creating new Kobac user...');
     await connectDB();
-    
+
     // Check if any SuperAdmin already exists
-    const existingSuperAdmin = await User.findOne({ 
-      role: { $in: [UserRole.SUPER_ADMIN, UserRole.SUPERADMIN] } 
+    const existingSuperAdmin = await User.findOne({
+      role: { $in: [UserRole.SUPER_ADMIN, UserRole.SUPERADMIN] }
     });
-    
+
     if (existingSuperAdmin) {
       return NextResponse.json(
-        { 
-          success: false, 
+        {
+          success: false,
           error: 'SuperAdmin already exists. Please delete the existing one first.',
           existingSuperAdmin: {
             id: existingSuperAdmin._id,
@@ -27,19 +27,19 @@ export async function POST(request: NextRequest) {
         { status: 409 }
       );
     }
-    
+
     // Create new Kobac user with plain password
     const newKobac = new User({
-      fullName: "Kobac Real Estate",
+      fullName: "Kobac Property",
       phone: "+252610251014",
       password: "8080kobac", // Plain text password
       role: UserRole.SUPERADMIN,
       status: UserStatus.ACTIVE,
       profile: {
-        avatar: generateSuperAdminAvatar("+252610251014", "Kobac Real Estate"),
+        avatar: generateSuperAdminAvatar("+252610251014", "Kobac Property"),
         location: "Somalia",
         occupation: "System Administrator",
-        company: "Kobac Real Estate"
+        company: "Kobac Property"
       },
       preferences: {
         favoriteProperties: [],
@@ -63,10 +63,10 @@ export async function POST(request: NextRequest) {
       },
       passwordChangedAt: new Date()
     });
-    
+
     await newKobac.save();
     console.log('✅ New Kobac user created successfully:', newKobac._id);
-    
+
     return NextResponse.json({
       success: true,
       message: 'New Kobac user created successfully',
@@ -81,12 +81,12 @@ export async function POST(request: NextRequest) {
         createdAt: newKobac.createdAt
       }
     });
-    
+
   } catch (error) {
     console.error('❌ Error creating new Kobac user:', error);
     return NextResponse.json(
-      { 
-        success: false, 
+      {
+        success: false,
         error: 'Failed to create new Kobac user',
         details: error instanceof Error ? error.message : 'Unknown error'
       },

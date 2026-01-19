@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/Button'
 import { User, Grid, List, Filter, Search, MapPin, Bed, Bath, Ruler, Users, RefreshCw, Award, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useUser } from '@/contexts/UserContext'
@@ -56,11 +56,7 @@ const BeautifulPropertyCard = ({ property, index, viewMode }: { property: any; i
   const router = useRouter()
   const { setPreviousPage, preserveState } = useNavigation()
   const { user, isAuthenticated } = useUser()
-  const { saveScrollPosition } = useScrollRestoration({
-    key: 'home_page_state',
-    enabled: true,
-    delay: 100
-  })
+  // Hook removed from here - moved to parent component
 
   const getPropertyImage = (property: any) => {
     const imageUrl = getPrimaryImageUrl(property)
@@ -93,10 +89,17 @@ const BeautifulPropertyCard = ({ property, index, viewMode }: { property: any; i
       if (typeof window !== 'undefined') {
         setPreviousPage(window.location.pathname)
 
-        // Save scroll position as backup (only if we're scrolled down)
-        const currentScrollY = window.scrollY
-        if (currentScrollY > 100) {
-          sessionStorage.setItem('home_scroll_position', currentScrollY.toString())
+        // Save scroll position using the standardized key expected by useScrollRestoration
+        if (window.scrollY > 0) {
+          const scrollState = {
+            timestamp: Date.now(),
+            scrollPosition: window.scrollY,
+            pathname: window.location.pathname,
+            search: window.location.search
+          };
+          sessionStorage.setItem('kobac_state_home_page_state', JSON.stringify(scrollState));
+          // Keep legacy key just in case other parts use it, but fix the main one
+          sessionStorage.setItem('home_scroll_position', window.scrollY.toString())
         }
 
         // Cache property data for instant loading on detail page
@@ -126,63 +129,89 @@ const BeautifulPropertyCard = ({ property, index, viewMode }: { property: any; i
     }
   }
 
-  // Prefetch property data on hover for instant loading
+  const prefetchTimeout = useRef<NodeJS.Timeout | null>(null)
+
+  // Clear timeout on unmount or when property changes
+  useEffect(() => {
+    return () => {
+      if (prefetchTimeout.current) {
+        clearTimeout(prefetchTimeout.current)
+      }
+    }
+  }, [property._id, property.propertyId])
+
+  // Prefetch property data on hover for instant loading - DEBOUNCED
   const handleMouseEnter = () => {
     if (typeof window === 'undefined') return
 
     const propertyId = property.propertyId || property._id
     if (!propertyId) return
 
-    // Check if already cached
-    const cacheKey = `prefetched_property_${propertyId}`
-    const cached = sessionStorage.getItem(cacheKey)
-    if (cached) {
-      try {
-        const parsed = JSON.parse(cached)
-        const cacheAge = Date.now() - (parsed.timestamp || 0)
-        // If cache is fresh (< 2 minutes), skip prefetch
-        if (cacheAge < 2 * 60 * 1000) {
-          return
-        }
-      } catch {
-        // Continue to prefetch if cache is invalid
-      }
+    // Clear any existing timeout
+    if (prefetchTimeout.current) {
+      clearTimeout(prefetchTimeout.current)
     }
 
-    // Prefetch property data in background
-    const targetUrl = getPropertyUrl(property)
-
-    // Prefetch the route (Next.js will handle this)
-    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
-      requestIdleCallback(() => {
-        const link = document.createElement('link')
-        link.rel = 'prefetch'
-        link.href = targetUrl
-        document.head.appendChild(link)
-      })
-    }
-
-    // Prefetch property API data
-    fetch(`/api/properties/${propertyId}`, {
-      cache: 'force-cache',
-      priority: 'low'
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success && data.data) {
-          const cachePayload = JSON.stringify({
-            data: data.data,
-            timestamp: Date.now()
-          })
-          sessionStorage.setItem(cacheKey, cachePayload)
-          if (data.data._id && data.data._id !== propertyId) {
-            sessionStorage.setItem(`prefetched_property_${data.data._id}`, cachePayload)
+    // Set new timeout for 300ms delay (debounce)
+    prefetchTimeout.current = setTimeout(() => {
+      // Check if already cached
+      const cacheKey = `prefetched_property_${propertyId}`
+      const cached = sessionStorage.getItem(cacheKey)
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached)
+          const cacheAge = Date.now() - (parsed.timestamp || 0)
+          // If cache is fresh (< 2 minutes), skip prefetch
+          if (cacheAge < 2 * 60 * 1000) {
+            return
           }
+        } catch {
+          // Continue to prefetch if cache is invalid
         }
+      }
+
+      // Prefetch property data in background
+      const targetUrl = getPropertyUrl(property)
+
+      // Prefetch the route (Next.js will handle this)
+      if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+        requestIdleCallback(() => {
+          const link = document.createElement('link')
+          link.rel = 'prefetch'
+          link.href = targetUrl
+          document.head.appendChild(link)
+        })
+      }
+
+      // Prefetch property API data
+      fetch(`/api/properties/${propertyId}`, {
+        cache: 'force-cache',
+        priority: 'low'
       })
-      .catch(() => {
-        // Silent error - prefetch failures shouldn't affect UX
-      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success && data.data) {
+            const cachePayload = JSON.stringify({
+              data: data.data,
+              timestamp: Date.now()
+            })
+            sessionStorage.setItem(cacheKey, cachePayload)
+            if (data.data._id && data.data._id !== propertyId) {
+              sessionStorage.setItem(`prefetched_property_${data.data._id}`, cachePayload)
+            }
+          }
+        })
+        .catch(() => {
+          // Silent error - prefetch failures shouldn't affect UX
+        })
+    }, 300) // 300ms delay
+  }
+
+  const handleMouseLeave = () => {
+    if (prefetchTimeout.current) {
+      clearTimeout(prefetchTimeout.current)
+      prefetchTimeout.current = null
+    }
   }
 
   // Grid View Card Component with original beautiful design
@@ -205,15 +234,12 @@ const BeautifulPropertyCard = ({ property, index, viewMode }: { property: any; i
         key={getPropertyKey(property, index)}
         id={`property-card-${property.propertyId || property._id || index}`}
         data-property-card
-        className="group relative opacity-0 animate-fade-in"
-        style={{
-          animationDelay: `${index * 50}ms`,
-          animationFillMode: 'forwards'
-        }}
+        className="group relative"
       >
         <div
           className="relative bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1"
           onMouseEnter={handleGridMouseEnter}
+          onMouseLeave={handleMouseLeave}
           onClick={(e) => {
             // Only navigate to property if click is not on agent profile
             if (!(e.target as HTMLElement).closest('[data-agent-profile]')) {
@@ -275,9 +301,12 @@ const BeautifulPropertyCard = ({ property, index, viewMode }: { property: any; i
                 </div>
               )}
               <div className="flex items-center text-slate-600 mb-2 sm:mb-3 md:mb-4">
-                <img
-                  src="/icons/adress.png"
-                  alt="Location"
+                <video
+                  src="/icons/Adress3.webm"
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
                   className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 mr-1 sm:mr-2 flex-shrink-0 object-contain"
                 />
                 <span className="text-xs sm:text-sm md:text-base lg:text-lg line-clamp-1">{property.location}</span>
@@ -498,9 +527,12 @@ const BeautifulPropertyCard = ({ property, index, viewMode }: { property: any; i
                   </div>
                 )}
                 <div className="flex items-center text-gray-600 mb-3">
-                  <img
-                    src="/icons/adress.png"
-                    alt="Location"
+                  <video
+                    src="/icons/Adress3.webm"
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
                     className="w-4 h-4 mr-2 flex-shrink-0 object-contain"
                   />
                   <span className="text-sm">{property.location}</span>
@@ -686,6 +718,13 @@ export const SampleHomesSimplified: React.FC = () => {
   const { user, isAuthenticated } = useUser()
   const router = useRouter()
   const { setPreviousPage } = useNavigation()
+
+  // Enable scroll restoration for the main page logic
+  useScrollRestoration({
+    key: 'home_page_state',
+    enabled: true,
+    delay: 100
+  })
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [filters, setFilters] = useState<FilterOptions>({
     listingType: 'all',

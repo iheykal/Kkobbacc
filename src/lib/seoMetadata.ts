@@ -31,9 +31,9 @@ export interface GenerateMetadataParams {
  * Generates comprehensive SEO metadata for property pages
  */
 export function generatePropertyMetadata({ property, baseUrl, seoUrl }: GenerateMetadataParams): Metadata {
-  const title = `${property.title} - ${property.district} | Kobac Real Estate`
+  const title = `${property.title} - ${property.district} | Kobac Property`
   const description = `${property.description.substring(0, 160)}... Located in ${property.district}, ${property.location}. ${property.propertyType} for ${property.status.toLowerCase()}.`
-  const keywords = `${property.propertyType}, ${property.district}, ${property.location}, real estate, property, ${property.status.toLowerCase()}`
+  const keywords = `${property.propertyType}, ${property.district}, ${property.location}, property, real estate, ${property.status.toLowerCase()}`
   const canonicalUrl = `${baseUrl}${seoUrl}`
   const imageUrl = property.thumbnailImage || property.images?.[0] || `${baseUrl}/icons/kobac.webp`
 
@@ -48,7 +48,7 @@ export function generatePropertyMetadata({ property, baseUrl, seoUrl }: Generate
       title: `${property.title} - ${property.district}`,
       description: property.description.substring(0, 160),
       url: canonicalUrl,
-      siteName: 'Kobac Real Estate',
+      siteName: 'Kobac Property',
       images: [
         {
           url: imageUrl,
@@ -103,10 +103,10 @@ export function generatePropertyMetadata({ property, baseUrl, seoUrl }: Generate
         datePosted: property.createdAt,
         floorSize: property.sqft
           ? {
-              '@type': 'QuantitativeValue',
-              value: property.sqft,
-              unitCode: 'SQF',
-            }
+            '@type': 'QuantitativeValue',
+            value: property.sqft,
+            unitCode: 'SQF',
+          }
           : undefined,
         numberOfBedroomsTotal: property.beds,
         numberOfBathroomsTotal: property.baths,

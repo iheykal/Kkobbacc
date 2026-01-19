@@ -5,7 +5,7 @@ import Property from '@/models/Property'
 
 // Ultimate superadmin protection - cannot be deleted or modified
 const ULTIMATE_SUPERADMIN_PHONE = '0610251014'
-const ULTIMATE_SUPERADMIN_NAME = 'Kobac Real Estate'
+const ULTIMATE_SUPERADMIN_NAME = 'Kobac Property'
 
 export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   try {
@@ -20,7 +20,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     let session: { userId: string; role: string } | null = null
     try {
       session = JSON.parse(decodeURIComponent(cookie))
-    } catch (_) {}
+    } catch (_) { }
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
@@ -39,7 +39,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
 
     // 🛡️ ULTIMATE PROTECTION: Prevent deletion of the ultimate superadmin
     if (targetUser.phone === ULTIMATE_SUPERADMIN_PHONE || targetUser.fullName === ULTIMATE_SUPERADMIN_NAME) {
-      return NextResponse.json({ 
+      return NextResponse.json({
         error: 'Forbidden: Cannot delete the ultimate superadmin. This account is protected and cannot be removed from the system.',
         code: 'ULTIMATE_SUPERADMIN_PROTECTED'
       }, { status: 403 })
@@ -51,9 +51,9 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     }
 
     // Check if the admin user is the ultimate superadmin (Kobac superadmin)
-    const isKobacSuperadmin = adminUser.phone === ULTIMATE_SUPERADMIN_PHONE || 
-                              adminUser.fullName === ULTIMATE_SUPERADMIN_NAME ||
-                              adminUser.fullName.toLowerCase().includes('kobac')
+    const isKobacSuperadmin = adminUser.phone === ULTIMATE_SUPERADMIN_PHONE ||
+      adminUser.fullName === ULTIMATE_SUPERADMIN_NAME ||
+      adminUser.fullName.toLowerCase().includes('kobac')
 
     // Prevent superadmin from deleting other superadmins (unless admin is Kobac superadmin)
     if (targetUser.role === 'superadmin' && !isKobacSuperadmin) {

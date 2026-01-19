@@ -8,14 +8,14 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useUser } from '@/contexts/UserContext'
 import { formatPhoneNumber, formatPrice } from '@/lib/utils'
 import { propertyEventManager } from '@/lib/propertyEvents'
-import { 
-  Users, 
-  User, 
-  Crown, 
-  Shield, 
-  CheckCircle, 
-  Clock, 
-  XCircle, 
+import {
+  Users,
+  User,
+  Crown,
+  Shield,
+  CheckCircle,
+  Clock,
+  XCircle,
   AlertCircle,
   Search,
   Filter,
@@ -89,13 +89,13 @@ interface StatsData {
 
 // Ultimate superadmin protection constants
 const ULTIMATE_SUPERADMIN_PHONE = '0610251014'
-const ULTIMATE_SUPERADMIN_NAME = 'Kobac Real Estate'
+const ULTIMATE_SUPERADMIN_NAME = 'Kobac Property'
 
 // Helper function to check if user is ultimate superadmin
 const isUltimateSuperadmin = (user: UserData) => {
-  return user.phone === ULTIMATE_SUPERADMIN_PHONE || 
-         user.fullName === ULTIMATE_SUPERADMIN_NAME ||
-         user.fullName.toLowerCase().includes('kobac')
+  return user.phone === ULTIMATE_SUPERADMIN_PHONE ||
+    user.fullName === ULTIMATE_SUPERADMIN_NAME ||
+    user.fullName.toLowerCase().includes('kobac')
 }
 
 // Memoized components for better performance
@@ -115,7 +115,7 @@ const StatusBadge = React.memo(({ status }: { status: string }) => {
   switch (status) {
     case 'active':
       return (
-        <motion.span 
+        <motion.span
           initial={{ scale: 0.8 }}
           animate={{ scale: 1 }}
           className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 border border-green-200"
@@ -126,7 +126,7 @@ const StatusBadge = React.memo(({ status }: { status: string }) => {
       )
     case 'pending_verification':
       return (
-        <motion.span 
+        <motion.span
           initial={{ scale: 0.8 }}
           animate={{ scale: 1 }}
           className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-yellow-100 to-amber-100 text-yellow-800 border border-yellow-200"
@@ -137,7 +137,7 @@ const StatusBadge = React.memo(({ status }: { status: string }) => {
       )
     case 'suspended':
       return (
-        <motion.span 
+        <motion.span
           initial={{ scale: 0.8 }}
           animate={{ scale: 1 }}
           className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-red-100 to-pink-100 text-red-800 border border-red-200"
@@ -148,7 +148,7 @@ const StatusBadge = React.memo(({ status }: { status: string }) => {
       )
     default:
       return (
-        <motion.span 
+        <motion.span
           initial={{ scale: 0.8 }}
           animate={{ scale: 1 }}
           className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-gray-100 to-slate-100 text-gray-800 border border-gray-200"
@@ -227,10 +227,10 @@ export default function UserManagementPage() {
   const filteredUsers = useMemo(() => {
     return users.filter(user => {
       const matchesSearch = user.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           user.phone.includes(searchTerm)
+        user.phone.includes(searchTerm)
       const matchesRole = roleFilter === 'all' || user.role === roleFilter
       const matchesStatus = statusFilter === 'all' || user.status === statusFilter
-      
+
       return matchesSearch && matchesRole && matchesStatus
     })
   }, [users, searchTerm, roleFilter, statusFilter])
@@ -248,13 +248,13 @@ export default function UserManagementPage() {
   // Memoized filtered agent users for search
   const filteredAgentUsers = useMemo(() => {
     if (!searchTerm) return agentUsers
-    
+
     return agentUsers.filter(user => {
       const searchLower = searchTerm.toLowerCase()
       const nameMatch = user.fullName.toLowerCase().includes(searchLower)
       const phoneMatch = user.phone.includes(searchTerm)
       const locationMatch = user.profile?.location?.toLowerCase().includes(searchLower)
-      
+
       return nameMatch || phoneMatch || locationMatch
     })
   }, [agentUsers, searchTerm])
@@ -268,7 +268,7 @@ export default function UserManagementPage() {
   const fetchUsers = useCallback(async () => {
     setIsLoadingUsers(true)
     try {
-      const res = await fetch('/api/admin/users', { 
+      const res = await fetch('/api/admin/users', {
         cache: 'no-store',
         headers: {
           'Cache-Control': 'no-cache'
@@ -329,10 +329,10 @@ export default function UserManagementPage() {
   // Fetch properties with lazy loading
   const fetchProperties = useCallback(async () => {
     if (activeTab !== 'properties') return
-    
+
     setIsLoadingProperties(true)
     try {
-      const res = await fetch('/api/properties?limit=200&sort=latest', { 
+      const res = await fetch('/api/properties?limit=200&sort=latest', {
         cache: 'no-store',
         headers: {
           'Cache-Control': 'no-cache',
@@ -363,7 +363,7 @@ export default function UserManagementPage() {
         credentials: 'include'
       })
       const json = await res.json()
-      
+
       if (res.ok && json.success) {
         setProperties(prev => prev.filter(p => p._id !== propertyId))
         // Notify other components about the deletion
@@ -400,7 +400,7 @@ export default function UserManagementPage() {
         credentials: 'include'
       })
       const json = await res.json()
-      
+
       if (res.ok && json.success) {
         setUsers(prev => prev.filter(u => u.id !== userToDelete.id))
         setStats(calculateStats(users.filter(u => u.id !== userToDelete.id)))
@@ -444,19 +444,19 @@ export default function UserManagementPage() {
         body: JSON.stringify({ role: newRole })
       })
       const json = await res.json()
-      
+
       console.log('🔍 API Response:', json)
-      
+
       if (res.ok && json) {
         // Update the user in the local state
         const updatedRole = mapDbRoleToUi(json.role)
-        setUsers(prev => prev.map(u => 
-          u.id === userToPromote.id 
+        setUsers(prev => prev.map(u =>
+          u.id === userToPromote.id
             ? { ...u, role: updatedRole, status: json.status }
             : u
         ))
-        setStats(calculateStats(users.map(u => 
-          u.id === userToPromote.id 
+        setStats(calculateStats(users.map(u =>
+          u.id === userToPromote.id
             ? { ...u, role: updatedRole, status: json.status }
             : u
         )))
@@ -522,11 +522,11 @@ export default function UserManagementPage() {
         body: JSON.stringify({ avatar: finalAvatarUrl })
       })
       const json = await res.json()
-      
+
       if (res.ok && json.success) {
         // Update the user in the local state
-        setUsers(prev => prev.map(u => 
-          u.id === selectedUser.id 
+        setUsers(prev => prev.map(u =>
+          u.id === selectedUser.id
             ? { ...u, avatar: finalAvatarUrl }
             : u
         ))
@@ -548,12 +548,12 @@ export default function UserManagementPage() {
   useEffect(() => {
     console.log('🔍 Users useEffect - user:', user, 'isAuthenticated:', isAuthenticated, 'authLoading:', authLoading)
     console.log('🔍 Users useEffect - user role:', user?.role, 'user id:', user?.id)
-    
+
     if (authLoading) {
       console.log('⏳ Users - Auth still loading, waiting...')
       return
     }
-    
+
     // Only redirect if we're sure the user is not authenticated after loading is complete
     if (!isAuthenticated && !authLoading) {
       console.log('❌ Users - Not authenticated after loading, redirecting to home')
@@ -561,7 +561,7 @@ export default function UserManagementPage() {
       router.replace('/')
       return
     }
-    
+
     if (isAuthenticated && user?.role === 'superadmin') {
       console.log('✅ Users - Superadmin detected, fetching users')
       fetchUsers()
@@ -602,22 +602,22 @@ export default function UserManagementPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <motion.h1 
+              <motion.h1
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent"
               >
                 User Management
               </motion.h1>
-              <motion.p 
+              <motion.p
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.05 }}
                 className="text-lg font-semibold text-blue-600"
               >
-                Kobac Real Estate
+                Kobac Property
               </motion.p>
-              <motion.p 
+              <motion.p
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.1 }}
@@ -626,12 +626,12 @@ export default function UserManagementPage() {
                 Manage all users, roles, and permissions with advanced analytics
               </motion.p>
             </div>
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               className="flex items-center space-x-4"
             >
-              <button 
+              <button
                 onClick={fetchUsers}
                 className="p-3 rounded-xl bg-white/80 backdrop-blur-sm border border-white/20 hover:bg-white/90 transition-all duration-300 shadow-lg hover:shadow-xl"
               >
@@ -647,7 +647,7 @@ export default function UserManagementPage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Navigation Tabs */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
@@ -660,11 +660,10 @@ export default function UserManagementPage() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center space-x-2 px-6 py-3 rounded-xl text-sm font-medium transition-all duration-300 ${
-                  activeTab === tab.id
-                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
-                }`}
+                className={`flex items-center space-x-2 px-6 py-3 rounded-xl text-sm font-medium transition-all duration-300 ${activeTab === tab.id
+                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
+                  }`}
               >
                 <tab.icon className="w-4 h-4" />
                 <span>{tab.label}</span>
@@ -765,7 +764,7 @@ export default function UserManagementPage() {
                 transition={{ delay: 0.2 }}
                 className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
               >
-                <motion.div 
+                <motion.div
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => setActiveTab('overview')}
@@ -774,7 +773,7 @@ export default function UserManagementPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium opacity-90">Total Users</p>
-                      <motion.p 
+                      <motion.p
                         className="text-3xl font-bold mt-2"
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
@@ -789,7 +788,7 @@ export default function UserManagementPage() {
                   </div>
                 </motion.div>
 
-                <motion.div 
+                <motion.div
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => {
@@ -801,7 +800,7 @@ export default function UserManagementPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium opacity-90">Active Users</p>
-                      <motion.p 
+                      <motion.p
                         className="text-3xl font-bold mt-2"
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
@@ -816,7 +815,7 @@ export default function UserManagementPage() {
                   </div>
                 </motion.div>
 
-                <motion.div 
+                <motion.div
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => {
@@ -828,7 +827,7 @@ export default function UserManagementPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium opacity-90">Pending</p>
-                      <motion.p 
+                      <motion.p
                         className="text-3xl font-bold mt-2"
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
@@ -843,7 +842,7 @@ export default function UserManagementPage() {
                   </div>
                 </motion.div>
 
-                <motion.div 
+                <motion.div
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => {
@@ -854,7 +853,7 @@ export default function UserManagementPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium opacity-90">Agents</p>
-                      <motion.p 
+                      <motion.p
                         className="text-3xl font-bold mt-2"
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
@@ -973,7 +972,7 @@ export default function UserManagementPage() {
                                 <RoleIcon role={user.role} isUltimate={isUltimateSuperadmin(user)} />
                               </div>
                             </div>
-                            
+
                             <h3 className="text-xl font-bold text-gray-900 mb-1">
                               {user.fullName}
                               {isUltimateSuperadmin(user) && (
@@ -994,7 +993,7 @@ export default function UserManagementPage() {
                               <StatusBadge status={user.status} />
                             </div>
                           </div>
-                          
+
                           {/* User Details */}
                           <div className="space-y-2 mb-4">
                             <div className="flex items-center justify-between py-2 px-3 bg-gray-50 rounded-lg">
@@ -1008,7 +1007,7 @@ export default function UserManagementPage() {
                               </div>
                             )}
                           </div>
-                          
+
                           <div className="flex items-center gap-2 mt-4 pt-4 border-t border-gray-100">
                             <button
                               onClick={(e) => {
@@ -1020,7 +1019,7 @@ export default function UserManagementPage() {
                               <Eye className="w-4 h-4 inline mr-1" />
                               View
                             </button>
-                            
+
                             {/* Set Avatar Button */}
                             <button
                               onClick={(e) => {
@@ -1032,7 +1031,7 @@ export default function UserManagementPage() {
                               <User className="w-4 h-4 inline mr-1" />
                               Set Avatar
                             </button>
-                            
+
                             {/* Disable Edit Role button for ultimate superadmin */}
                             {!isUltimateSuperadmin(user) ? (
                               <button
@@ -1055,7 +1054,7 @@ export default function UserManagementPage() {
                                 Protected
                               </button>
                             )}
-                            
+
                             {/* Disable Delete button for ultimate superadmin */}
                             {user.role === 'agent' && !isUltimateSuperadmin(user) && (
                               <button
@@ -1078,7 +1077,7 @@ export default function UserManagementPage() {
                                 )}
                               </button>
                             )}
-                            
+
                             {/* Show protection indicator for ultimate superadmin */}
                             {isUltimateSuperadmin(user) && (
                               <button
@@ -1111,10 +1110,10 @@ export default function UserManagementPage() {
                         <Shield className="w-6 h-6 text-white" />
                       </div>
                       Agent Command Center
-                  </h2>
+                    </h2>
                     <p className="text-blue-200 text-lg">Advanced agent management and analytics dashboard</p>
                   </div>
-                  
+
                   <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
                     {/* Advanced Search */}
                     <div className="relative group">
@@ -1135,20 +1134,20 @@ export default function UserManagementPage() {
                         </button>
                       )}
                     </div>
-                    
+
                     {/* Quick Stats Badge */}
                     <div className="flex items-center space-x-2 bg-white/10 backdrop-blur-sm rounded-2xl px-4 py-3 border border-white/20">
                       <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
                       <span className="text-white font-semibold">{agentUsers.length}</span>
                       <span className="text-blue-200 text-sm">Active Agents</span>
+                    </div>
                   </div>
-                </div>
                 </motion.div>
 
                 {/* Main Dashboard Grid */}
                 <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
                   {/* Agent Analytics Panel */}
-                <motion.div
+                  <motion.div
                     initial={{ opacity: 0, x: -30 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.2 }}
@@ -1162,7 +1161,7 @@ export default function UserManagementPage() {
                         </div>
                         Performance Metrics
                       </h3>
-                      
+
                       <div className="space-y-4">
                         <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl">
                           <div className="flex items-center space-x-3">
@@ -1171,7 +1170,7 @@ export default function UserManagementPage() {
                           </div>
                           <span className="text-white font-bold text-lg">{agentUsers.filter(u => u.status === 'active').length}</span>
                         </div>
-                        
+
                         <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl">
                           <div className="flex items-center space-x-3">
                             <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
@@ -1179,7 +1178,7 @@ export default function UserManagementPage() {
                           </div>
                           <span className="text-white font-bold text-lg">{agentUsers.filter(u => u.status === 'pending_verification').length}</span>
                         </div>
-                        
+
                         <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl">
                           <div className="flex items-center space-x-3">
                             <div className="w-3 h-3 bg-purple-400 rounded-full"></div>
@@ -1187,7 +1186,7 @@ export default function UserManagementPage() {
                           </div>
                           <span className="text-white font-bold text-lg">{agentUsers.filter(u => u.agentProfile?.verified).length}</span>
                         </div>
-                        
+
                         <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl">
                           <div className="flex items-center space-x-3">
                             <div className="w-3 h-3 bg-blue-400 rounded-full"></div>
@@ -1195,7 +1194,7 @@ export default function UserManagementPage() {
                           </div>
                           <span className="text-white font-bold text-lg">{agentUsers.reduce((acc, u) => acc + (u.agentProfile?.totalProperties || 0), 0)}</span>
                         </div>
-                        
+
                         <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl">
                           <div className="flex items-center space-x-3">
                             <div className="w-3 h-3 bg-indigo-400 rounded-full"></div>
@@ -1203,10 +1202,10 @@ export default function UserManagementPage() {
                           </div>
                           <span className="text-white font-bold text-lg">
                             {agentUsers.length > 0 ? Math.round(agentUsers.reduce((acc, u) => acc + (u.agentProfile?.totalProperties || 0), 0) / agentUsers.length) : 0}
-                    </span>
+                          </span>
                         </div>
-                  </div>
-                </div>
+                      </div>
+                    </div>
 
                     {/* Top Performers */}
                     <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
@@ -1216,17 +1215,17 @@ export default function UserManagementPage() {
                         </div>
                         Top Performers
                       </h3>
-                      
+
                       <div className="space-y-3">
                         {agentUsers
                           .filter(u => u.agentProfile?.rating)
                           .sort((a, b) => (b.agentProfile?.rating || 0) - (a.agentProfile?.rating || 0))
                           .slice(0, 5)
                           .map((user, index) => (
-                <motion.div
+                            <motion.div
                               key={user.id}
                               initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
+                              animate={{ opacity: 1, y: 0 }}
                               transition={{ delay: index * 0.1 }}
                               className="flex items-center justify-between p-3 bg-white/5 rounded-xl hover:bg-white/10 transition-all duration-300 cursor-pointer group"
                               onClick={() => handleCardClick(user)}
@@ -1275,10 +1274,10 @@ export default function UserManagementPage() {
                         <h3 className="text-2xl font-bold text-white flex items-center">
                           <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-500 rounded-2xl flex items-center justify-center mr-4">
                             <Shield className="w-5 h-5 text-white" />
-                        </div>
-                        Agent Directory
-                      </h3>
-                        
+                          </div>
+                          Agent Directory
+                        </h3>
+
                         {/* Filter Controls */}
                         <div className="flex items-center space-x-3">
                           <select className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-400">
@@ -1287,7 +1286,7 @@ export default function UserManagementPage() {
                             <option value="pending" className="bg-slate-800">Pending</option>
                             <option value="verified" className="bg-slate-800">Verified</option>
                           </select>
-                          
+
                           <select className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-400">
                             <option value="name" className="bg-slate-800">Sort by Name</option>
                             <option value="rating" className="bg-slate-800">Sort by Rating</option>
@@ -1295,7 +1294,7 @@ export default function UserManagementPage() {
                             <option value="date" className="bg-slate-800">Sort by Date</option>
                           </select>
                         </div>
-                        </div>
+                      </div>
 
                       {/* Search Results Info */}
                       {searchTerm ? (
@@ -1320,90 +1319,90 @@ export default function UserManagementPage() {
                       {/* Agent Grid */}
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-h-[600px] overflow-y-auto custom-scrollbar">
                         {filteredAgentUsers.map((user, index) => (
-                            <motion.div
-                              key={user.id}
-                              initial={{ opacity: 0, y: 20, scale: 0.9 }}
-                              animate={{ opacity: 1, y: 0, scale: 1 }}
-                              transition={{ delay: index * 0.1 }}
-                              whileHover={{ scale: 1.02, y: -5 }}
-                              whileTap={{ scale: 0.98 }}
-                              className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:bg-white/15 hover:border-white/30 transition-all duration-300 cursor-pointer group relative overflow-hidden"
-                              onClick={() => handleCardClick(user)}
-                            >
-                              {/* Background Gradient */}
-                              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                              
-                              {/* Agent Info */}
-                              <div className="relative z-10">
-                                <div className="flex items-center space-x-4 mb-4">
-                                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-400 to-purple-500 p-[3px] group-hover:scale-110 transition-transform duration-300">
-                                    <div className="w-full h-full rounded-2xl bg-slate-800 overflow-hidden flex items-center justify-center">
+                          <motion.div
+                            key={user.id}
+                            initial={{ opacity: 0, y: 20, scale: 0.9 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            transition={{ delay: index * 0.1 }}
+                            whileHover={{ scale: 1.02, y: -5 }}
+                            whileTap={{ scale: 0.98 }}
+                            className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:bg-white/15 hover:border-white/30 transition-all duration-300 cursor-pointer group relative overflow-hidden"
+                            onClick={() => handleCardClick(user)}
+                          >
+                            {/* Background Gradient */}
+                            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+                            {/* Agent Info */}
+                            <div className="relative z-10">
+                              <div className="flex items-center space-x-4 mb-4">
+                                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-400 to-purple-500 p-[3px] group-hover:scale-110 transition-transform duration-300">
+                                  <div className="w-full h-full rounded-2xl bg-slate-800 overflow-hidden flex items-center justify-center">
                                     {user.avatar ? (
                                       <img src={user.avatar} alt={user.fullName} className="w-full h-full object-cover" />
                                     ) : (
-                                        <span className="text-white font-bold text-xl">
+                                      <span className="text-white font-bold text-xl">
                                         {user.fullName.charAt(0).toUpperCase()}
                                       </span>
                                     )}
                                   </div>
                                 </div>
 
-                                  <div className="flex-1">
-                                    <h4 className="text-white font-bold text-lg group-hover:text-blue-300 transition-colors">
+                                <div className="flex-1">
+                                  <h4 className="text-white font-bold text-lg group-hover:text-blue-300 transition-colors">
                                     {user.fullName}
                                   </h4>
-                                    <p className="text-blue-200 text-sm flex items-center">
-                                      <span className="mr-2">📞</span>
-                                      {formatPhoneNumber(user.phone)}
-                                    </p>
-                                    <div className="flex items-center space-x-2 mt-1">
-                                <StatusBadge status={user.status} />
-                                      {user.agentProfile?.verified && (
-                                        <span className="text-xs bg-green-500/20 text-green-300 px-2 py-1 rounded-full border border-green-500/30">
-                                          ✓ Verified
-                                        </span>
-                                      )}
+                                  <p className="text-blue-200 text-sm flex items-center">
+                                    <span className="mr-2">📞</span>
+                                    {formatPhoneNumber(user.phone)}
+                                  </p>
+                                  <div className="flex items-center space-x-2 mt-1">
+                                    <StatusBadge status={user.status} />
+                                    {user.agentProfile?.verified && (
+                                      <span className="text-xs bg-green-500/20 text-green-300 px-2 py-1 rounded-full border border-green-500/30">
+                                        ✓ Verified
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
                               </div>
+
+                              {/* Performance Stats */}
+                              <div className="grid grid-cols-3 gap-3 mb-4">
+                                <div className="bg-white/5 rounded-xl p-3 text-center">
+                                  <p className="text-blue-200 text-xs mb-1">Properties</p>
+                                  <p className="text-white font-bold text-lg">{user.agentProfile?.totalProperties || 0}</p>
+                                  <p className="text-blue-300 text-xs">Listed</p>
+                                </div>
+                                <div className="bg-white/5 rounded-xl p-3 text-center">
+                                  <p className="text-blue-200 text-xs mb-1">Rating</p>
+                                  <p className="text-white font-bold text-lg flex items-center justify-center">
+                                    ⭐ {user.agentProfile?.rating || 'N/A'}
+                                  </p>
+                                  <p className="text-blue-300 text-xs">Stars</p>
+                                </div>
+                                <div className="bg-white/5 rounded-xl p-3 text-center">
+                                  <p className="text-blue-200 text-xs mb-1">Experience</p>
+                                  <p className="text-white font-bold text-lg">{user.agentProfile?.experience || 0}</p>
+                                  <p className="text-blue-300 text-xs">Years</p>
+                                </div>
+                              </div>
+
+                              {/* Action Buttons */}
+                              <div className="flex items-center space-x-2">
+                                <button className="flex-1 bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 py-2 px-3 rounded-xl text-sm font-medium transition-all duration-300 border border-blue-500/30">
+                                  View Profile
+                                </button>
+                                <button className="bg-white/10 hover:bg-white/20 text-white p-2 rounded-xl transition-all duration-300">
+                                  <span className="text-sm">⚙️</span>
+                                </button>
+                              </div>
+                            </div>
+                          </motion.div>
+                        ))}
                       </div>
                     </div>
-
-                                {/* Performance Stats */}
-                                <div className="grid grid-cols-3 gap-3 mb-4">
-                                  <div className="bg-white/5 rounded-xl p-3 text-center">
-                                    <p className="text-blue-200 text-xs mb-1">Properties</p>
-                                    <p className="text-white font-bold text-lg">{user.agentProfile?.totalProperties || 0}</p>
-                                    <p className="text-blue-300 text-xs">Listed</p>
-                        </div>
-                                  <div className="bg-white/5 rounded-xl p-3 text-center">
-                                    <p className="text-blue-200 text-xs mb-1">Rating</p>
-                                    <p className="text-white font-bold text-lg flex items-center justify-center">
-                                      ⭐ {user.agentProfile?.rating || 'N/A'}
-                                    </p>
-                                    <p className="text-blue-300 text-xs">Stars</p>
-                        </div>
-                                  <div className="bg-white/5 rounded-xl p-3 text-center">
-                                    <p className="text-blue-200 text-xs mb-1">Experience</p>
-                                    <p className="text-white font-bold text-lg">{user.agentProfile?.experience || 0}</p>
-                                    <p className="text-blue-300 text-xs">Years</p>
-                        </div>
-                      </div>
-
-                                {/* Action Buttons */}
-                                <div className="flex items-center space-x-2">
-                                  <button className="flex-1 bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 py-2 px-3 rounded-xl text-sm font-medium transition-all duration-300 border border-blue-500/30">
-                                    View Profile
-                                  </button>
-                                  <button className="bg-white/10 hover:bg-white/20 text-white p-2 rounded-xl transition-all duration-300">
-                                    <span className="text-sm">⚙️</span>
-                      </button>
-                              </div>
-                  </div>
-                </motion.div>
-                            ))}
-                        </div>
-                      </div>
                   </motion.div>
-                    </div>
+                </div>
               </div>
             </motion.div>
           </Suspense>
@@ -1462,7 +1461,7 @@ export default function UserManagementPage() {
                 transition={{ delay: 0.2 }}
                 className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
               >
-                <motion.div 
+                <motion.div
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl p-6 text-white shadow-xl"
@@ -1470,7 +1469,7 @@ export default function UserManagementPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium opacity-90">Total Properties</p>
-                      <motion.p 
+                      <motion.p
                         className="text-3xl font-bold mt-2"
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
@@ -1485,7 +1484,7 @@ export default function UserManagementPage() {
                   </div>
                 </motion.div>
 
-                <motion.div 
+                <motion.div
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl p-6 text-white shadow-xl"
@@ -1493,7 +1492,7 @@ export default function UserManagementPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium opacity-90">Featured</p>
-                      <motion.p 
+                      <motion.p
                         className="text-3xl font-bold mt-2"
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
@@ -1508,7 +1507,7 @@ export default function UserManagementPage() {
                   </div>
                 </motion.div>
 
-                <motion.div 
+                <motion.div
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   className="bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl p-6 text-white shadow-xl"
@@ -1516,7 +1515,7 @@ export default function UserManagementPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium opacity-90">For Sale</p>
-                      <motion.p 
+                      <motion.p
                         className="text-3xl font-bold mt-2"
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
@@ -1531,7 +1530,7 @@ export default function UserManagementPage() {
                   </div>
                 </motion.div>
 
-                <motion.div 
+                <motion.div
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   className="bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl p-6 text-white shadow-xl"
@@ -1539,7 +1538,7 @@ export default function UserManagementPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium opacity-90">For Rent</p>
-                      <motion.p 
+                      <motion.p
                         className="text-3xl font-bold mt-2"
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
@@ -1603,8 +1602,8 @@ export default function UserManagementPage() {
                     {properties
                       .filter(property => {
                         const matchesSearch = property.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                                             property.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                                             property.district.toLowerCase().includes(searchTerm.toLowerCase())
+                          property.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          property.district.toLowerCase().includes(searchTerm.toLowerCase())
                         const matchesType = roleFilter === 'all' || property.listingType === roleFilter
                         return matchesSearch && matchesType
                       })
@@ -1632,40 +1631,39 @@ export default function UserManagementPage() {
                             </div>
                             {/* Expiration Status Badge */}
                             {property.expiresAt && (
-                              <div className={`absolute bottom-2 right-2 px-2 py-1 rounded-full text-xs font-semibold ${
-                                property.isExpired 
-                                  ? 'bg-red-500 text-white' 
-                                  : new Date(property.expiresAt).getTime() - Date.now() <= 7 * 24 * 60 * 60 * 1000
-                                    ? 'bg-orange-500 text-white'
-                                    : 'bg-green-500 text-white'
-                              }`}>
-                                {property.isExpired 
-                                  ? 'Expired' 
+                              <div className={`absolute bottom-2 right-2 px-2 py-1 rounded-full text-xs font-semibold ${property.isExpired
+                                ? 'bg-red-500 text-white'
+                                : new Date(property.expiresAt).getTime() - Date.now() <= 7 * 24 * 60 * 60 * 1000
+                                  ? 'bg-orange-500 text-white'
+                                  : 'bg-green-500 text-white'
+                                }`}>
+                                {property.isExpired
+                                  ? 'Expired'
                                   : (() => {
-                                      const diff = new Date(property.expiresAt).getTime() - Date.now()
-                                      const days = Math.floor(diff / (1000 * 60 * 60 * 24))
-                                      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
-                                      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
-                                      const seconds = Math.floor((diff % (1000 * 60)) / 1000)
-                                      
-                                      if (days > 0) return `${days}d`
-                                      if (hours > 0) return `${hours}h`
-                                      if (minutes > 0) return `${minutes}m`
-                                      if (seconds > 0) return `${seconds}s`
-                                      return 'Expiring'
-                                    })()
+                                    const diff = new Date(property.expiresAt).getTime() - Date.now()
+                                    const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+                                    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+                                    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
+                                    const seconds = Math.floor((diff % (1000 * 60)) / 1000)
+
+                                    if (days > 0) return `${days}d`
+                                    if (hours > 0) return `${hours}h`
+                                    if (minutes > 0) return `${minutes}m`
+                                    if (seconds > 0) return `${seconds}s`
+                                    return 'Expiring'
+                                  })()
                                 }
                               </div>
                             )}
                           </div>
-                          
+
                           <div className="p-4">
                             <h4 className="font-semibold text-gray-900 mb-2 line-clamp-2">{property.title}</h4>
                             <p className="text-gray-600 text-sm mb-3 flex items-center">
                               <MapPin className="w-4 h-4 mr-1" />
                               {property.location}, {property.district}
                             </p>
-                            
+
                             <div className="flex items-center justify-between mb-3">
                               <div className="flex items-center space-x-4 text-sm text-gray-600">
                                 <span className="flex items-center">
@@ -1678,9 +1676,9 @@ export default function UserManagementPage() {
                                 </span>
                                 {property.status === 'For Sale' && property.measurement && (
                                   <span className="flex items-center">
-                                    <img 
-                                      src="/icons/ruler.webp" 
-                                      alt="Measurement" 
+                                    <img
+                                      src="/icons/ruler.webp"
+                                      alt="Measurement"
                                       className="w-4 h-4 mr-1 object-contain"
                                     />
                                     {property.measurement}
@@ -1688,34 +1686,33 @@ export default function UserManagementPage() {
                                 )}
                               </div>
                             </div>
-                            
+
                             {/* Expiration Details */}
                             {property.expiresAt && (
                               <div className="mb-3 p-2 bg-gray-50 rounded-lg">
                                 <div className="flex items-center justify-between text-sm">
                                   <span className="text-gray-600">Expires:</span>
-                                  <span className={`font-medium ${
-                                    property.isExpired 
-                                      ? 'text-red-600' 
-                                      : new Date(property.expiresAt).getTime() - Date.now() <= 7 * 24 * 60 * 60 * 1000
-                                        ? 'text-orange-600'
-                                        : 'text-green-600'
-                                  }`}>
+                                  <span className={`font-medium ${property.isExpired
+                                    ? 'text-red-600'
+                                    : new Date(property.expiresAt).getTime() - Date.now() <= 7 * 24 * 60 * 60 * 1000
+                                      ? 'text-orange-600'
+                                      : 'text-green-600'
+                                    }`}>
                                     {(() => {
                                       const diff = new Date(property.expiresAt).getTime() - Date.now()
                                       if (diff <= 0) return 'Expired'
-                                      
+
                                       const days = Math.floor(diff / (1000 * 60 * 60 * 24))
                                       const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
                                       const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
                                       const seconds = Math.floor((diff % (1000 * 60)) / 1000)
-                                      
+
                                       const parts = []
                                       if (days > 0) parts.push(`${days}d`)
                                       if (hours > 0) parts.push(`${hours}h`)
                                       if (minutes > 0) parts.push(`${minutes}m`)
                                       if (seconds > 0) parts.push(`${seconds}s`)
-                                      
+
                                       return parts.length > 0 ? parts.join(' ') : 'Expiring now'
                                     })()}
                                   </span>
@@ -1726,7 +1723,7 @@ export default function UserManagementPage() {
                                 </div>
                               </div>
                             )}
-                            
+
                             <div className="flex items-center justify-between">
                               <span className="text-lg font-bold text-green-600">
                                 ${property.price.toLocaleString()}
@@ -1770,7 +1767,7 @@ export default function UserManagementPage() {
         {/* User Details Modal */}
         {showUserDetailsModal && selectedUser && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               className="bg-white rounded-2xl p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto"
@@ -1814,7 +1811,7 @@ export default function UserManagementPage() {
                     <div className="mt-2">
                       <StatusBadge status={selectedUser.status} />
                     </div>
-                    
+
                     {/* Ultimate Superadmin Protection Notice */}
                     {isUltimateSuperadmin(selectedUser) && (
                       <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
@@ -1960,7 +1957,7 @@ export default function UserManagementPage() {
                         <User className="w-4 h-4 inline mr-2" />
                         Set Profile Picture
                       </button>
-                      
+
                       {/* Disable actions for ultimate superadmin */}
                       {!isUltimateSuperadmin(selectedUser) ? (
                         <>
@@ -2014,110 +2011,107 @@ export default function UserManagementPage() {
               </div>
             </motion.div>
           </div>
-                 )}
+        )}
 
-         {/* Role Promotion Modal */}
-         {showPromoteModal && userToPromote && (
-           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-             <motion.div 
-               initial={{ opacity: 0, scale: 0.9 }}
-               animate={{ opacity: 1, scale: 1 }}
-               className="bg-white rounded-2xl p-6 max-w-md w-full mx-4"
-             >
-               <div className="text-center">
-                 <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-blue-100 flex items-center justify-center">
-                   <Edit className="w-8 h-8 text-blue-600" />
-                 </div>
-                 <h3 className="text-xl font-bold text-gray-900 mb-2">Edit User Role</h3>
-                 <p className="text-gray-600 mb-4">
-                   Change role for <span className="font-semibold text-blue-600">{userToPromote.fullName}</span>
-                 </p>
-                 
-                 <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
-                   <h4 className="font-semibold text-gray-800 mb-3">Current Role: <span className="text-blue-600 capitalize">{userToPromote.role.replace('_', ' ')}</span></h4>
-                   <div className="space-y-3">
-                     <button
-                       onClick={() => confirmPromoteUser('user')}
-                       disabled={promotingUser === userToPromote.id || userToPromote.role === 'normal_user'}
-                       className={`w-full px-4 py-3 rounded-lg border-2 transition-all duration-300 text-left ${
-                         userToPromote.role === 'normal_user'
-                           ? 'bg-green-50 border-green-200 text-green-700 cursor-not-allowed'
-                           : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50'
-                       }`}
-                     >
-                       <div className="flex items-center justify-between">
-                         <div>
-                           <div className="font-semibold">Normal User</div>
-                           <div className="text-sm text-gray-600">Basic user with limited permissions</div>
-                         </div>
-                         {userToPromote.role === 'normal_user' && (
-                           <div className="text-green-600">✓ Current</div>
-                         )}
-                       </div>
-                     </button>
-                     
-                     <button
-                       onClick={() => confirmPromoteUser('agency')}
-                       disabled={promotingUser === userToPromote.id || userToPromote.role === 'agent'}
-                       className={`w-full px-4 py-3 rounded-lg border-2 transition-all duration-300 text-left ${
-                         userToPromote.role === 'agent'
-                           ? 'bg-blue-50 border-blue-200 text-blue-700 cursor-not-allowed'
-                           : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50'
-                       }`}
-                     >
-                       <div className="flex items-center justify-between">
-                         <div>
-                           <div className="font-semibold">Agent</div>
-                           <div className="text-sm text-gray-600">Can manage properties and listings</div>
-                         </div>
-                         {userToPromote.role === 'agent' && (
-                           <div className="text-blue-600">✓ Current</div>
-                         )}
-                       </div>
-                     </button>
-                     
-                     <button
-                       onClick={() => confirmPromoteUser('superadmin')}
-                       disabled={promotingUser === userToPromote.id || userToPromote.role === 'super_admin'}
-                       className={`w-full px-4 py-3 rounded-lg border-2 transition-all duration-300 text-left ${
-                         userToPromote.role === 'super_admin'
-                           ? 'bg-purple-50 border-purple-200 text-purple-700 cursor-not-allowed'
-                           : 'border-gray-200 hover:border-purple-300 hover:bg-purple-50'
-                       }`}
-                     >
-                       <div className="flex items-center justify-between">
-                         <div>
-                           <div className="font-semibold">Super Admin</div>
-                           <div className="text-sm text-gray-600">Full system access and control</div>
-                         </div>
-                         {userToPromote.role === 'super_admin' && (
-                           <div className="text-purple-600">✓ Current</div>
-                         )}
-                       </div>
-                     </button>
-                   </div>
-                 </div>
-                 
-                 <div className="flex space-x-3">
-                   <button
-                     onClick={() => {
-                       setShowPromoteModal(false)
-                       setUserToPromote(null)
-                     }}
-                     className="flex-1 px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors font-medium"
-                   >
-                     Cancel
-                   </button>
-                 </div>
-               </div>
-             </motion.div>
-           </div>
-         )}
+        {/* Role Promotion Modal */}
+        {showPromoteModal && userToPromote && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-white rounded-2xl p-6 max-w-md w-full mx-4"
+            >
+              <div className="text-center">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-blue-100 flex items-center justify-center">
+                  <Edit className="w-8 h-8 text-blue-600" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Edit User Role</h3>
+                <p className="text-gray-600 mb-4">
+                  Change role for <span className="font-semibold text-blue-600">{userToPromote.fullName}</span>
+                </p>
 
-         {/* Delete User Confirmation Modal */}
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
+                  <h4 className="font-semibold text-gray-800 mb-3">Current Role: <span className="text-blue-600 capitalize">{userToPromote.role.replace('_', ' ')}</span></h4>
+                  <div className="space-y-3">
+                    <button
+                      onClick={() => confirmPromoteUser('user')}
+                      disabled={promotingUser === userToPromote.id || userToPromote.role === 'normal_user'}
+                      className={`w-full px-4 py-3 rounded-lg border-2 transition-all duration-300 text-left ${userToPromote.role === 'normal_user'
+                        ? 'bg-green-50 border-green-200 text-green-700 cursor-not-allowed'
+                        : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50'
+                        }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="font-semibold">Normal User</div>
+                          <div className="text-sm text-gray-600">Basic user with limited permissions</div>
+                        </div>
+                        {userToPromote.role === 'normal_user' && (
+                          <div className="text-green-600">✓ Current</div>
+                        )}
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={() => confirmPromoteUser('agency')}
+                      disabled={promotingUser === userToPromote.id || userToPromote.role === 'agent'}
+                      className={`w-full px-4 py-3 rounded-lg border-2 transition-all duration-300 text-left ${userToPromote.role === 'agent'
+                        ? 'bg-blue-50 border-blue-200 text-blue-700 cursor-not-allowed'
+                        : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50'
+                        }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="font-semibold">Agent</div>
+                          <div className="text-sm text-gray-600">Can manage properties and listings</div>
+                        </div>
+                        {userToPromote.role === 'agent' && (
+                          <div className="text-blue-600">✓ Current</div>
+                        )}
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={() => confirmPromoteUser('superadmin')}
+                      disabled={promotingUser === userToPromote.id || userToPromote.role === 'super_admin'}
+                      className={`w-full px-4 py-3 rounded-lg border-2 transition-all duration-300 text-left ${userToPromote.role === 'super_admin'
+                        ? 'bg-purple-50 border-purple-200 text-purple-700 cursor-not-allowed'
+                        : 'border-gray-200 hover:border-purple-300 hover:bg-purple-50'
+                        }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="font-semibold">Super Admin</div>
+                          <div className="text-sm text-gray-600">Full system access and control</div>
+                        </div>
+                        {userToPromote.role === 'super_admin' && (
+                          <div className="text-purple-600">✓ Current</div>
+                        )}
+                      </div>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex space-x-3">
+                  <button
+                    onClick={() => {
+                      setShowPromoteModal(false)
+                      setUserToPromote(null)
+                    }}
+                    className="flex-1 px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+
+        {/* Delete User Confirmation Modal */}
         {showDeleteUserModal && userToDelete && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               className="bg-white rounded-2xl p-6 max-w-md w-full mx-4"
@@ -2174,7 +2168,7 @@ export default function UserManagementPage() {
         {/* Avatar Management Modal */}
         {showAvatarModal && selectedUser && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               className="bg-white rounded-2xl p-6 max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto"
@@ -2187,7 +2181,7 @@ export default function UserManagementPage() {
                 <p className="text-gray-600 mb-4">
                   Set profile picture for <span className="font-semibold text-purple-600">{selectedUser.fullName}</span>
                 </p>
-                
+
                 {/* Current Avatar Display */}
                 <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
                   <h4 className="font-semibold text-gray-800 mb-3">Current Profile Picture</h4>
@@ -2277,7 +2271,7 @@ export default function UserManagementPage() {
                     </div>
                   </div>
                 )}
-                
+
                 <div className="flex space-x-3">
                   <button
                     onClick={() => {

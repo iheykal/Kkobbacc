@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import User from '@/models/User';
-import { getAuthenticatedUser } from '@/lib/utils';
+import { getAuthenticatedUser } from '@/lib/serverUtils';
 
 export async function POST(
   request: NextRequest,
@@ -20,8 +20,8 @@ export async function POST(
 
     // Only superadmins can request avatar changes
     if (currentUser.role !== 'superadmin' && currentUser.role !== 'super_admin') {
-      return NextResponse.json({ 
-        error: 'Only superadmins can request avatar changes' 
+      return NextResponse.json({
+        error: 'Only superadmins can request avatar changes'
       }, { status: 403 });
     }
 
@@ -39,7 +39,7 @@ export async function POST(
 
     // Check if there's already a pending request
     if (user.avatarChangeRequest?.status === 'pending') {
-      return NextResponse.json({ 
+      return NextResponse.json({
         error: 'You already have a pending avatar change request. Please wait for admin approval.',
         code: 'PENDING_REQUEST_EXISTS'
       }, { status: 400 });
@@ -93,8 +93,8 @@ export async function GET(
 
     // Only superadmins can check avatar change requests
     if (currentUser.role !== 'superadmin' && currentUser.role !== 'super_admin') {
-      return NextResponse.json({ 
-        error: 'Only superadmins can view avatar change requests' 
+      return NextResponse.json({
+        error: 'Only superadmins can view avatar change requests'
       }, { status: 403 });
     }
 

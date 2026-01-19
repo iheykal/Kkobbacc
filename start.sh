@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "🚀 Starting Kobac Real Estate App..."
+echo "🚀 Starting Kobac Property App..."
 
 # Check if required environment variables are set
 echo "📋 Checking environment variables..."

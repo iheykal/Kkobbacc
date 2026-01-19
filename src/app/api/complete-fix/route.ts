@@ -8,11 +8,11 @@ export const dynamic = 'force-dynamic';
 export async function POST(request: NextRequest) {
   try {
     console.log('🔧 Complete fix: Creating session and fixing agent profile...');
-    
+
     // Connect to database
     await connectDB();
     console.log('✅ Database connected');
-    
+
     // Find the superadmin user from database
     const superAdmin = await User.findOne({ role: 'superadmin' }).select('_id fullName phone role status');
     if (!superAdmin) {
@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
         error: "No superadmin user found in database"
       });
     }
-    
+
     console.log('👤 Found database user:', {
       id: superAdmin._id.toString(),
       name: superAdmin.fullName,
@@ -29,11 +29,11 @@ export async function POST(request: NextRequest) {
       role: superAdmin.role,
       status: superAdmin.status
     });
-    
+
     // Create new session payload with database user
     const sessionPayload = createSessionPayload(superAdmin._id.toString(), superAdmin.role);
     console.log('🔄 Created session payload:', sessionPayload);
-    
+
     // Verify the user exists in database
     const verifyUser = await User.findById(sessionPayload.userId);
     if (!verifyUser) {
@@ -42,39 +42,39 @@ export async function POST(request: NextRequest) {
         error: "Failed to verify user exists in database"
       });
     }
-    
+
     console.log('✅ User verified in database:', {
       id: verifyUser._id.toString(),
       name: verifyUser.fullName,
       role: verifyUser.role
     });
-    
+
     // Check if user has agent profile
     const userWithProfile = await User.findById(sessionPayload.userId).select('_id fullName phone role status profile agentProfile');
     const hasAgentProfile = userWithProfile?.agentProfile && Object.keys(userWithProfile.agentProfile).length > 0;
-    
+
     console.log('🔍 Agent profile check:', {
       hasAgentProfile,
       agentProfileKeys: userWithProfile?.agentProfile ? Object.keys(userWithProfile.agentProfile) : []
     });
-    
+
     let agentProfileCreated = false;
     let agentProfile = null;
-    
+
     // Create agent profile if missing
     if (!hasAgentProfile) {
       console.log('🔧 Creating agent profile...');
-      
+
       agentProfile = {
         licenseNumber: `LIC-${superAdmin._id.toString().slice(-8).toUpperCase()}`,
         verified: true,
-        experience: "Experienced Real Estate Professional",
+        experience: "Experienced Property Professional",
         specializations: ["Residential", "Commercial", "Land"],
         languages: ["Somali", "English", "Arabic"],
         areas: ["Mogadishu", "Hargeisa", "Kismayo"],
-        bio: `Professional real estate agent with extensive experience in the Somali market. Specializing in residential and commercial properties.`,
+        bio: `Professional property agent with extensive experience in the Somali market. Specializing in residential and commercial properties.`,
         achievements: ["Top Performer 2024", "Client Satisfaction Award"],
-        certifications: ["Real Estate License", "Property Management"],
+        certifications: ["Property License", "Property Management"],
         socialMedia: {
           facebook: "",
           instagram: "",
@@ -99,18 +99,18 @@ export async function POST(request: NextRequest) {
           workingHours: "9:00 AM - 6:00 PM"
         }
       };
-      
+
       // Update user with agent profile
       userWithProfile.agentProfile = agentProfile;
       await userWithProfile.save();
       agentProfileCreated = true;
-      
+
       console.log('✅ Agent profile created:', {
         licenseNumber: agentProfile.licenseNumber,
         verified: agentProfile.verified
       });
     }
-    
+
     // Create response
     const response = NextResponse.json({
       success: true,
@@ -141,14 +141,14 @@ export async function POST(request: NextRequest) {
         agentProfileReady: true
       }
     });
-    
+
     // Set the session cookie
     setSessionCookie(response, sessionPayload, process.env.NODE_ENV === 'production');
-    
+
     console.log('✅ Complete fix applied: Session created and agent profile ready');
-    
+
     return response;
-    
+
   } catch (error) {
     console.error('❌ Complete fix error:', error);
     return NextResponse.json({
@@ -161,24 +161,24 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     console.log('🔍 Checking complete fix status...');
-    
+
     // Connect to database
     await connectDB();
-    
+
     // Find superadmin user
     const superAdmin = await User.findOne({ role: 'superadmin' }).select('_id fullName phone role status');
-    
+
     if (!superAdmin) {
       return NextResponse.json({
         success: false,
         error: "No superadmin user found in database"
       });
     }
-    
+
     // Check if user has agent profile
     const userWithProfile = await User.findById(superAdmin._id).select('_id fullName phone role status profile agentProfile');
     const hasAgentProfile = userWithProfile?.agentProfile && Object.keys(userWithProfile.agentProfile).length > 0;
-    
+
     return NextResponse.json({
       success: true,
       databaseUser: {
@@ -202,7 +202,7 @@ export async function GET(request: NextRequest) {
         description: "Ready to apply complete fix: Create session and ensure agent profile exists"
       }
     });
-    
+
   } catch (error) {
     console.error('❌ Check complete fix status error:', error);
     return NextResponse.json({

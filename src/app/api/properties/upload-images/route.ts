@@ -17,24 +17,24 @@ export async function POST(req: NextRequest) {
       R2_BUCKET: process.env.R2_BUCKET ? 'SET' : 'NOT SET',
       R2_PUBLIC_BASE_URL: process.env.R2_PUBLIC_BASE_URL ? 'SET' : 'NOT SET'
     });
-    
+
     // Check if we have the required environment variables
     if (!process.env.R2_ENDPOINT || !process.env.R2_ACCESS_KEY_ID || !process.env.R2_SECRET_ACCESS_KEY || !process.env.R2_BUCKET) {
       console.error('❌ Missing required R2 environment variables');
-      return NextResponse.json({ 
-        success: false, 
-        error: 'R2 configuration missing. Please check environment variables.' 
+      return NextResponse.json({
+        success: false,
+        error: 'R2 configuration missing. Please check environment variables.'
       }, { status: 500 });
     }
-    
+
     console.log('✅ All required R2 environment variables are present');
-    
+
     // Get session for authorization
     const session = getSessionFromRequest(req);
     if (!session) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
-    
+
     // Check authorization for creating properties
     const authResult = isAllowed({
       sessionUserId: session.userId,
@@ -43,24 +43,24 @@ export async function POST(req: NextRequest) {
       resource: 'property',
       ownerId: session.userId
     });
-    
+
     if (!authResult.allowed) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Forbidden: insufficient permissions' 
+      return NextResponse.json({
+        success: false,
+        error: 'Forbidden: insufficient permissions'
       }, { status: 403 });
     }
-    
+
     const form = await req.formData();
     const files = form.getAll('files') as File[];
     let listingId = form.get('listingId') as string;
-    
+
     console.log('📸 Form data parsed:', {
       filesCount: files.length,
       listingId: listingId,
       filesInfo: files.map(f => f instanceof File ? { name: f.name, size: f.size, type: f.type } : { name: 'unknown', size: 0, type: 'unknown' })
     });
-    
+
     // Generate a unique identifier for this upload session if no listingId is provided
     const uploadSessionId = listingId || `temp-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
     console.log('📸 Upload session ID:', uploadSessionId);
@@ -86,12 +86,12 @@ export async function POST(req: NextRequest) {
     if (!process.env.R2_ACCESS_KEY_ID) missingEnvVars.push('R2_ACCESS_KEY_ID');
     if (!process.env.R2_SECRET_ACCESS_KEY) missingEnvVars.push('R2_SECRET_ACCESS_KEY');
     if (!process.env.R2_BUCKET) missingEnvVars.push('R2_BUCKET');
-    
+
     if (missingEnvVars.length > 0) {
       console.error('❌ Missing R2 environment variables:', missingEnvVars);
-      return NextResponse.json({ 
-        success: false, 
-        error: `R2 configuration missing: ${missingEnvVars.join(', ')}. Please configure R2 environment variables in Render dashboard.` 
+      return NextResponse.json({
+        success: false,
+        error: `R2 configuration missing: ${missingEnvVars.join(', ')}. Please configure R2 environment variables in Render dashboard.`
       }, { status: 500 });
     }
 
@@ -99,9 +99,9 @@ export async function POST(req: NextRequest) {
 
     // Extract the actual endpoint URL from the environment variable
     let r2Endpoint = process.env.R2_ENDPOINT!;
-    
+
     console.log('🔍 Raw R2_ENDPOINT:', r2Endpoint);
-    
+
     // Handle case where the environment variable contains key=value format
     if (r2Endpoint.includes('R2_ENDPOINT=')) {
       r2Endpoint = r2Endpoint.split('R2_ENDPOINT=')[1];
@@ -110,7 +110,7 @@ export async function POST(req: NextRequest) {
       r2Endpoint = r2Endpoint.split('r2_endpoint=')[1];
       console.log('🔍 Extracted from r2_endpoint= format:', r2Endpoint);
     }
-    
+
     // If the endpoint contains the full URL, extract just the hostname
     if (r2Endpoint.includes('https://')) {
       r2Endpoint = r2Endpoint.replace('https://', '');
@@ -118,22 +118,22 @@ export async function POST(req: NextRequest) {
     if (r2Endpoint.includes('http://')) {
       r2Endpoint = r2Endpoint.replace('http://', '');
     }
-    
+
     console.log('🔍 R2 Endpoint processing:', {
       original: process.env.R2_ENDPOINT,
       processed: r2Endpoint
     });
-    
+
     // Validate the processed endpoint
     if (!r2Endpoint || r2Endpoint.trim() === '') {
       throw new Error('R2_ENDPOINT is empty after processing');
     }
-    
+
     // Ensure the endpoint doesn't contain any invalid characters
     if (r2Endpoint.includes('=') || r2Endpoint.includes(' ')) {
       throw new Error(`Invalid R2_ENDPOINT format after processing: ${r2Endpoint}. Original: ${process.env.R2_ENDPOINT}`);
     }
-    
+
     const finalEndpoint = `https://${r2Endpoint}`;
     console.log('🔍 Final S3 endpoint:', finalEndpoint);
 
@@ -232,11 +232,11 @@ export async function POST(req: NextRequest) {
       } else {
         testUrl = `https://${bucket}.r2.dev/${testKey}`;
       }
-      
+
       if (!testUrl || testUrl.trim() === '') {
         throw new Error('Test URL is empty');
       }
-      
+
       new URL(testUrl);
       console.log('✅ Test URL generation successful:', testUrl);
     } catch (testError) {
@@ -251,7 +251,7 @@ export async function POST(req: NextRequest) {
     }
 
     console.log('📸 Starting file processing loop for', files.length, 'files');
-    
+
     for (const f of files) {
       try {
         console.log('📸 Processing file:', f instanceof File ? f.name : 'unknown');
@@ -259,16 +259,16 @@ export async function POST(req: NextRequest) {
           console.log('⚠️ Skipping non-File object');
           continue;
         }
-        
+
         // Type assertion since we've confirmed it's a File
         const file = f as File;
         console.log(`🔄 Processing property image: ${file.name} (${file.type})`);
-        
+
         let processedFile: { buffer: Buffer; filename: string; contentType: string };
-        
+
         // Check if it's an image file
         console.log('📸 File type check:', { type: file.type, isImage: file.type.startsWith('image/') });
-        
+
         if (file.type.startsWith('image/')) {
           console.log('📸 Converting property image to WebP format...');
           try {
@@ -282,10 +282,11 @@ export async function POST(req: NextRequest) {
             });
             console.log(`✅ WebP conversion successful: ${processedFile.filename}`);
           } catch (error) {
-            console.error('❌ WebP conversion failed - using original format:', error);
-            console.error('❌ WebP conversion error details:', {
-              message: error instanceof Error ? error.message : 'Unknown error',
-              stack: error instanceof Error ? error.stack : undefined
+            console.error('❌ WebP conversion failed - using original format:', {
+              error: error instanceof Error ? error.message : 'Unknown error',
+              fileName: file.name,
+              fileType: file.type,
+              fileSize: file.size
             });
             // Use original format if WebP conversion fails
             const bytes = await file.arrayBuffer();
@@ -307,7 +308,7 @@ export async function POST(req: NextRequest) {
           };
           console.log('✅ Non-image file processed successfully');
         }
-        
+
         // Create a unique key for each upload
         console.log('📸 Generating unique key for file:', processedFile.filename);
         const key = `properties/${uploadSessionId}/${cryptoRandom(8)}-${Date.now()}-${sanitizeName(processedFile.filename)}`;
@@ -332,7 +333,7 @@ export async function POST(req: NextRequest) {
 
         // Generate correct R2 public URL format: https://bucket-name.r2.dev/key
         let url: string = '';
-        
+
         console.log('📸 Starting URL generation for key:', key);
         console.log('📸 URL generation inputs:', {
           publicBase: publicBase,
@@ -341,7 +342,7 @@ export async function POST(req: NextRequest) {
           hasPublicBase: !!publicBase,
           publicBaseLength: publicBase?.length || 0
         });
-        
+
         try {
           // More robust URL generation with validation
           if (publicBase && publicBase.trim() !== '') {
@@ -349,7 +350,7 @@ export async function POST(req: NextRequest) {
             // Remove trailing slash from publicBase and add key
             const cleanPublicBase = publicBase.replace(/\/$/, '').trim();
             console.log('📸 Clean publicBase:', cleanPublicBase);
-            
+
             if (cleanPublicBase.startsWith('http://') || cleanPublicBase.startsWith('https://')) {
               url = `${cleanPublicBase}/${key}`;
               console.log('📸 URL with protocol:', url);
@@ -364,20 +365,20 @@ export async function POST(req: NextRequest) {
             url = `https://${bucket}.r2.dev/${key}`;
             console.log('📸 Fallback URL:', url);
           }
-          
+
           // Additional validation
           if (!url || url.trim() === '') {
             throw new Error('Generated URL is empty');
           }
-          
+
           console.log('📸 Final URL before validation:', url);
-          
+
           // Validate the URL before adding to results
           new URL(url); // This will throw if URL is invalid
           console.log('✅ URL validation successful');
-          
+
           results.push({ key, url });
-          
+
           console.log(`✅ Uploaded: ${key} -> ${url}`);
           console.log(`🔍 URL Debug:`, {
             publicBase: publicBase,
@@ -414,42 +415,42 @@ export async function POST(req: NextRequest) {
       try {
         console.log('📸 Persisting uploaded URLs to property document:', listingId);
         await connectToDatabase();
-        
+
         const urls = results.map(r => r.url);
-        
+
         // Find property by _id first (if it's a MongoDB ObjectId), then by propertyId
         let property = null;
-        
+
         // Check if listingId is a MongoDB ObjectId (24 hex characters)
         if (/^[0-9a-fA-F]{24}$/.test(listingId)) {
           console.log('📸 Searching by MongoDB _id:', listingId);
           property = await Property.findById(listingId);
         }
-        
+
         // If not found by _id, try by propertyId
         if (!property) {
           console.log('📸 Searching by propertyId:', listingId);
           property = await Property.findOne({ propertyId: Number(listingId) });
         }
-        
+
         if (property) {
           console.log('📸 Found property, updating images:', {
             propertyId: property.propertyId,
             currentImages: property.images?.length || 0,
             newUrls: urls.length
           });
-          
+
           // Set thumbnail if empty, and append to images (dedupe)
           if (!property.thumbnailImage && urls.length > 0) {
             property.thumbnailImage = urls[0];
             console.log('📸 Set thumbnail image:', urls[0]);
           }
-          
+
           // Merge with existing images and deduplicate
           const existingImages = property.images || [];
           const imageSet = new Set([...existingImages, ...urls]);
           property.images = Array.from(imageSet);
-          
+
           await property.save();
           console.log('✅ Property images updated successfully:', {
             totalImages: property.images.length,
@@ -466,13 +467,13 @@ export async function POST(req: NextRequest) {
       console.log('📸 No listingId provided - URLs returned but not persisted to property');
     }
 
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       files: results,
       message: `Successfully uploaded ${results.length} images to Cloudflare R2 with WebP optimization`,
       persisted: !!(listingId && results.length > 0)
     });
-    
+
   } catch (err: any) {
     console.error('❌ Property image upload error:', err);
     console.error('❌ Error stack:', err?.stack);

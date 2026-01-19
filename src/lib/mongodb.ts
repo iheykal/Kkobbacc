@@ -45,8 +45,9 @@ async function connectDB() {
     const opts = {
       bufferCommands: false,
       // Optimized connection pool settings for Render (Serverless)
-      // Setting maxPoolSize to 1 is critical for serverless functions to avoid hitting DB connection limits
-      maxPoolSize: 1,
+      // Increased maxPoolSize to 10 to allow parallel requests (e.g. prefetching + navigation)
+      // This prevents the "single-file line" bottleneck where one slow request blocks all others
+      maxPoolSize: 10,
       minPoolSize: 0, // Allow pool to scale down to 0
       serverSelectionTimeoutMS: 60000, // Further increased to 60s
       socketTimeoutMS: 60000,

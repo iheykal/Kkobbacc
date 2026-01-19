@@ -45,7 +45,7 @@ export async function generateMetadata(
   }
 
   return {
-    title: `${property.title} - ${property.district} | Kobac Real Estate`,
+    title: `${property.title} - ${property.district} | Kobac Property`,
     description: `${property.description.substring(0, 160)}... Located in ${property.district}, ${property.location}. ${property.propertyType} for ${property.status.toLowerCase()}.`,
     keywords: [property.propertyType, property.district, property.location, 'real estate', 'property', property.status.toLowerCase()],
     openGraph: {

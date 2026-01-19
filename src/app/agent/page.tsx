@@ -1345,9 +1345,12 @@ export default function AgentDashboard() {
                           </span>
                         </div>
                         <div className="flex items-center space-x-2 text-gray-600">
-                          <img
-                            src="/icons/adress.png"
-                            alt="Location"
+                          <video
+                            src="/icons/Adress3.webm"
+                            autoPlay
+                            loop
+                            muted
+                            playsInline
                             className="w-4 h-4 object-contain"
                           />
                           <span className="text-sm">{property.location || 'Location not specified'}</span>
@@ -1611,7 +1614,14 @@ export default function AgentDashboard() {
                   <label className="block text-sm font-semibold text-gray-800 mb-3">Location</label>
                   <div className="relative">
                     <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center z-10">
-                      <img src="/icons/adress.png" alt="Address" className="w-5 h-5 object-contain" />
+                      <video
+                        src="/icons/Adress3.webm"
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        className="w-5 h-5 object-contain"
+                      />
                     </div>
                     <input
                       type="text"

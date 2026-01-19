@@ -25,7 +25,7 @@ function HomePageContent() {
   })
   const searchParams = useSearchParams()
   const router = useRouter()
-  
+
 
   // Initialize navigation prevention - temporarily disabled
   // useEffect(() => {
@@ -45,25 +45,25 @@ function HomePageContent() {
   return (
     <>
       <Head>
-        <title>Kobac Real Estate: Homepage</title>
-        <meta name="description" content="Somalia's #1 Real Estate Platform. Browse premium properties for sale and rent in Mogadishu. Find villas, apartments, and houses with trusted agents." />
-        <meta name="keywords" content="real estate, mogadishu, properties, villas, apartments, houses, luxury homes, for sale, for rent, somalia property" />
-        <meta property="og:title" content="Kobac Real Estate: Homepage" />
-        <meta property="og:description" content="Somalia's #1 Real Estate Platform. Browse premium properties for sale and rent in Mogadishu. Find villas, apartments, and houses with trusted agents." />
+        <title>Kobac Property: Homepage</title>
+        <meta name="description" content="Somalia's #1 Property Platform. Browse premium properties for sale and rent in Mogadishu. Find villas, apartments, and houses with trusted agents." />
+        <meta name="keywords" content="property, mogadishu, properties, villas, apartments, houses, luxury homes, for sale, for rent, somalia property" />
+        <meta property="og:title" content="Kobac Property: Homepage" />
+        <meta property="og:description" content="Somalia's #1 Property Platform. Browse premium properties for sale and rent in Mogadishu. Find villas, apartments, and houses with trusted agents." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content={`${typeof window !== 'undefined' ? window.location.origin : ''}`} />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Kobac Real Estate: Homepage" />
-        <meta name="twitter:description" content="Somalia's #1 Real Estate Platform. Browse premium properties for sale and rent in Mogadishu." />
+        <meta name="twitter:title" content="Kobac Property: Homepage" />
+        <meta name="twitter:description" content="Somalia's #1 Property Platform. Browse premium properties for sale and rent in Mogadishu." />
       </Head>
       <div className="min-h-screen">
         {/* Redirect Animation */}
         <RedirectAnimation {...animationProps} />
-      
-      
-      
-      {/* Background Auth Loader - Hidden */}
-      {/* {isLoading && (
+
+
+
+        {/* Background Auth Loader - Hidden */}
+        {/* {isLoading && (
         <div className="fixed top-4 right-4 z-50">
           <div className="bg-white/90 backdrop-blur-sm rounded-lg px-3 py-2 shadow-lg border border-white/20">
             <div className="flex items-center space-x-2">
@@ -73,45 +73,45 @@ function HomePageContent() {
           </div>
         </div>
       )} */}
-      
-      {/* Agent Dashboard Access Button - Only show when auth is loaded and user is agent */}
-      {!isLoading && isAuthenticated && user?.role === 'agent' && (
-        <>
-          {/* Desktop/Tablet Button - Positioned below header */}
-          <div className="hidden sm:block fixed top-20 right-4 z-40">
-            <Button 
-              onClick={handleAgentDashboardClick}
-              variant="secondary" 
-              size="sm"
-              className="bg-white/90 backdrop-blur-sm text-blue-600 hover:bg-white shadow-lg border border-blue-200 font-semibold transition-all duration-300 hover:scale-105 active:scale-95"
-            >
-              <User className="w-4 h-4 mr-2" aria-hidden="true" />
-              Agent Dashboard
-            </Button>
-          </div>
-          
-          {/* Mobile Floating Action Button */}
-          <div className="sm:hidden fixed bottom-6 right-6 z-50 relative">
-            <Button 
-              onClick={handleAgentDashboardClick}
-              variant="secondary" 
-              size="lg"
-              className="bg-blue-600 hover:bg-blue-700 text-white shadow-2xl border-0 font-semibold w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95"
-              aria-label="Open Agent Dashboard"
-            >
-              <User className="w-6 h-6" aria-hidden="true" />
-            </Button>
-            <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full font-bold shadow-lg">
-              Agent
+
+        {/* Agent Dashboard Access Button - Only show when auth is loaded and user is agent */}
+        {!isLoading && isAuthenticated && user?.role === 'agent' && (
+          <>
+            {/* Desktop/Tablet Button - Positioned below header */}
+            <div className="hidden sm:block fixed top-20 right-4 z-40">
+              <Button
+                onClick={handleAgentDashboardClick}
+                variant="secondary"
+                size="sm"
+                className="bg-white/90 backdrop-blur-sm text-blue-600 hover:bg-white shadow-lg border border-blue-200 font-semibold transition-all duration-300 hover:scale-105 active:scale-95"
+              >
+                <User className="w-4 h-4 mr-2" aria-hidden="true" />
+                Agent Dashboard
+              </Button>
             </div>
-          </div>
-        </>
-      )}
+
+            {/* Mobile Floating Action Button */}
+            <div className="sm:hidden fixed bottom-6 right-6 z-50 relative">
+              <Button
+                onClick={handleAgentDashboardClick}
+                variant="secondary"
+                size="lg"
+                className="bg-blue-600 hover:bg-blue-700 text-white shadow-2xl border-0 font-semibold w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95"
+                aria-label="Open Agent Dashboard"
+              >
+                <User className="w-6 h-6" aria-hidden="true" />
+              </Button>
+              <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full font-bold shadow-lg">
+                Agent
+              </div>
+            </div>
+          </>
+        )}
 
 
         <Hero />
         <SampleHomesSimplified />
-        
+
 
       </div>
     </>
