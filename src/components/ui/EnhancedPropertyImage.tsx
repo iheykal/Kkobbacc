@@ -55,15 +55,15 @@ export default function EnhancedPropertyImage({
     if (index === 0 || !property.images?.length) {
       return getPrimaryImageUrl(property);
     }
-    
+
     const imageIndex = index - 1;
     if (property.images && imageIndex < property.images.length) {
       return property.images[imageIndex];
     }
-    
+
     return getPrimaryImageUrl(property);
   };
-  
+
   const imageUrl = getImageUrl();
 
   // Watermark size classes
@@ -85,7 +85,7 @@ export default function EnhancedPropertyImage({
   const handleImageLoad = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     const img = e.target as HTMLImageElement;
     setIsLoading(false);
-    
+
     // Calculate and store aspect ratio for responsive behavior
     if (maintainAspectRatio && img.naturalWidth && img.naturalHeight) {
       const aspectRatio = img.naturalWidth / img.naturalHeight;
@@ -106,10 +106,10 @@ export default function EnhancedPropertyImage({
       complete: target.complete,
       isR2Url: imageUrl ? imageUrl.includes('r2.dev') || imageUrl.includes('r2.cloudflarestorage.com') : false
     });
-    
+
     setImageError(true);
     setIsLoading(false);
-    
+
     if (onError) {
       onError(`Failed to load image at index ${index}: ${imageUrl}`);
     }
@@ -120,7 +120,7 @@ export default function EnhancedPropertyImage({
     if (fallbackComponent) {
       return <>{fallbackComponent}</>;
     }
-    
+
     // Show a proper "No Image" placeholder instead of villa-2.webp
     return (
       <div className={`relative ${className} flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200`}>
@@ -150,7 +150,7 @@ export default function EnhancedPropertyImage({
           >
             <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 animate-pulse" />
             <div className="absolute inset-0 flex items-center justify-center">
-              <motion.div 
+              <motion.div
                 className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full"
                 animate={{ rotate: 360 }}
                 transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
@@ -159,7 +159,7 @@ export default function EnhancedPropertyImage({
           </motion.div>
         )}
       </AnimatePresence>
-      
+
       {/* Main Image */}
       <motion.img
         src={imageUrl}
@@ -176,21 +176,19 @@ export default function EnhancedPropertyImage({
         }}
         onError={handleImageError}
         onLoad={handleImageLoad}
-        className={`transition-all duration-500 ${
-          maintainAspectRatio 
-            ? 'max-w-full max-h-full w-auto h-auto object-contain' 
+        className={`transition-all duration-500 ${maintainAspectRatio
+            ? 'max-w-full max-h-full w-auto h-auto object-contain'
             : 'w-full h-full object-cover object-center'
-        } ${
-          isLoading ? 'opacity-0 scale-105' : 'opacity-100 scale-100'
-        }`}
+          } ${isLoading ? 'opacity-0 scale-105' : 'opacity-100 scale-100'
+          }`}
         initial={{ opacity: 0, scale: 1.05 }}
-        animate={{ 
-          opacity: isLoading ? 0 : 1, 
-          scale: isLoading ? 1.05 : 1 
+        animate={{
+          opacity: isLoading ? 0 : 1,
+          scale: isLoading ? 1.05 : 1
         }}
         transition={{ duration: 0.5 }}
       />
-      
+
       {/* Company Logo Watermark */}
       {showWatermark && (
         <motion.div
@@ -201,7 +199,7 @@ export default function EnhancedPropertyImage({
         >
           <div className={`${watermarkSizeClasses[watermarkSize]} relative opacity-70`}>
             <img
-              src="/icons/header.png"
+              src="/icons/newlogo.png"
               alt="Kobac Company Logo"
               className="max-w-full max-h-full w-auto h-auto object-contain"
               style={{
@@ -227,7 +225,7 @@ export function useEnhancedPropertyImages(property: {
 }) {
   const primaryImageUrl = getPrimaryImageUrl(property);
   const allImageUrls = getAllImageUrls(property);
-  
+
   return {
     primaryImageUrl,
     allImageUrls,

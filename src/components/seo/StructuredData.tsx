@@ -16,7 +16,7 @@ export function StructuredData() {
     "@type": "Organization",
     "name": "Kobac Property",
     "url": baseUrl,
-    "logo": `${baseUrl}/icons/header.png`,
+    "logo": `${baseUrl}/icons/newlogo.png`,
     "description": "Somalia's #1 Property Platform - Premium properties in Mogadishu. Buy, rent, or list properties with trusted agents.",
     "contactPoint": {
       "@type": "ContactPoint",

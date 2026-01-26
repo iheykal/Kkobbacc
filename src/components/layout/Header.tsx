@@ -53,7 +53,7 @@ export const Header: React.FC = () => {
             >
               <div className="w-24 h-24 flex items-center justify-center">
                 <HybridImage
-                  src="/icons/header.png"
+                  src="/icons/newlogo.png"
                   alt="Kobac Logo"
                   width={96}
                   height={96}

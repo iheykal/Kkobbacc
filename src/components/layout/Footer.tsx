@@ -20,7 +20,7 @@ export const Footer: React.FC = () => {
             >
               <div className="w-12 h-12 flex items-center justify-center">
                 <HybridImage
-                  src="/icons/header.png"
+                  src="/icons/newlogo.png"
                   alt="Kobac Logo"
                   width={48}
                   height={48}

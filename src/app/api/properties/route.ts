@@ -28,7 +28,7 @@ type PropertyDocument = PropertyWithPopulatedAgent & {
   toObject(): any;
 };
 import { getNextPropertyId } from '@/lib/propertyIdGenerator';
-import { getCompanyLogoUrl, DEFAULT_AVATAR_URL } from '@/lib/utils';
+import { getCompanyLogoUrl, DEFAULT_AVATAR_URL, AGENT_AVATAR_URL } from '@/lib/utils';
 import { getSessionFromRequest } from '@/lib/sessionUtils';
 import { isAllowed, createListFilter, enforceOwnership, sanitizeUpdateData } from '@/lib/authz/authorize';
 
@@ -370,6 +370,7 @@ export async function GET(request: NextRequest) {
         if (propertyObj.agentId && typeof propertyObj.agentId === 'object' && '_id' in propertyObj.agentId) {
           // Use populated agent data directly
           const agentData = propertyObj.agentId as any;
+          // Prioritize avatar from User model (populated) over snapshotted property.agent.image
           const agentAvatar = agentData.avatar || agentData.profile?.avatar;
 
           // Build agent name from available fields - prioritize fullName
@@ -386,7 +387,7 @@ export async function GET(request: NextRequest) {
           propertyObj.agent = {
             name: agentName,
             phone: agentData.phone || 'N/A',
-            image: agentAvatar || DEFAULT_AVATAR_URL,
+            image: agentAvatar || propertyObj.agent?.image || DEFAULT_AVATAR_URL,
             rating: 5.0
           };
         } else {
@@ -705,7 +706,7 @@ export async function POST(request: NextRequest) {
     const agentData = {
       name: user.fullName || user.firstName + ' ' + user.lastName || 'Agent',
       phone: user.phone || 'N/A',
-      image: agentAvatar || DEFAULT_AVATAR_URL,
+      image: agentAvatar || AGENT_AVATAR_URL,
       rating: 5.0 // Default rating for new agents
     };
 

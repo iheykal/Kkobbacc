@@ -8,11 +8,11 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useUser } from '@/contexts/UserContext'
 import { formatPrice } from '@/lib/utils'
 import { propertyEventManager } from '@/lib/propertyEvents'
-import { 
-  Trash2, 
-  CheckCircle, 
-  XCircle, 
-  Clock, 
+import {
+  Trash2,
+  CheckCircle,
+  XCircle,
+  Clock,
   AlertTriangle,
   ArrowLeft,
   Eye,
@@ -74,7 +74,7 @@ export default function PendingDeletionsPage() {
       const response = await fetch('/api/properties/pending-deletion', {
         credentials: 'include'
       })
-      
+
       if (response.ok) {
         const result = await response.json()
         console.log('✅ Pending deletions fetched:', result.data?.length || 0)
@@ -100,7 +100,7 @@ export default function PendingDeletionsPage() {
     try {
       setConfirmingDeletion(propertyId)
       console.log('🔄 Confirming deletion for property:', propertyId)
-      
+
       const response = await fetch(`/api/properties/${propertyId}/confirm-deletion`, {
         method: 'POST',
         credentials: 'include'
@@ -110,16 +110,31 @@ export default function PendingDeletionsPage() {
       if (response.ok) {
         // Immediately remove the item from the UI for better UX
         setPendingDeletions(prev => prev.filter(item => item._id !== propertyId))
-        
+
+        // CRITICAL: Clear all property caches from sessionStorage to ensure
+        // the deleted property disappears from the homepage immediately
+        // This fixes the "deleted property still appears" bug
+        if (typeof window !== 'undefined') {
+          console.log('🧹 Clearing property caches after deletion...')
+          Object.keys(sessionStorage).forEach(key => {
+            if (key.startsWith('cache_properties_') ||
+              key.startsWith('cache_timestamp_properties_') ||
+              key.startsWith('prefetched_property_') ||
+              key.startsWith('property_')) {
+              sessionStorage.removeItem(key)
+            }
+          })
+        }
+
         // Notify other components about the deletion
         propertyEventManager.notifyDeleted(propertyId)
-        
+
         // Show success message
         setSuccessMessage('Property has been permanently deleted from the system.')
-        
+
         // Clear success message after 3 seconds
         setTimeout(() => setSuccessMessage(null), 3000)
-        
+
         // Also refresh the list to ensure consistency
         fetchPendingDeletions()
       } else {
@@ -194,7 +209,7 @@ export default function PendingDeletionsPage() {
               <p className="text-gray-600">Review and confirm property deletion requests</p>
             </div>
           </div>
-          
+
           <div className="flex items-center space-x-2 text-sm text-gray-600">
             <Clock className="w-4 h-4" />
             <span>Last updated: {new Date().toLocaleTimeString()}</span>
@@ -229,7 +244,7 @@ export default function PendingDeletionsPage() {
               </div>
             </div>
           </div>
-          
+
           <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-xl">
             <div className="flex items-center justify-between">
               <div>
@@ -246,7 +261,7 @@ export default function PendingDeletionsPage() {
               </div>
             </div>
           </div>
-          
+
           <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-xl">
             <div className="flex items-center justify-between">
               <div>
@@ -298,22 +313,22 @@ export default function PendingDeletionsPage() {
                             Pending Deletion
                           </div>
                         </div>
-                        
+
                         <h3 className="text-lg font-semibold text-gray-900 mb-2">
                           {deletion.title}
                         </h3>
-                        
+
                         <div className="flex items-center space-x-4 text-sm text-gray-600 mb-3">
                           <div className="flex items-center space-x-1">
                             <MapPin className="w-4 h-4" />
                             <span>{deletion.location}</span>
                           </div>
-                          <div 
+                          <div
                             className="font-semibold text-green-600"
                             dangerouslySetInnerHTML={{ __html: formatPrice(deletion.price, deletion.listingType) }}
                           />
                         </div>
-                        
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                           <div>
                             <p className="text-gray-500 mb-1">Requested by:</p>
@@ -333,7 +348,7 @@ export default function PendingDeletionsPage() {
                           </div>
                         </div>
                       </div>
-                      
+
                       <div className="flex items-center space-x-3 ml-6">
                         <button
                           onClick={() => handleConfirmDeletion(deletion._id)}

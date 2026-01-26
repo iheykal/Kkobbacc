@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { useUser } from '@/contexts/UserContext'
-import { BackgroundAuthLoader } from '@/components/ui/BackgroundAuthLoader'
+import { NavigationProgressBar } from '@/components/ui/NavigationProgressBar'
 
 interface ClientLayoutWrapperProps {
   children: React.ReactNode
@@ -13,6 +13,7 @@ export const ClientLayoutWrapper: React.FC<ClientLayoutWrapperProps> = ({ childr
 
   return (
     <>
+      <NavigationProgressBar />
       {children}
       {/* <BackgroundAuthLoader isLoading={isLoading} /> */}
     </>

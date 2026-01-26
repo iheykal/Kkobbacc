@@ -70,7 +70,7 @@ export const PropertyImageWithWatermark: React.FC<PropertyImageWithWatermarkProp
       {isLoading && (
         <div className="absolute inset-0 bg-gray-200 animate-pulse" />
       )}
-      
+
       {/* Main Property Image */}
       <motion.img
         src={src}
@@ -83,7 +83,7 @@ export const PropertyImageWithWatermark: React.FC<PropertyImageWithWatermarkProp
         onError={handleImageError}
         onLoad={handleImageLoad}
       />
-      
+
       {/* Company Logo Watermark */}
       {showWatermark && (
         <motion.div
@@ -95,7 +95,7 @@ export const PropertyImageWithWatermark: React.FC<PropertyImageWithWatermarkProp
           <div className={`${watermarkSizeClasses[watermarkSize]} relative`}>
             {/* Company Logo */}
             <img
-              src="/icons/header.png"
+              src="/icons/newlogo.png"
               alt="Kobac Company Logo"
               className="w-full h-full object-contain"
               style={{

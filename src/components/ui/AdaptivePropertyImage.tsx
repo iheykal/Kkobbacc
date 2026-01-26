@@ -80,7 +80,7 @@ export const AdaptivePropertyImage: React.FC<AdaptivePropertyImageProps> = ({
     });
     setImageError(true);
     setIsLoading(false);
-    
+
     if (onError) {
       onError(`Failed to load image: ${imageUrl}`)
     }
@@ -90,12 +90,12 @@ export const AdaptivePropertyImage: React.FC<AdaptivePropertyImageProps> = ({
   const getSizingStrategy = () => {
     if (sizingMode === 'contain') return 'object-contain'
     if (sizingMode === 'cover') return 'object-cover'
-    
+
     // For mobile, always use cover for better card appearance
     if (typeof window !== 'undefined' && window.innerWidth < 768) {
       return 'object-cover'
     }
-    
+
     // Adaptive mode: choose based on aspect ratios
     if (imageAspectRatio && containerAspectRatio) {
       // If image is much wider than container, use cover to fill
@@ -109,7 +109,7 @@ export const AdaptivePropertyImage: React.FC<AdaptivePropertyImageProps> = ({
       // Otherwise, use contain to show full image
       return 'object-contain'
     }
-    
+
     // Default to cover for better card appearance
     return 'object-cover'
   }
@@ -131,7 +131,7 @@ export const AdaptivePropertyImage: React.FC<AdaptivePropertyImageProps> = ({
   }
 
   return (
-    <div 
+    <div
       className={`relative overflow-hidden w-full h-full ${className}`}
       style={{
         maxWidth: '100%',
@@ -154,7 +154,7 @@ export const AdaptivePropertyImage: React.FC<AdaptivePropertyImageProps> = ({
       {isLoading && (
         <div className="absolute inset-0 bg-gray-200 animate-pulse" />
       )}
-      
+
       {/* Main Property Image */}
       <motion.img
         src={imageUrl}
@@ -173,8 +173,8 @@ export const AdaptivePropertyImage: React.FC<AdaptivePropertyImageProps> = ({
         }}
         initial={{ opacity: 0, scale: 1.05 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ 
-          duration: 0.6, 
+        transition={{
+          duration: 0.6,
           ease: [0.25, 0.46, 0.45, 0.94],
           opacity: { duration: 0.6 },
           scale: { duration: 0.8 }
@@ -185,15 +185,15 @@ export const AdaptivePropertyImage: React.FC<AdaptivePropertyImageProps> = ({
         onError={handleImageError}
         onLoad={handleImageLoad}
       />
-      
+
       {/* Company Logo Watermark */}
       {showWatermark && (
         <motion.div
           className={`absolute ${watermarkPositionClasses[watermarkPosition]} z-10 pointer-events-none`}
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ 
-            duration: 0.8, 
+          transition={{
+            duration: 0.8,
             delay: 0.3,
             ease: [0.25, 0.46, 0.45, 0.94],
             opacity: { duration: 0.8 },
@@ -203,7 +203,7 @@ export const AdaptivePropertyImage: React.FC<AdaptivePropertyImageProps> = ({
           <div className={`${watermarkSizeClasses[watermarkSize]} relative`}>
             {/* Company Logo */}
             <img
-              src="/icons/header.png"
+              src="/icons/newlogo.png"
               alt="Kobac Company Logo"
               className="w-full h-full object-contain"
               style={{

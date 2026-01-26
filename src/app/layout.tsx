@@ -46,18 +46,18 @@ export const metadata: Metadata = {
   manifest: '/manifest.json',
   icons: {
     icon: [
-      { url: '/icons/header.png', sizes: '16x16', type: 'image/png' },
-      { url: '/icons/header.png', sizes: '32x32', type: 'image/png' },
-      { url: '/icons/header.png', sizes: '48x48', type: 'image/png' },
-      { url: '/icons/header.png', sizes: '64x64', type: 'image/png' },
-      { url: '/icons/header.png', sizes: '128x128', type: 'image/png' },
-      { url: '/icons/header.png', sizes: '192x192', type: 'image/png' },
-      { url: '/icons/header.png', sizes: '256x256', type: 'image/png' },
-      { url: '/icons/header.png', sizes: '384x384', type: 'image/png' },
-      { url: '/icons/header.png', sizes: '512x512', type: 'image/png' },
+      { url: '/icons/newlogo.png', sizes: '16x16', type: 'image/png' },
+      { url: '/icons/newlogo.png', sizes: '32x32', type: 'image/png' },
+      { url: '/icons/newlogo.png', sizes: '48x48', type: 'image/png' },
+      { url: '/icons/newlogo.png', sizes: '64x64', type: 'image/png' },
+      { url: '/icons/newlogo.png', sizes: '128x128', type: 'image/png' },
+      { url: '/icons/newlogo.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icons/newlogo.png', sizes: '256x256', type: 'image/png' },
+      { url: '/icons/newlogo.png', sizes: '384x384', type: 'image/png' },
+      { url: '/icons/newlogo.png', sizes: '512x512', type: 'image/png' },
     ],
-    shortcut: '/icons/header.png',
-    apple: '/icons/header.png',
+    shortcut: '/icons/newlogo.png',
+    apple: '/icons/newlogo.png',
   },
   appleWebApp: {
     capable: true,
@@ -71,7 +71,7 @@ export const metadata: Metadata = {
     locale: 'en_US',
     images: [
       {
-        url: '/icons/header.png',
+        url: '/icons/newlogo.png',
         width: 512,
         height: 512,
         alt: 'Kobac Property Logo',
@@ -82,7 +82,7 @@ export const metadata: Metadata = {
     card: 'summary',
     title: 'Kobac Property - Premium Property',
     description: 'Discover luxury properties in the most prestigious locations worldwide.',
-    images: ['/icons/header.png'],
+    images: ['/icons/newlogo.png'],
   },
 }
 
@@ -121,28 +121,28 @@ export default function RootLayout({
 
         {/* Favicon - Google Search looks for /favicon.ico specifically */}
         <link rel="icon" href="/favicon.ico" type="image/png" />
-        <link rel="icon" href="/icons/header.png" sizes="16x16" type="image/png" />
-        <link rel="icon" href="/icons/header.png" sizes="32x32" type="image/png" />
-        <link rel="icon" href="/icons/header.png" sizes="48x48" type="image/png" />
-        <link rel="icon" href="/icons/header.png" sizes="64x64" type="image/png" />
-        <link rel="icon" href="/icons/header.png" sizes="128x128" type="image/png" />
-        <link rel="icon" href="/icons/header.png" sizes="192x192" type="image/png" />
-        <link rel="icon" href="/icons/header.png" sizes="256x256" type="image/png" />
-        <link rel="icon" href="/icons/header.png" sizes="384x384" type="image/png" />
-        <link rel="icon" href="/icons/header.png" sizes="512x512" type="image/png" />
+        <link rel="icon" href="/icons/newlogo.png" sizes="16x16" type="image/png" />
+        <link rel="icon" href="/icons/newlogo.png" sizes="32x32" type="image/png" />
+        <link rel="icon" href="/icons/newlogo.png" sizes="48x48" type="image/png" />
+        <link rel="icon" href="/icons/newlogo.png" sizes="64x64" type="image/png" />
+        <link rel="icon" href="/icons/newlogo.png" sizes="128x128" type="image/png" />
+        <link rel="icon" href="/icons/newlogo.png" sizes="192x192" type="image/png" />
+        <link rel="icon" href="/icons/newlogo.png" sizes="256x256" type="image/png" />
+        <link rel="icon" href="/icons/newlogo.png" sizes="384x384" type="image/png" />
+        <link rel="icon" href="/icons/newlogo.png" sizes="512x512" type="image/png" />
         <link rel="shortcut icon" href="/favicon.ico" />
 
         {/* Apple Touch Icons */}
-        <link rel="apple-touch-icon" sizes="180x180" href="/icons/header.png" />
-        <link rel="apple-touch-icon" sizes="152x152" href="/icons/header.png" />
-        <link rel="apple-touch-icon" sizes="144x144" href="/icons/header.png" />
-        <link rel="apple-touch-icon" sizes="120x120" href="/icons/header.png" />
-        <link rel="apple-touch-icon" sizes="114x114" href="/icons/header.png" />
-        <link rel="apple-touch-icon" sizes="76x76" href="/icons/header.png" />
-        <link rel="apple-touch-icon" sizes="72x72" href="/icons/header.png" />
-        <link rel="apple-touch-icon" sizes="60x60" href="/icons/header.png" />
-        <link rel="apple-touch-icon" sizes="57x57" href="/icons/header.png" />
-        <link rel="apple-touch-icon" href="/icons/header.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/icons/newlogo.png" />
+        <link rel="apple-touch-icon" sizes="152x152" href="/icons/newlogo.png" />
+        <link rel="apple-touch-icon" sizes="144x144" href="/icons/newlogo.png" />
+        <link rel="apple-touch-icon" sizes="120x120" href="/icons/newlogo.png" />
+        <link rel="apple-touch-icon" sizes="114x114" href="/icons/newlogo.png" />
+        <link rel="apple-touch-icon" sizes="76x76" href="/icons/newlogo.png" />
+        <link rel="apple-touch-icon" sizes="72x72" href="/icons/newlogo.png" />
+        <link rel="apple-touch-icon" sizes="60x60" href="/icons/newlogo.png" />
+        <link rel="apple-touch-icon" sizes="57x57" href="/icons/newlogo.png" />
+        <link rel="apple-touch-icon" href="/icons/newlogo.png" />
 
         {/* Only preload GA if ID is provided and not in development */}
         {gaId && process.env.NODE_ENV === 'production' && (

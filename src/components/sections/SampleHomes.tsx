@@ -6,7 +6,7 @@ import { Bed, Bath, MapPin, Heart, ArrowRight, Play, Calendar, Users, Grid, List
 import { Card, CardContent } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { PropertyImageWithWatermarkFixed } from '@/components/ui/PropertyImageWithWatermarkFixed'
-import { cn, formatPrice, formatPhoneNumber, capitalizeName, DEFAULT_AVATAR_URL, getStableAvatarUrl, getPropertyUrl, resolveMeasurementValue } from '@/lib/utils'
+import { cn, formatPrice, formatPhoneNumber, capitalizeName, DEFAULT_AVATAR_URL, AGENT_AVATAR_URL, getStableAvatarUrl, getPropertyUrl, resolveMeasurementValue } from '@/lib/utils'
 import { getFirstName } from '@/utils/nameUtils'
 import { getPrimaryImageUrl } from '@/lib/imageUrlResolver'
 import { useProperties, FilterOptions } from '@/hooks/useProperties'
@@ -880,7 +880,7 @@ export const SampleHomes: React.FC = () => {
             <div className="flex items-center p-2 sm:p-3 md:p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl md:rounded-2xl">
               <div className="flex items-center space-x-2 sm:space-x-3 md:space-x-4">
                 <HybridImage
-                  src={getStableAvatarUrl(property.agentId || property.agent?.name || 'agent-1', property.agent?.image, false)}
+                  src={property.agent?.image || (property.agent?.name?.toLowerCase().includes('kobac') ? DEFAULT_AVATAR_URL : AGENT_AVATAR_URL)}
                   alt={capitalizeName(property.agent?.name || 'Agent')}
                   width={48}
                   height={48}
@@ -1107,7 +1107,7 @@ export const SampleHomes: React.FC = () => {
                 <div className="flex items-center p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl">
                   <div className="flex items-center space-x-4">
                     <HybridImage
-                      src={getStableAvatarUrl(property.agentId || property.agent?.name || 'agent-1', property.agent?.image, false)}
+                      src={property.agent?.image || (property.agent?.name?.toLowerCase().includes('kobac') ? DEFAULT_AVATAR_URL : AGENT_AVATAR_URL)}
                       alt={capitalizeName(property.agent?.name || 'Agent')}
                       width={48}
                       height={48}

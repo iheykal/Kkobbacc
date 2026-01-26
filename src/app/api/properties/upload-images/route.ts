@@ -70,6 +70,31 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: 'No files provided' }, { status: 400 });
     }
 
+    // Validate file types and sizes
+    for (const f of files) {
+      if (!(f instanceof File)) continue;
+
+      const isImage = f.type.startsWith('image/');
+      const isVideo = f.type.startsWith('video/');
+
+      if (!isImage && !isVideo) {
+        return NextResponse.json({
+          success: false,
+          error: `Unsupported file type: ${f.type}. Only images and videos are allowed.`
+        }, { status: 400 });
+      }
+
+      // Size limits: 10MB for images, 100MB for videos
+      const maxSize = isVideo ? 100 * 1024 * 1024 : 10 * 1024 * 1024;
+      if (f.size > maxSize) {
+        const maxMB = isVideo ? 100 : 10;
+        return NextResponse.json({
+          success: false,
+          error: `File ${f.name} is too large. Maximum size: ${maxMB}MB for ${isVideo ? 'videos' : 'images'}`
+        }, { status: 400 });
+      }
+    }
+
     console.log(`📸 Uploading ${files.length} files to R2 for listing: ${listingId || 'general'}`);
     console.log('📸 Files to upload:', files.map(f => f instanceof File ? { name: f.name, size: f.size, type: f.type } : { name: 'unknown', size: 0, type: 'unknown' }));
 
@@ -216,7 +241,7 @@ export async function POST(req: NextRequest) {
       }
     });
 
-    const results: Array<{ key: string; url: string }> = [];
+    const results: any[] = [];
 
     // Test URL generation before processing files
     const testKey = 'test-key';
@@ -262,24 +287,28 @@ export async function POST(req: NextRequest) {
 
         // Type assertion since we've confirmed it's a File
         const file = f as File;
-        console.log(`🔄 Processing property image: ${file.name} (${file.type})`);
+        const isImage = file.type.startsWith('image/');
+        const isVideo = file.type.startsWith('video/');
 
-        let processedFile: { buffer: Buffer; filename: string; contentType: string };
+        console.log(`🔄 Processing property media: ${file.name} (${file.type}) - ${isImage ? 'Image' : isVideo ? 'Video' : 'Unknown'}`);
 
-        // Check if it's an image file
-        console.log('📸 File type check:', { type: file.type, isImage: file.type.startsWith('image/') });
+        let processedFile: { buffer: Buffer; filename: string; contentType: string; mediaType: 'image' | 'video' };
 
-        if (file.type.startsWith('image/')) {
+        if (isImage) {
           console.log('📸 Converting property image to WebP format...');
           try {
-            processedFile = await processImageFileSafe(file, {
-              quality: 85, // Good balance of quality and file size for property images
-              width: 1920, // Max width for web display
-              height: 1080, // Max height for web display
-              fit: 'inside', // Maintain aspect ratio
-              validateOutput: true, // Ensure WebP conversion is valid
-              fallbackToOriginal: true // Allow fallback to original format if WebP conversion fails
+            const webpFile = await processImageFileSafe(file, {
+              quality: 85,
+              width: 1920,
+              height: 1080,
+              fit: 'inside',
+              validateOutput: true,
+              fallbackToOriginal: true
             });
+            processedFile = {
+              ...webpFile,
+              mediaType: 'image'
+            };
             console.log(`✅ WebP conversion successful: ${processedFile.filename}`);
           } catch (error) {
             console.error('❌ WebP conversion failed - using original format:', {
@@ -288,25 +317,37 @@ export async function POST(req: NextRequest) {
               fileType: file.type,
               fileSize: file.size
             });
-            // Use original format if WebP conversion fails
             const bytes = await file.arrayBuffer();
             processedFile = {
               buffer: Buffer.from(bytes),
               filename: sanitizeName(file.name),
-              contentType: file.type || 'application/octet-stream'
+              contentType: file.type || 'application/octet-stream',
+              mediaType: 'image'
             };
-            console.log('✅ Using original format as fallback');
+            console.log('✅ Using original image format as fallback');
           }
-        } else {
-          // For non-image files, use original
-          console.log('📄 Non-image file, using original format');
+        } else if (isVideo) {
+          // For video files, upload as-is (no processing)
+          console.log('🎥 Processing video file (no conversion)...');
           const bytes = await file.arrayBuffer();
           processedFile = {
             buffer: Buffer.from(bytes),
             filename: sanitizeName(file.name),
-            contentType: file.type || 'application/octet-stream'
+            contentType: file.type || 'video/mp4',
+            mediaType: 'video'
           };
-          console.log('✅ Non-image file processed successfully');
+          console.log(`✅ Video file processed: ${processedFile.filename} (${(bytes.byteLength / (1024 * 1024)).toFixed(2)}MB)`);
+        } else {
+          // Fallback for other file types
+          console.log('📄 Unknown file type, using original format');
+          const bytes = await file.arrayBuffer();
+          processedFile = {
+            buffer: Buffer.from(bytes),
+            filename: sanitizeName(file.name),
+            contentType: file.type || 'application/octet-stream',
+            mediaType: 'image' // Default to image for backward compatibility
+          };
+          console.log('✅ File processed with default settings');
         }
 
         // Create a unique key for each upload
@@ -377,7 +418,12 @@ export async function POST(req: NextRequest) {
           new URL(url); // This will throw if URL is invalid
           console.log('✅ URL validation successful');
 
-          results.push({ key, url });
+          results.push({
+            key,
+            url,
+            mediaType: processedFile.mediaType,
+            contentType: processedFile.contentType
+          });
 
           console.log(`✅ Uploaded: ${key} -> ${url}`);
           console.log(`🔍 URL Debug:`, {
@@ -467,11 +513,15 @@ export async function POST(req: NextRequest) {
       console.log('📸 No listingId provided - URLs returned but not persisted to property');
     }
 
+    const imageCount = results.filter(r => r.mediaType === 'image').length;
+    const videoCount = results.filter(r => r.mediaType === 'video').length;
+
     return NextResponse.json({
       success: true,
       files: results,
-      message: `Successfully uploaded ${results.length} images to Cloudflare R2 with WebP optimization`,
-      persisted: !!(listingId && results.length > 0)
+      message: `Successfully uploaded ${imageCount} image(s) and ${videoCount} video(s) to Cloudflare R2`,
+      persisted: !!(listingId && results.length > 0),
+      stats: { images: imageCount, videos: videoCount, total: results.length }
     });
 
   } catch (err: any) {

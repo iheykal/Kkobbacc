@@ -75,8 +75,8 @@ export const PropertyImageWithWatermarkFixed: React.FC<PropertyImageWithWatermar
           }}
           initial={{ opacity: 0, scale: 1.05 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ 
-            duration: 0.6, 
+          transition={{
+            duration: 0.6,
             ease: [0.25, 0.46, 0.45, 0.94],
             opacity: { duration: 0.6 },
             scale: { duration: 0.8 }
@@ -93,15 +93,15 @@ export const PropertyImageWithWatermarkFixed: React.FC<PropertyImageWithWatermar
           }}
         />
       )}
-      
+
       {/* Company Logo Watermark */}
       {showWatermark && (
         <motion.div
           className={`absolute ${watermarkPositionClasses[watermarkPosition]} z-10 pointer-events-none`}
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ 
-            duration: 0.8, 
+          transition={{
+            duration: 0.8,
             delay: 0.3,
             ease: [0.25, 0.46, 0.45, 0.94],
             opacity: { duration: 0.8 },
@@ -111,7 +111,7 @@ export const PropertyImageWithWatermarkFixed: React.FC<PropertyImageWithWatermar
           <div className={`${watermarkSizeClasses[watermarkSize]} relative opacity-70`}>
             {/* Company Logo */}
             <img
-              src="/icons/header.png"
+              src="/icons/newlogo.png"
               alt="Kobac Company Logo"
               className="max-w-full max-h-full w-auto h-auto object-contain transition-opacity duration-500"
               style={{

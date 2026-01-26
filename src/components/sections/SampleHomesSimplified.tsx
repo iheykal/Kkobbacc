@@ -12,7 +12,7 @@ import { useRouter } from 'next/navigation'
 import { useNavigation } from '@/contexts/NavigationContext'
 import { useScrollRestoration } from '@/hooks/useScrollRestoration'
 import { useProperties, FilterOptions } from '@/hooks/useProperties'
-import { cn, getPropertyUrl, getStableAvatarUrl, capitalizeName, formatPhoneNumber, resolveMeasurementValue } from '@/lib/utils'
+import { cn, getPropertyUrl, getStableAvatarUrl, capitalizeName, formatPhoneNumber, resolveMeasurementValue, DEFAULT_AVATAR_URL, AGENT_AVATAR_URL } from '@/lib/utils'
 import { PropertyImageWithWatermarkFixed } from '@/components/ui/PropertyImageWithWatermarkFixed'
 import { getPrimaryImageUrl, getAllImageUrls } from '@/lib/imageUrlResolver'
 import HybridImage from '@/components/ui/HybridImage'
@@ -123,6 +123,12 @@ const BeautifulPropertyCard = ({ property, index, viewMode }: { property: any; i
 
       // Use SEO-friendly URL format - navigate directly (no redirect chain)
       const targetUrl = getPropertyUrl(property)
+
+      // Trigger global navigation progress bar
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('kobac:navigation-start'));
+      }
+
       router.push(targetUrl)
     } catch (error) {
       console.error('❌ Error handling property click:', error)
@@ -429,7 +435,7 @@ const BeautifulPropertyCard = ({ property, index, viewMode }: { property: any; i
                 >
                   <div style={{ pointerEvents: 'none' }}>
                     <HybridImage
-                      src={getStableAvatarUrl(property.agentId || property.agent?.name || 'agent-1', property.agent?.image, false)}
+                      src={property.agent?.image || (property.agent?.name?.toLowerCase().includes('kobac') ? DEFAULT_AVATAR_URL : AGENT_AVATAR_URL)}
                       alt={getFirstName(property.agent?.name)}
                       width={32}
                       height={32}
@@ -658,7 +664,7 @@ const BeautifulPropertyCard = ({ property, index, viewMode }: { property: any; i
                   >
                     <div style={{ pointerEvents: 'none' }}>
                       <HybridImage
-                        src={getStableAvatarUrl(property.agentId || property.agent?.name || 'agent-1', property.agent?.image, false)}
+                        src={property.agent?.image || (property.agent?.name?.toLowerCase().includes('kobac') ? DEFAULT_AVATAR_URL : AGENT_AVATAR_URL)}
                         alt={getFirstName(property.agent?.name)}
                         width={40}
                         height={40}

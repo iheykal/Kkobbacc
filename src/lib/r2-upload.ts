@@ -36,14 +36,14 @@ export async function uploadMultipleToR2(files: File[], listingId?: string): Pro
   return Promise.all(files.map((f) => uploadToR2(f, listingId)));
 }
 
-export async function uploadPropertyImagesToR2(files: File[], listingId?: string): Promise<{ key: string; url: string }[]> {
+export async function uploadPropertyImagesToR2(files: File[], listingId?: string): Promise<{ key: string; url: string; mediaType?: string; contentType?: string }[]> {
   console.log('📸 uploadPropertyImagesToR2 called with:', { filesCount: files.length, listingId });
-  
+
   // Validate input files
   if (!files || files.length === 0) {
     throw new Error('No files provided for upload');
   }
-  
+
   // Validate each file
   for (const file of files) {
     if (!(file instanceof File)) {
@@ -52,29 +52,41 @@ export async function uploadPropertyImagesToR2(files: File[], listingId?: string
     if (file.size === 0) {
       throw new Error(`File ${file.name} is empty`);
     }
-    if (file.size > 10 * 1024 * 1024) { // 10MB limit
-      throw new Error(`File ${file.name} is too large (max 10MB)`);
+
+    // Check file type and size limits
+    const isImage = file.type.startsWith('image/');
+    const isVideo = file.type.startsWith('video/');
+
+    if (!isImage && !isVideo) {
+      throw new Error(`File ${file.name} has unsupported type. Only images and videos are allowed.`);
+    }
+
+    // Size limits: 10MB for images, 100MB for videos
+    const maxSize = isVideo ? 100 * 1024 * 1024 : 10 * 1024 * 1024;
+    if (file.size > maxSize) {
+      const maxMB = isVideo ? 100 : 10;
+      throw new Error(`File ${file.name} is too large (max ${maxMB}MB for ${isVideo ? 'videos' : 'images'})`);
     }
   }
-  
+
   const formData = new FormData();
   files.forEach(file => formData.append('files', file));
   if (listingId) formData.append('listingId', listingId);
 
   console.log('📸 Making request to /api/properties/upload-images');
   const res = await fetch('/api/properties/upload-images', { method: 'POST', body: formData, credentials: 'include' });
-  
+
   console.log('📸 Upload response status:', res.status, res.ok);
-  
+
   if (!res.ok) {
     const errorText = await res.text();
     console.error('📸 Upload failed with status:', res.status, errorText);
     throw new Error(`Upload failed with status ${res.status}: ${errorText}`);
   }
-  
+
   const responseData = await res.json();
   console.log('📸 Upload response data:', responseData);
-  
+
   const { success, files: uploadedFiles, error } = responseData;
 
   if (error) {
@@ -83,7 +95,7 @@ export async function uploadPropertyImagesToR2(files: File[], listingId?: string
   }
   if (!success || !uploadedFiles?.length) {
     console.error('📸 Upload failed - no files returned:', { success, uploadedFiles });
-    throw new Error('Property image upload failed');
+    throw new Error('Property media upload failed');
   }
 
   // Validate returned URLs
@@ -92,7 +104,7 @@ export async function uploadPropertyImagesToR2(files: File[], listingId?: string
       console.error('📸 Invalid URL returned:', file);
       throw new Error('Invalid URL returned from upload service');
     }
-    
+
     // Basic URL validation
     try {
       new URL(file.url);
@@ -105,3 +117,6 @@ export async function uploadPropertyImagesToR2(files: File[], listingId?: string
   console.log('📸 Upload successful, returning:', uploadedFiles);
   return uploadedFiles;
 }
+
+// Alias for backward compatibility
+export const uploadPropertyMediaToR2 = uploadPropertyImagesToR2;

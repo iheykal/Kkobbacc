@@ -416,10 +416,9 @@ export function getStableAvatarUrl(agentId: string, currentAvatar?: string, isSa
     return SAMPLE_AGENT_AVATARS[sampleKey as keyof typeof SAMPLE_AGENT_AVATARS] || DEFAULT_AVATAR_URL;
   }
 
-  // For real agents without avatars, use default avatar
+  // For real agents without avatars, use default agent avatar - no more DiceBear API
   if (!isSampleData && (!currentAvatar || currentAvatar === DEFAULT_AVATAR_URL)) {
-    // Return default avatar - no more DiceBear API
-    return DEFAULT_AVATAR_URL;
+    return AGENT_AVATAR_URL;
   }
 
   // For real agents without avatars, use default

@@ -5,14 +5,14 @@ import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import { useCallback } from 'react'
 import { incrementPropertyView } from '@/lib/viewIncrement'
-import { 
-  Bed, 
-  Bath, 
+import {
+  Bed,
+  Bath,
   MapPin,
-  Heart, 
-  Share2, 
-  Phone, 
-  Mail, 
+  Heart,
+  Share2,
+  Phone,
+  Mail,
   ArrowLeft,
   ArrowRight,
   Home,
@@ -27,7 +27,7 @@ import { Button } from '@/components/ui/Button'
 import { Card, CardContent } from '@/components/ui/Card'
 import { PropertyImageWithWatermarkFixed } from '@/components/ui/PropertyImageWithWatermarkFixed'
 import EnhancedImageGallery from '@/components/ui/EnhancedImageGallery'
-import { PropertyImageGallery } from '@/components/ui/FlexibleImage'
+import { PropertyImageGallery } from '@/components/ui/PropertyImageGallery'
 import { PropertyRecommendations } from './PropertyRecommendations'
 import { formatPrice, formatPhoneNumber, formatListingDate, capitalizeName, DEFAULT_AVATAR_URL } from '@/lib/utils'
 import { getPrimaryImageUrl, getAllImageUrls } from '@/lib/imageUrlResolver'
@@ -35,15 +35,15 @@ import { getPrimaryImageUrl, getAllImageUrls } from '@/lib/imageUrlResolver'
 // Safe agent ID resolver function
 function resolveAgentId(property: any): string | number | undefined {
   if (!property) return undefined;
-  
+
   if (typeof property.agentId === 'string') {
     return property.agentId;
   }
-  
+
   if (typeof property.agentId === 'number') {
     return property.agentId;
   }
-  
+
   if (property.agentId && typeof property.agentId === 'object') {
     if (property.agentId._id) {
       return property.agentId._id;
@@ -52,19 +52,19 @@ function resolveAgentId(property: any): string | number | undefined {
       return property.agentId.id;
     }
   }
-  
+
   if (property.agent && property.agent.id) {
     return property.agent.id;
   }
-  
+
   if (property.agent && property.agent._id) {
     return property.agent._id;
   }
-  
+
   if (property.agentId) {
     return String(property.agentId);
   }
-  
+
   return undefined;
 }
 
@@ -108,7 +108,7 @@ interface PropertyDetailModalProps {
 export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({ property, onClose }) => {
   const router = useRouter()
   const [selectedImage, setSelectedImage] = useState(0)
-  
+
   // Get all image URLs
   const allImageUrls = React.useMemo(() => {
     console.log('🔍 PropertyDetailModal: Getting image URLs for property:', {
@@ -122,14 +122,14 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({ proper
       hasImages: !!property.images,
       imagesArray: Array.isArray(property.images) ? property.images : 'not an array'
     });
-    
+
     const urls = getAllImageUrls(property);
     console.log('🔍 PropertyDetailModal: Resolved image URLs:', {
       urls,
       urlsLength: urls.length,
       urlsDetails: urls.map((url, index) => ({ index, url, type: typeof url }))
     });
-    
+
     return urls;
   }, [property]);
   const [isFavorite, setIsFavorite] = useState(false)
@@ -210,9 +210,9 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({ proper
       agentObjectKeys: property.agent ? Object.keys(property.agent) : 'no agent object',
       agentObjectValues: property.agent ? Object.entries(property.agent) : 'no agent object'
     });
-    
+
     const resolvedAgentId = resolveAgentId(property);
-    
+
     if (!resolvedAgentId) {
       console.warn('❌ No agent ID found for property:', property);
       return;
@@ -239,7 +239,7 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({ proper
     };
 
     const agentId = extractAgentIdAsString(resolvedAgentId);
-    
+
     if (!agentId) {
       console.error('❌ Invalid agentId after extraction:', resolvedAgentId);
       alert('Invalid agent information. Please try again.');
@@ -309,7 +309,7 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({ proper
     // Fallback to ID if slug generation fails
     router.push(`/agent/${encodeURIComponent(agentId)}`);
     onClose();
-    
+
     // Let all preloads continue in background
     Promise.allSettled([]).then(() => {
       setLoadingAgentId(null);
@@ -457,17 +457,17 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({ proper
                       className="cursor-pointer hover:scale-110 transition-transform duration-300 inline-block"
                       title="View agent profile"
                     >
-                    <img
-                      src={property.agent?.image || DEFAULT_AVATAR_URL}
-                      alt={`${capitalizeName(property.agent?.name || 'Agent')} profile picture`}
-                      width={80}
-                      height={80}
-                      className="w-20 h-20 rounded-full mx-auto mb-4 object-cover border-4 border-white shadow-lg hover:border-blue-500 transition-colors"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.src = DEFAULT_AVATAR_URL;
-                      }}
-                    />
+                      <img
+                        src={property.agent?.image || DEFAULT_AVATAR_URL}
+                        alt={`${capitalizeName(property.agent?.name || 'Agent')} profile picture`}
+                        width={80}
+                        height={80}
+                        className="w-20 h-20 rounded-full mx-auto mb-4 object-cover border-4 border-white shadow-lg hover:border-blue-500 transition-colors"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = DEFAULT_AVATAR_URL;
+                        }}
+                      />
                     </div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-2">
                       {capitalizeName(property.agent?.name || 'Agent')}
@@ -521,11 +521,10 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({ proper
               <div className="space-y-3">
                 <Button
                   onClick={handleFavorite}
-                  className={`w-full ${
-                    isFavorite
+                  className={`w-full ${isFavorite
                       ? 'bg-red-600 hover:bg-red-700 text-white'
                       : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-                  }`}
+                    }`}
                   aria-label={isFavorite ? 'Remove property from saved list' : 'Save property to favorites'}
                 >
                   <Heart className={`w-4 h-4 mr-2 ${isFavorite ? 'fill-current' : ''}`} aria-hidden="true" />

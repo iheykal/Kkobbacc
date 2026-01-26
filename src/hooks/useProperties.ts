@@ -149,6 +149,8 @@ export const useProperties = (featured?: boolean, filters?: FilterOptions) => {
 
       // Always ask for latest first so new uploads surface immediately
       params.append('sort', 'latest');
+      // Add a timestamp to bust all caches (browser, CDN, Next.js)
+      params.append('t', Date.now().toString());
 
       // Optimized limit for better performance - increased to 500 to show virtually all properties
       params.append('limit', '500'); // Increased limit to support high volume (100+ per day)
@@ -169,9 +171,9 @@ export const useProperties = (featured?: boolean, filters?: FilterOptions) => {
         credentials: 'include',
         headers: headers,
         // For mobile, use no-cache or reload to ensure fresh data
-        cache: isMobile ? 'no-cache' : 'force-cache',
+        cache: 'no-store', // CRITICAL: Force fresh fetch from server
         // Add cache-busting for mobile
-        ...(isMobile ? { next: { revalidate: 0 } } : { next: { revalidate: 30 } })
+        next: { revalidate: 0 } // transform to dynamic fetch
       });
 
       if (!response.ok) {

@@ -20,7 +20,17 @@ export interface IProperty extends Document {
   features: string[];
   amenities: string[];
   thumbnailImage?: string; // Main/featured image (optional)
-  images: string[]; // Additional property images
+  images: string[]; // Legacy: Additional property images (backward compatibility)
+  // Enhanced media field for images AND videos
+  media?: [{
+    url: string;
+    type: 'image' | 'video';
+    format?: string; // jpg, png, webp, mp4, webm, mov, etc.
+    thumbnail?: string; // Auto-generated thumbnail for videos
+    duration?: number; // Video duration in seconds
+    size?: number; // File size in bytes
+    uploadedAt?: Date;
+  }];
   agentId: string | { _id: string; fullName: string; email: string }; // Add agentId field to link properties to agents
   agent: {
     name: string;
@@ -190,6 +200,38 @@ const PropertySchema: Schema = new Schema({
   images: [{
     type: String,
     required: false
+  }],
+  // Enhanced media field for images AND videos with metadata
+  media: [{
+    url: {
+      type: String,
+      required: true
+    },
+    type: {
+      type: String,
+      enum: ['image', 'video'],
+      required: true
+    },
+    format: {
+      type: String, // jpg, png, webp, mp4, webm, mov
+      required: false
+    },
+    thumbnail: {
+      type: String, // Generated thumbnail URL for videos
+      required: false
+    },
+    duration: {
+      type: Number, // Video duration in seconds
+      required: false
+    },
+    size: {
+      type: Number, // File size in bytes
+      required: false
+    },
+    uploadedAt: {
+      type: Date,
+      default: Date.now
+    }
   }],
   agentId: {
     type: Schema.Types.ObjectId,

@@ -27,6 +27,9 @@ import {
   X
 } from 'lucide-react'
 import { PropertyImageWithWatermarkFixed } from '@/components/ui/PropertyImageWithWatermarkFixed'
+import { parseSmartText } from '@/lib/smart-parser'
+import { ClipboardPaste } from 'lucide-react'
+
 
 interface Property {
   id: string
@@ -180,14 +183,14 @@ export default function AgentDashboard() {
 
       // Fetch properties and views in parallel with mobile optimizations
       const [propertiesResponse, viewsResponse] = await Promise.allSettled([
-        fetch(`/api/properties?agentId=${agentId}&limit=${limit}`, {
+        fetch(`/api/properties?agentId=${agentId}&limit=${limit}&t=${Date.now()}`, {
           credentials: 'include',
           headers: {
             'x-agent-dashboard': 'true',
             'x-mobile-optimized': isMobile ? 'true' : 'false'
           },
-          cache: 'force-cache', // Cache for better performance
-          next: { revalidate: 60 } // Revalidate every minute
+          cache: 'no-store', // Ensure fresh data
+          next: { revalidate: 0 }
         }),
         fetch(`/api/agent/total-views?agentId=${agentId}`, {
           credentials: 'include',
@@ -251,11 +254,13 @@ export default function AgentDashboard() {
       const controller = new AbortController()
       const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 second timeout
 
-      const response = await fetch(`/api/properties?agentId=${agentId}`, {
+      const response = await fetch(`/api/properties?agentId=${agentId}&t=${Date.now()}`, {
         credentials: 'include',
         headers: {
           'x-agent-dashboard': 'true' // This tells the API this is an agent dashboard request
         },
+        cache: 'no-store',
+        next: { revalidate: 0 },
         signal: controller.signal
       })
 
@@ -695,6 +700,19 @@ export default function AgentDashboard() {
 
       // Re-fetch total views after successful upload
       fetchAgentTotalViews(user.id)
+
+      // CRITICAL: Clear all property caches to ensure proper visibility
+      if (typeof window !== 'undefined') {
+        console.log('🧹 Clearing property caches after upload...')
+        Object.keys(sessionStorage).forEach(key => {
+          if (key.startsWith('cache_properties_') ||
+            key.startsWith('cache_timestamp_properties_') ||
+            key.startsWith('prefetched_property_') ||
+            key.startsWith('property_')) {
+            sessionStorage.removeItem(key)
+          }
+        })
+      }
 
       // Force refresh the main page properties as well
       console.log('🔄 Triggering main page property refresh...')
@@ -1515,6 +1533,66 @@ export default function AgentDashboard() {
                 </button>
               </div>
 
+
+
+              {/* Smart Paste Section */}
+              <div className="mb-8 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-5 shadow-sm">
+                <div className="flex items-start gap-4">
+                  <div className="p-3 bg-blue-600 rounded-xl text-white shadow-lg shadow-blue-200">
+                    <ClipboardPaste className="w-6 h-6" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="tex-lg font-bold text-gray-900 mb-1 flex items-center">
+                      Smart Paste
+                      <span className="ml-2 px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full font-bold uppercase tracking-wider">New</span>
+                    </h3>
+                    <p className="text-sm text-gray-600 mb-3">
+                      Paste property details from WhatsApp or Facebook to auto-fill the form instantly!
+                    </p>
+                    <textarea
+                      placeholder="Paste text here (e.g. #GURI KIRO_AH #DABAQ 2qol...)"
+                      className="w-full h-24 p-4 border border-blue-200 rounded-xl text-sm mb-1 focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-inner bg-white/50"
+                      onChange={(e) => {
+                        const text = e.target.value;
+                        if (!text.trim()) return;
+
+                        const parsed = parseSmartText(text);
+                        console.log('🔮 Smart Parse Result:', parsed);
+
+                        // Auto-fill logic
+                        setPropertyData(prev => ({
+                          ...prev,
+                          // Title: Generate a smart title if location & type are found
+                          title: parsed.location && parsed.propertyType
+                            ? `${parsed.propertyType.charAt(0).toUpperCase() + parsed.propertyType.slice(1)} ${parsed.listingType === 'rent' ? 'Kiro ah' : 'Iib ah'} - ${parsed.location}`
+                            : prev.title,
+
+                          description: parsed.description || prev.description,
+                          listingType: parsed.listingType || prev.listingType || 'sale',
+                          propertyType: parsed.propertyType || prev.propertyType || 'villa',
+
+                          // Numeric fields
+                          price: parsed.price || prev.price,
+                          bedrooms: parsed.beds || prev.bedrooms,
+                          bathrooms: parsed.baths || prev.bathrooms,
+
+                          // Dropdowns (try to match exact values, otherwise user selects)
+                          district: parsed.district || prev.district,
+                          location: parsed.location || prev.location,
+
+                          // Smart measurement detection if present
+                          measurement: parsed.measurement || prev.measurement
+                        }));
+                      }}
+                    />
+                    <p className="text-xs text-blue-600 font-medium mt-2 flex items-center">
+                      <span className="w-2 h-2 bg-blue-500 rounded-full mr-2 animate-pulse"></span>
+                      System automatically detects: Rooms, Price, District, Location & Type
+                    </p>
+                  </div>
+                </div>
+              </div>
+
               {/* Form Fields */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-2">
@@ -1714,7 +1792,7 @@ export default function AgentDashboard() {
                     <div className="relative">
                       <input
                         type="file"
-                        accept="image/*"
+                        accept="image/*,video/*"
                         onChange={(e) => {
                           const file = e.target.files?.[0] || null
                           setPropertyData(prev => ({ ...prev, thumbnailImage: file }))
@@ -1722,18 +1800,11 @@ export default function AgentDashboard() {
                         className="block w-full text-sm text-gray-700 file:mr-4 file:py-3 file:px-6 file:rounded-2xl file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-all duration-300"
                       />
                     </div>
-                    <p className="text-sm text-gray-600 mt-3">
-                      💡 This will be the main image displayed in property listings and cards.
-                    </p>
-                    <div className="mt-3 p-4 bg-blue-50 border border-blue-200 rounded-2xl">
-                      <p className="text-sm text-blue-700">
-                        ✨ <strong>Auto-optimized:</strong> Images are automatically converted to WebP format for faster loading and smaller file sizes
-                      </p>
-                    </div>
+
                     {propertyData.thumbnailImage && (
                       <div className="mt-3 p-4 bg-emerald-50 border border-emerald-200 rounded-2xl">
                         <p className="text-sm text-emerald-700 font-medium">
-                          ✅ Selected: {propertyData.thumbnailImage.name}
+                          ✅ Image selected
                         </p>
                       </div>
                     )}
@@ -1750,7 +1821,7 @@ export default function AgentDashboard() {
                       <input
                         type="file"
                         multiple
-                        accept="image/*"
+                        accept="image/*,video/*"
                         onChange={(e) => {
                           const files = Array.from(e.target.files || [])
                           setPropertyData(prev => ({ ...prev, additionalImages: files }))
@@ -1758,38 +1829,12 @@ export default function AgentDashboard() {
                         className="block w-full text-sm text-gray-700 file:mr-4 file:py-3 file:px-6 file:rounded-2xl file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 transition-all duration-300"
                       />
                     </div>
-                    <p className="text-sm text-gray-600 mt-3">
-                      💡 Upload multiple images to showcase different views of the property.
-                    </p>
-                    <div className="mt-3 p-4 bg-blue-50 border border-blue-200 rounded-2xl">
-                      <p className="text-sm text-blue-700">
-                        ✨ <strong>Auto-optimized:</strong> All images are automatically converted to WebP format for faster loading and smaller file sizes
-                      </p>
-                    </div>
+
                     {propertyData.additionalImages.length > 0 && (
                       <div className="mt-3 p-4 bg-emerald-50 border border-emerald-200 rounded-2xl">
-                        <p className="text-sm text-emerald-700 font-medium mb-2">
-                          ✅ Selected {propertyData.additionalImages.length} additional image(s):
+                        <p className="text-sm text-emerald-700 font-medium">
+                          ✅ {propertyData.additionalImages.length} additional image(s) selected
                         </p>
-                        <ul className="text-sm text-emerald-600 space-y-1">
-                          {propertyData.additionalImages.map((file, index) => {
-                            const isDuplicate = propertyData.thumbnailImage && file.name === propertyData.thumbnailImage.name
-                            return (
-                              <li key={index} className={`flex items-center space-x-2 ${isDuplicate ? 'text-red-600' : ''}`}>
-                                <span className={`w-1.5 h-1.5 rounded-full ${isDuplicate ? 'bg-red-500' : 'bg-emerald-500'}`}></span>
-                                <span>{file.name}</span>
-                                {isDuplicate && <span className="text-red-600 text-xs">(Same as thumbnail - will be skipped)</span>}
-                              </li>
-                            )
-                          })}
-                        </ul>
-                        {propertyData.thumbnailImage && propertyData.additionalImages.some(file => file.name === propertyData.thumbnailImage?.name) && (
-                          <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded-lg">
-                            <p className="text-sm text-yellow-700">
-                              ⚠️ <strong>Warning:</strong> You've selected the same image for both thumbnail and additional images. Duplicates will be automatically removed.
-                            </p>
-                          </div>
-                        )}
                       </div>
                     )}
                   </div>
@@ -1885,7 +1930,7 @@ export default function AgentDashboard() {
                         </label>
                         <input
                           type="file"
-                          accept="image/*"
+                          accept="image/*,video/*"
                           onChange={(e) => {
                             const file = e.target.files?.[0] || null
                             setEditData(prev => ({ ...prev, thumbnailImage: file }))
@@ -1907,7 +1952,7 @@ export default function AgentDashboard() {
                         <input
                           type="file"
                           multiple
-                          accept="image/*"
+                          accept="image/*,video/*"
                           onChange={(e) => {
                             const files = Array.from(e.target.files || [])
                             setEditData(prev => ({ ...prev, additionalImages: files }))
@@ -2044,6 +2089,6 @@ export default function AgentDashboard() {
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </div >
   )
 }

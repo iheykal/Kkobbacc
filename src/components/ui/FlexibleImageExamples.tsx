@@ -1,7 +1,8 @@
 'use client';
 
 import React from 'react';
-import { FlexibleImage, PropertyImageGallery } from './FlexibleImage';
+import { FlexibleImage } from './FlexibleImage';
+import PropertyImageGallery from './PropertyImageGallery';
 
 /**
  * Example component showing different ways to use FlexibleImage
@@ -17,7 +18,7 @@ export const FlexibleImageExamples: React.FC = () => {
   return (
     <div className="p-8 space-y-8">
       <h1 className="text-3xl font-bold text-gray-900 mb-8">FlexibleImage Examples</h1>
-      
+
       {/* Example 1: Basic flexible image with auto aspect ratio */}
       <div className="space-y-4">
         <h2 className="text-xl font-semibold">1. Basic Flexible Image (Auto Aspect Ratio)</h2>

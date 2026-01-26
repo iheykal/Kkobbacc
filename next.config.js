@@ -29,7 +29,7 @@ const nextConfig = {
     return [
       {
         source: '/favicon.ico',
-        destination: '/icons/header.png',
+        destination: '/icons/newlogo.png',
       },
     ]
   },
@@ -93,7 +93,6 @@ const nextConfig = {
     minimumCacheTTL: 60,
   },
 
-  // Optimized webpack config
   webpack: (config, { isServer, dev }) => {
     // Only externalize heavy packages for server in production
     if (isServer && !dev) {
@@ -107,52 +106,6 @@ const nextConfig = {
         'formidable': 'commonjs formidable',
         'sharp': 'commonjs sharp',
       });
-    }
-
-    // Optimize bundle splitting for better performance
-    if (!isServer) {
-      config.optimization = {
-        ...config.optimization,
-        // Removed usedExports and sideEffects - Next.js handles tree shaking internally
-        // These settings conflict with Next.js's cacheUnaffected optimization
-        splitChunks: {
-          chunks: 'all',
-          cacheGroups: {
-            default: false,
-            vendors: false,
-            // Vendor chunk for node_modules
-            vendor: {
-              test: /[\\/]node_modules[\\/]/,
-              name: 'vendors',
-              priority: 10,
-              reuseExistingChunk: true,
-            },
-            // Separate chunk for framer-motion (large library) - load async
-            framerMotion: {
-              test: /[\\/]node_modules[\\/]framer-motion[\\/]/,
-              name: 'framer-motion',
-              priority: 20,
-              reuseExistingChunk: true,
-              chunks: 'async', // Load async instead of blocking
-            },
-            // Separate chunk for recharts (large library) - load async
-            recharts: {
-              test: /[\\/]node_modules[\\/]recharts[\\/]/,
-              name: 'recharts',
-              priority: 20,
-              reuseExistingChunk: true,
-              chunks: 'async', // Load async instead of blocking
-            },
-            // Common chunk for shared code
-            common: {
-              name: 'common',
-              minChunks: 2,
-              priority: 5,
-              reuseExistingChunk: true,
-            },
-          },
-        },
-      };
     }
 
     return config;

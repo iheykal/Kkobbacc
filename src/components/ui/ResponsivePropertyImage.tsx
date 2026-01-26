@@ -68,7 +68,7 @@ export const ResponsivePropertyImage: React.FC<ResponsivePropertyImageProps> = (
     console.warn('ResponsivePropertyImage: Image failed to load:', imageUrl)
     setImageError(true)
     setIsLoading(false)
-    
+
     if (onError) {
       onError(`Failed to load image: ${imageUrl}`)
     }
@@ -96,7 +96,7 @@ export const ResponsivePropertyImage: React.FC<ResponsivePropertyImageProps> = (
       {isLoading && (
         <div className="absolute inset-0 bg-gray-200 animate-pulse" />
       )}
-      
+
       {/* Main Property Image */}
       <motion.img
         src={imageUrl}
@@ -117,7 +117,7 @@ export const ResponsivePropertyImage: React.FC<ResponsivePropertyImageProps> = (
         onError={handleImageError}
         onLoad={handleImageLoad}
       />
-      
+
       {/* Company Logo Watermark */}
       {showWatermark && (
         <motion.div
@@ -129,7 +129,7 @@ export const ResponsivePropertyImage: React.FC<ResponsivePropertyImageProps> = (
           <div className={`${watermarkSizeClasses[watermarkSize]} relative`}>
             {/* Company Logo */}
             <img
-              src="/icons/header.png"
+              src="/icons/newlogo.png"
               alt="Kobac Company Logo"
               className="w-full h-full object-contain"
               style={{

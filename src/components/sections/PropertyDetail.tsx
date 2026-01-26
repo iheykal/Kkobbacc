@@ -29,9 +29,9 @@ import { Button } from '@/components/ui/Button'
 import { Card, CardContent } from '@/components/ui/Card'
 import { PropertyImageWithWatermarkFixed } from '@/components/ui/PropertyImageWithWatermarkFixed'
 import EnhancedImageGallery from '@/components/ui/EnhancedImageGallery'
-import { PropertyImageGallery } from '@/components/ui/FlexibleImage'
+import { PropertyImageGallery } from '@/components/ui/PropertyImageGallery'
 import { PropertyRecommendations } from './PropertyRecommendations'
-import { formatPrice, formatPhoneNumber, formatListingDate, capitalizeName, DEFAULT_AVATAR_URL } from '@/lib/utils'
+import { formatPrice, formatPhoneNumber, formatListingDate, capitalizeName, DEFAULT_AVATAR_URL, AGENT_AVATAR_URL } from '@/lib/utils'
 import { getPrimaryImageUrl, getAllImageUrls } from '@/lib/imageUrlResolver'
 import { navigateToAgentProfile } from '@/lib/agentNavigation'
 import { useRoleAccess } from '@/hooks/useRoleAccess'
@@ -643,12 +643,12 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ property, onClos
                           {/* Main profile circle */}
                           <div className="relative w-20 h-20 rounded-full p-1 transition-all duration-300 bg-white">
                             <img
-                              src={property.agent?.image || DEFAULT_AVATAR_URL}
+                              src={property.agent?.image || (property.agent?.name?.toLowerCase().includes('kobac') ? DEFAULT_AVATAR_URL : AGENT_AVATAR_URL)}
                               alt={capitalizeName(property.agent?.name || 'Agent')}
                               className={`w-full h-full border-2 border-white shadow-md ${(property.agent?.name?.toLowerCase().includes('kobac real estate') || property.agent?.name?.toLowerCase().includes('kobac real')) ? 'rounded-full object-contain' : 'rounded-full object-cover'}`}
                               onError={(e) => {
                                 const target = e.target as HTMLImageElement;
-                                target.src = DEFAULT_AVATAR_URL;
+                                target.src = property.agent?.name?.toLowerCase().includes('kobac') ? DEFAULT_AVATAR_URL : AGENT_AVATAR_URL;
                               }}
                               style={{ pointerEvents: 'none' }}
                             />
