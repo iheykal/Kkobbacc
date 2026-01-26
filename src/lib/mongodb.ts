@@ -19,9 +19,9 @@ if (!cached) {
 }
 
 async function connectDB() {
-  // Skip connection during build phase if MONGODB_URI is not available
-  if (!MONGODB_URI) {
-    console.warn('⚠️ MONGODB_URI not available, skipping database connection');
+  // Skip connection during build phase if MONGODB_URI is not available or is dummy
+  if (!MONGODB_URI || MONGODB_URI.includes('dummy')) {
+    console.warn('⚠️ MONGODB_URI not available or dummy, skipping database connection');
     return null;
   }
 

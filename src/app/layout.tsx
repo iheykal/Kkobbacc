@@ -13,6 +13,8 @@ import GoogleAnalyticsComponent from '@/components/analytics/GoogleAnalytics'
 import { StructuredData } from '@/components/seo/StructuredData'
 import { GoogleAuthProviderWrapper } from '@/components/providers/GoogleAuthProviderWrapper'
 
+export const dynamic = 'force-dynamic'
+
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
