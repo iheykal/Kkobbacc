@@ -19,6 +19,7 @@ ENV NODE_OPTIONS="--max-old-space-size=4096"
 ENV MONGODB_URI="mongodb://dummy:27017/dummy"
 
 # Build the application
+RUN rm -rf src/app/test-* src/app/debug-*
 RUN npm run build
 
 # Expose port
