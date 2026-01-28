@@ -748,24 +748,37 @@ export const SampleHomesSimplified: React.FC = () => {
     startRedirect('/agent')
   }
 
-  const { properties, loading, error } = useProperties(false, filters)
-
-  // Get all properties for calculating available districts
-  const { properties: allProperties } = useProperties(false, undefined)
+  // PERFORMANCE FIX: Fetch properties once instead of twice
+  // Previously: Made 2 API calls (one filtered, one unfiltered for districts)
+  // Now: Single API call with client-side filtering
+  const { properties: allProperties, loading, error } = useProperties(false, undefined)
 
   // Check if user is agent
   const isAgent = isAuthenticated && user?.role === 'agent'
 
   // Safe properties array
-  const safeProperties = Array.isArray(properties) ? properties : []
+  const safeAllProperties = Array.isArray(allProperties) ? allProperties : []
 
-  // Filter properties for agents
-  const agentProperties = safeProperties.filter(p => p.agentId === user?.id)
-  const otherProperties = safeProperties.filter(p => p.agentId !== user?.id)
-  const displayProperties = isAgent ? [...agentProperties, ...otherProperties] : safeProperties
+  // Client-side filtering based on active filters
+  const filteredProperties = safeAllProperties.filter(p => {
+    // Apply listing type filter
+    if (filters.listingType && filters.listingType !== 'all' && p.listingType !== filters.listingType) {
+      return false
+    }
+    // Apply district filter
+    if (filters.district && p.district !== filters.district) {
+      return false
+    }
+    return true
+  })
 
-  // Get unique districts
-  const districts = Array.from(new Set(Array.isArray(allProperties) ? allProperties.map(p => p.district).filter(Boolean) : []))
+  // Filter properties for agents (show agent's properties first)
+  const agentProperties = filteredProperties.filter(p => p.agentId === user?.id)
+  const otherProperties = filteredProperties.filter(p => p.agentId !== user?.id)
+  const displayProperties = isAgent ? [...agentProperties, ...otherProperties] : filteredProperties
+
+  // Get unique districts from ALL properties (not filtered)
+  const districts = Array.from(new Set(safeAllProperties.map(p => p.district).filter(Boolean)))
   const availableDistricts = districts
 
   // Reset carousel index when properties change
