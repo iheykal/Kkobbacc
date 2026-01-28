@@ -91,6 +91,7 @@ export async function GET(request: NextRequest) {
     if (!isSuperadmin && !isAdminRequest) {
       const now = new Date();
       query.deletionStatus = { $nin: ['deleted', 'pending_deletion'] }; // Exclude deleted and pending deletion
+      query.isHidden = { $ne: true }; // Exclude hidden properties from public view
 
       // Simplified visibility filter: Only check deletion status
       // We no longer hide expired properties automatically
@@ -101,8 +102,16 @@ export async function GET(request: NextRequest) {
     } else {
       // For superadmins/admin requests: only exclude actually deleted properties
       query.deletionStatus = { $ne: 'deleted' };
+
+      // IMPORTANT: Hide properties from main page for everyone (including admins)
+      // Only show hidden properties in admin panel (x-admin-request)
+      if (!isAdminRequest) {
+        query.isHidden = { $ne: true }; // Filter hidden properties from main page even for admins
+      }
+      // Superadmins can see hidden properties ONLY in admin panel
+
       if (process.env.NODE_ENV === 'development') {
-        console.log('🔍 Admin/Superadmin request - showing all properties including expired and pending');
+        console.log('🔍 Admin/Superadmin request - showing all properties including expired, pending, and hidden');
       }
     }
 
@@ -193,8 +202,8 @@ export async function GET(request: NextRequest) {
     // EXCLUDE heavy text fields (description) and arrays (features, amenities) that aren't shown on cards
     // This significantly reduces payload size for large lists (500+ items)
     const selectFields = isMobileOptimized
-      ? 'propertyId title location district price beds baths sqft propertyType listingType measurement status thumbnailImage images agentId createdAt viewCount uniqueViewCount deletionStatus expiresAt isExpired'
-      : 'propertyId title location district price beds baths sqft yearBuilt lotSize propertyType listingType measurement status thumbnailImage images agentId createdAt viewCount uniqueViewCount agent deletionStatus expiresAt isExpired';
+      ? 'propertyId title location district price beds baths sqft propertyType listingType measurement status thumbnailImage images agentId createdAt viewCount uniqueViewCount deletionStatus expiresAt isExpired isHidden'
+      : 'propertyId title location district price beds baths sqft yearBuilt lotSize propertyType listingType measurement status thumbnailImage images agentId createdAt viewCount uniqueViewCount agent deletionStatus expiresAt isExpired isHidden';
 
     let propertiesQuery;
     try {

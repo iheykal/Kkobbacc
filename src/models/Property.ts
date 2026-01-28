@@ -49,6 +49,7 @@ export interface IProperty extends Document {
   deletionRequestedBy?: string; // Who requested deletion
   deletionConfirmedAt?: Date; // When superadmin confirmed
   deletionConfirmedBy?: string; // Who confirmed deletion
+  isHidden: boolean; // Hide property from public listings (admin can still see it)
   // Property expiration fields
   expiresAt: Date; // When the property listing expires
   isExpired: boolean; // Computed field to check if property is expired
@@ -303,6 +304,11 @@ const PropertySchema: Schema = new Schema({
   deletionConfirmedBy: {
     type: String
   },
+  isHidden: {
+    type: Boolean,
+    default: false,
+    required: false
+  },
   // Property expiration fields
   expiresAt: {
     type: Date,
@@ -410,6 +416,7 @@ PropertySchema.index({ featured: 1, status: 1, createdAt: -1 }); // Featured pro
 PropertySchema.index({ deletionStatus: 1, createdAt: -1 }); // Active properties
 PropertySchema.index({ agentId: 1, status: 1, createdAt: -1 }); // Agent active properties
 PropertySchema.index({ isExpired: 1, deletionStatus: 1 }); // Active non-expired properties
+PropertySchema.index({ isHidden: 1 }); // Hidden property queries
 PropertySchema.index({ expiresAt: 1, deletionStatus: 1 }); // Expiration cleanup queries
 
 // Performance indexes for API queries

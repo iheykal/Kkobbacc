@@ -1562,9 +1562,9 @@ export default function AgentDashboard() {
                         // Auto-fill logic
                         setPropertyData(prev => ({
                           ...prev,
-                          // Title: Generate a smart title if location & type are found
-                          title: parsed.location && parsed.propertyType
-                            ? `${parsed.propertyType.charAt(0).toUpperCase() + parsed.propertyType.slice(1)} ${parsed.listingType === 'rent' ? 'Kiro ah' : 'Iib ah'} - ${parsed.location}`
+                          // Title: Generate a smart title without suffix (API will add it automatically)
+                          title: parsed.propertyType
+                            ? `${parsed.propertyType.charAt(0).toUpperCase() + parsed.propertyType.slice(1)}`
                             : prev.title,
 
                           description: parsed.description || prev.description,

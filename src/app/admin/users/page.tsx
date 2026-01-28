@@ -181,6 +181,7 @@ export default function UserManagementPage() {
   const [properties, setProperties] = useState<any[]>([])
   const [isLoadingProperties, setIsLoadingProperties] = useState(false)
   const [deletingProperty, setDeletingProperty] = useState<string | null>(null)
+  const [hidingProperty, setHidingProperty] = useState<string | null>(null)
   const [deletingUser, setDeletingUser] = useState<string | null>(null)
   const [showDeleteUserModal, setShowDeleteUserModal] = useState(false)
   const [userToDelete, setUserToDelete] = useState<UserData | null>(null)
@@ -377,6 +378,36 @@ export default function UserManagementPage() {
       alert('Error deleting property')
     } finally {
       setDeletingProperty(null)
+    }
+  }, [])
+
+  const handleToggleHidden = useCallback(async (propertyId: string, currentlyHidden: boolean) => {
+    try {
+      setHidingProperty(propertyId)
+      const res = await fetch(`/api/properties/${propertyId}/toggle-hidden`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ isHidden: !currentlyHidden })
+      })
+      const json = await res.json()
+
+      if (res.ok && json.success) {
+        // Update local state
+        setProperties(prev => prev.map(p =>
+          p._id === propertyId
+            ? { ...p, isHidden: !currentlyHidden }
+            : p
+        ))
+        alert(`Property ${!currentlyHidden ? 'hidden from public view' : 'made visible to public'} successfully!`)
+      } else {
+        alert(json?.error || 'Failed to toggle property visibility')
+      }
+    } catch (e) {
+      console.error('Failed to toggle property visibility', e)
+      alert('Error toggling property visibility')
+    } finally {
+      setHidingProperty(null)
     }
   }, [])
 
@@ -1613,14 +1644,24 @@ export default function UserManagementPage() {
                           initial={{ opacity: 0, scale: 0.9 }}
                           animate={{ opacity: 1, scale: 1 }}
                           whileHover={{ scale: 1.02 }}
-                          className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200 hover:shadow-xl transition-all duration-300"
+                          className={`bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200 hover:shadow-xl transition-all duration-300 ${property.isHidden ? 'opacity-60 border-orange-400' : ''
+                            }`}
                         >
                           <div className="relative">
                             <img
                               src={property.thumbnailImage || property.images?.[0] || 'https://via.placeholder.com/400x300/e5e7eb/6b7280?text=No+Image'}
                               alt={property.title}
-                              className="w-full h-48 object-cover"
+                              className={`w-full h-48 object-cover ${property.isHidden ? 'filter grayscale opacity-50' : ''
+                                }`}
                             />
+                            {/* Hidden status overlay */}
+                            {property.isHidden && (
+                              <div className="absolute inset-0 bg-orange-500/20 flex items-center justify-center">
+                                <div className="bg-orange-500 text-white px-4 py-2 rounded-lg font-bold text-sm shadow-lg">
+                                  🙈 HIDDEN FROM PUBLIC
+                                </div>
+                              </div>
+                            )}
                             {property.featured && (
                               <div className="absolute top-2 right-2 bg-yellow-500 text-white px-2 py-1 rounded-full text-xs font-semibold">
                                 Featured
@@ -1735,6 +1776,29 @@ export default function UserManagementPage() {
                                   title="View Property"
                                 >
                                   <Eye className="w-4 h-4" />
+                                </button>
+                                <button
+                                  onClick={() => handleToggleHidden(property._id, property.isHidden)}
+                                  disabled={hidingProperty === property._id}
+                                  className={`p-2 rounded-lg transition-colors disabled:opacity-50 ${property.isHidden
+                                    ? 'text-green-600 hover:bg-green-50'
+                                    : 'text-orange-600 hover:bg-orange-50'
+                                    }`}
+                                  title={property.isHidden ? 'Show Property (Make Public)' : 'Hide Property (From Public)'}
+                                >
+                                  {hidingProperty === property._id ? (
+                                    <motion.div
+                                      animate={{ rotate: 360 }}
+                                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                                      className="w-4 h-4 border-2 border-orange-600 border-t-transparent rounded-full"
+                                    />
+                                  ) : property.isHidden ? (
+                                    <Eye className="w-4 h-4" />
+                                  ) : (
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                                    </svg>
+                                  )}
                                 </button>
                                 <button
                                   onClick={() => handleDirectDeleteProperty(property._id)}

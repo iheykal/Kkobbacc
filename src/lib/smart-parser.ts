@@ -12,9 +12,57 @@ interface ParsedProperty {
     features?: string[]; // Added to capture detected features like Kitchen, Balcony
 }
 
+// Helper function to generate standardized Somali description
+const generateSmartDescription = (parsed: ParsedProperty): string => {
+    // Property type in Somali
+    const propertyTypeMap: Record<string, string> = {
+        'apartment': 'apartment',
+        'villa': 'guri',
+        'bacweyne': 'bacweyne',
+        'dabaq': 'dabaq'
+    };
+
+    const propertyTypeSomali = parsed.propertyType
+        ? propertyTypeMap[parsed.propertyType.toLowerCase()] || parsed.propertyType
+        : 'guri';
+
+    // Build the description parts
+    let description = `Welcome to Kobac Property, waxaan idin heynaa ${propertyTypeSomali}`;
+
+    // Add composition details if we have beds/baths
+    if (parsed.beds || parsed.baths) {
+        description += ` wuxuuna ka koobanyahay`;
+
+        if (parsed.beds) {
+            description += ` ${parsed.beds} qol`;
+        }
+
+        if (parsed.baths) {
+            if (parsed.beds) {
+                description += ` iyo`;
+            }
+            description += ` ${parsed.baths} musqulood`;
+        }
+
+        // Add kitchen if detected
+        if (parsed.features?.includes('Kitchen')) {
+            description += ` iyo jiko`;
+        }
+    }
+
+    // Add rental price for rent properties
+    if (parsed.listingType === 'rent' && parsed.price) {
+        description += `. Kirada bishii waa $${parsed.price}`;
+    }
+
+    // Add contact information
+    description += `. Wixii faahfaahin dheeraad ah nagala soo xariir 0610251014.`;
+
+    return description;
+};
+
 export const parseSmartText = (text: string): ParsedProperty => {
     const result: ParsedProperty = {
-        description: text, // Default description is the full text
         features: []
     };
 
@@ -146,6 +194,9 @@ export const parseSmartText = (text: string): ParsedProperty => {
         else if (raw.includes('ABDIAZIZ') || raw.includes('CABDI')) result.district = 'Abdiaziz';
         else if (raw.includes('KAXDA')) result.district = 'Kaxda';
     }
+
+    // Generate smart description based on parsed data
+    result.description = generateSmartDescription(result);
 
     return result;
 }
